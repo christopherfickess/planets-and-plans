@@ -1,0 +1,141 @@
+# Variables with Defaults and Descriptions
+
+variable "ami_type" {
+  description = "The AMI name pattern to use for the EC2 instance."
+  type        = string
+  default     = "al2023-ami-2023*"
+}
+
+variable "admin_access" {
+  description = "Enable or disable admin access."
+  type        = string
+  default     = "aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_d1e9700799a73262"
+}
+
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "ec2_instance_profile_name" {
+  description = "The name of the IAM instance profile to associate with the EC2 instance."
+  type        = string
+  default     = "ec2-instance-profile"
+}
+
+variable "ec2_instance_name" {
+  description = "The name of the EC2 instance."
+  type        = string
+  default     = "mattermost-ec2-instance"
+}
+
+variable "ec2_instance_size" {
+  description = "The size of the EC2 instance."
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "ec2_security_group_name" {
+  description = "The name of the EC2 security group."
+  type        = string
+  default     = "mattermost-ec2-sg"
+}
+
+variable "ec2_iam_role_name" {
+  description = "The name of the IAM role to attach to the EC2 instance."
+  type        = string
+  default     = "ec2-role"
+}
+
+variable "ec2_iam_role_policy_name" {
+  description = "The name of the IAM role policy."
+  type        = string
+  default     = "ec2-role-policy"
+}
+
+variable "region" {
+  description = "The AWS region to deploy resources in."
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "rds_db_name" {
+  description = "The name of the RDS database."
+  type        = string
+  default     = "mattermostdb-ec2"
+}
+
+variable "rds_db_policy_name" {
+  description = "The name of the RDS database policy"
+  type        = string
+  default     = "Mattermost-RDS-Access-Policy"
+}
+variable "rds_instance_type" {
+  description = "The RDS instance type."
+  type        = string
+  default     = "db.t3.medium"
+}
+
+variable "rds_security_group_name" {
+  description = "The name of the RDS security group."
+  type        = string
+  default     = "mattermost-rds-sg"
+}
+
+variable "root_volume_size" {
+  description = "The size of the root volume in GB."
+  type        = number
+  default     = 25
+}
+
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket to use."
+  type        = string
+  default     = "ec2-mattermost-bucket"
+}
+
+variable "s3_bucket_policy_name" {
+  description = "The name of the S3 bucket policy."
+  type        = string
+  default     = "mattermost-s3-bucket-policy"
+}
+
+variable "ssm_run_command_name" {
+  description = "The name of the SSM document to run shell commands."
+  type        = string
+  default     = "MattermostDevDeployment"
+}
+
+variable "vpc_id" {
+  description = "The ID of the VPC where resources will be deployed."
+  type        = string
+  default     = "vpc-5be87621"
+}
+# Variables for Unique Naming in tfvars
+
+variable "unique_name_suffix" {
+  description = "A unique identifier for resource naming."
+  type        = string
+}
+
+variable "unique_id" {
+  description = "A unique ID for tagging and naming resources."
+  type        = string
+}
+
+#####################################################################
+#       These will be required variables without defaults           #
+#####################################################################
+variable "db_username" {
+  description = "The username for the RDS database admin user."
+  type        = string
+}
+
+variable "db_password" {
+  description = "The password for the RDS database admin Password."
+  type        = string
+  sensitive   = true
+}
+#####################################################################
+# End of variables.tf

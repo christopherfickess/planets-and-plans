@@ -1,0 +1,46 @@
+#cloud-config
+packages:
+  - amazon-ssm-agent
+
+write_files:
+  - path: /etc/systemd/system/mattermost.service
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Mattermost
+      After=network.target
+      Requires=network.target
+
+      [Service]
+      Type=simple
+      User=mattermost
+      Group=mattermost
+      WorkingDirectory=/home/mattermost/mattermost
+      ExecStart=/home/mattermost/mattermost/bin/mattermost
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - systemctl enable amazon-ssm-agent
+  - systemctl start amazon-ssm-agent
+  - dnf update -y
+  - amazon-linux-extras enable corretto8
+  - dnf install -y java-1.8.0-amazon-corretto-devel wget tar
+  - useradd --system --user-group mattermost
+  - mkdir -p /home/mattermost
+  - cd /home/mattermost
+  - wget https://releases.mattermost.com/7.10.0/mattermost-7.10.0-linux-amd64.tar.gz
+  - tar -xvzf mattermost-7.10.0-linux-amd64.tar.gz
+  - rm mattermost-7.10.0-linux-amd64.tar.gz
+  - chown -R mattermost:mattermost /home/mattermost
+  - systemctl daemon-reload
+  - systemctl enable mattermost
+  - systemctl start mattermost
+  # Fetch Mattermost config from S3 and set proper ownership
+  - aws s3 cp s3://my-mattermost-config-bucket/config.json /home/mattermost/mattermost/config/config.json
+  - chown mattermost:mattermost /home/mattermost/mattermost/config/config.json
+  - systemctl restart mattermost
