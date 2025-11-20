@@ -7,7 +7,12 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
-  depends_on = [data.aws_ami.ami_type, aws_iam_instance_profile.ec2_profile]
+  depends_on = [
+    data.aws_ami.ami_type,
+    aws_iam_instance_profile.ec2_profile,
+    aws_ssm_parameter.mattermost_db_username,
+    aws_ssm_parameter.mattermost_db_password
+  ]
 
   ami                  = data.aws_ami.ami_type.id
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
@@ -29,7 +34,14 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
   instance_type = var.ec2_instance_size
 
   # Only needed if not using AL2023 AMI (need ssm agent)
-  # user_data = file("${path.module}/user_data/mattermost-ec2-user-data.sh")
+  user_data = file("${path.module}/scripts/mattermost_cloud_init.yaml", {
+    mattermost_email   = var.domain_user_email
+    mattermost_domain  = "chat.dev.${var.unique_name_suffix}.com"
+    mattermost_version = var.mattermost_version
+    password_param     = aws_ssm_parameter.mattermost_db_password.name
+    rds_endpoint       = aws_db_instance.mattermost_rds.address
+    username_param     = aws_ssm_parameter.mattermost_db_username.name
+  })
 
   tags = {
     Name = "test-mattermost-ec2-spot-instance-chris-fickess"

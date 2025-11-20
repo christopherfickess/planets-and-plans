@@ -1,6 +1,6 @@
 
 
-```
-terraform init -backend-config=tfvars/dev/backend.hcl
+```bash
+terraform init -backend-config=tfvars/dev-chris/backend.hcl
 
-terraform plan -var-file="tfvars/dev/base.tfvars" -out="plan.tfplan"
+terraform plan -var-file="tfvars/dev-chris/base.tfvars" -out="plan.tfplan"

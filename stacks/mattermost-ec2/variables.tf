@@ -54,6 +54,12 @@ variable "ec2_iam_role_policy_name" {
   default     = "ec2-role-policy"
 }
 
+variable "mattermost_version" {
+  description = "[String]Default Mattermost Version to Install"
+  type        = string
+  default     = "7.10.0"
+}
+
 variable "region" {
   description = "The AWS region to deploy resources in."
   type        = string
@@ -127,12 +133,23 @@ variable "unique_id" {
 #####################################################################
 #       These will be required variables without defaults           #
 #####################################################################
-variable "db_username" {
+variable "parameter_store_path_prefix" {
+  description = "Prefix for SSM parameter names"
+  type        = string
+  default     = "/mattermost-dev-chris-self-hosted"
+}
+
+variable "domain_user_email" {
+  description = "[String]Admin User Email Address for Forwarding"
+  type        = string
+}
+
+variable "mattermost_db_username" {
   description = "The username for the RDS database admin user."
   type        = string
 }
 
-variable "db_password" {
+variable "mattermost_db_password" {
   description = "The password for the RDS database admin Password."
   type        = string
   sensitive   = true

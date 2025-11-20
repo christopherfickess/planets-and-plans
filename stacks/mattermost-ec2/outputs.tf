@@ -3,42 +3,42 @@
 ###############################################
 # EC2 Outputs
 ###############################################
-output "ami_type" {
+output "mattermost_ami_type" {
   value = data.aws_ami.ami_type.id
 }
 
-output "ec2_public_ip" {
-  value = aws_instance.ami_instance_mattermost_ec2_spot.public_ip
-}
-
-output "ec2_id" {
+output "mattermost_ec2_id" {
   value = aws_instance.ami_instance_mattermost_ec2_spot.id
 }
 
-output "s3_bucket" {
-  value = aws_s3_bucket.bucket.id
+output "mattermost_ec2_name" {
+  value = local.ec2_instance_name
 }
 
-output "iam_role_name" {
+output "mattermost_ec2_public_ip" {
+  value = aws_instance.ami_instance_mattermost_ec2_spot.public_ip
+}
+
+output "mattermost_iam_role_name" {
   value = aws_iam_role.ec2_role.name
 }
 
-output "name" {
-  value = local.ec2_instance_name
+output "mattermost_s3_bucket" {
+  value = aws_s3_bucket.mattermost_bucket.id
 }
 
 ###############################################
 # RDS Outputs
 ###############################################
-output "rds_endpoint" {
+output "mattermost_rds_endpoint" {
   value = aws_db_instance.mattermost_rds.endpoint
 }
 
-output "rds_id" {
+output "mattermost_rds_id" {
   value = aws_db_instance.mattermost_rds.id
 }
 
-output "rds_port" {
+output "mattermost_rds_port" {
   value = aws_db_instance.mattermost_rds.port
 }
 

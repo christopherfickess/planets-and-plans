@@ -17,14 +17,12 @@ data "aws_ami" "ami_type" {
 }
 
 data "aws_iam_policy_document" "mattermost_s3_policy" {
-  depends_on = [aws_iam_role.ec2_role]
-
   statement {
     actions = [
       "s3:ListBucket"
     ]
 
-    resources = [aws_s3_bucket.bucket.arn]
+    resources = [aws_s3_bucket.mattermost_bucket.arn]
     effect    = "Allow"
     principals {
       type = "AWS"
@@ -43,7 +41,7 @@ data "aws_iam_policy_document" "mattermost_s3_policy" {
       "s3:DeleteObject"
     ]
 
-    resources = ["${aws_s3_bucket.bucket.arn}/*"]
+    resources = ["${aws_s3_bucket.mattermost_bucket.arn}/*"]
     effect    = "Allow"
     principals {
       type = "AWS"
@@ -57,8 +55,6 @@ data "aws_iam_policy_document" "mattermost_s3_policy" {
 }
 
 data "aws_iam_policy_document" "assume_ec2" {
-  depends_on = [aws_iam_role.ec2_role]
-
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -69,14 +65,18 @@ data "aws_iam_policy_document" "assume_ec2" {
 }
 
 data "aws_iam_policy_document" "mattermost_rds_policy" {
-  depends_on = [aws_db_instance.mattermost_rds, aws_iam_role.ec2_role]
-
   statement {
-    actions = ["rds-db:connect"]
+    actions = [
+      "rds-db:connect",
+      "ssm:GetParameter",
+      "ssm:GetParameters"
+    ]
 
     resources = [
       # RDS DB user ARN format: arn:aws:rds-db:region:account-id:dbuser:dbi-resource-id/db-username
-      "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.mattermost_rds.resource_id}/${aws_db_instance.mattermost_rds.username}"
+      "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.mattermost_rds.resource_id}/${aws_db_instance.mattermost_rds.username}",
+      aws_ssm_parameter.mattermost_db_username.arn,
+      aws_ssm_parameter.mattermost_db_password.arn
     ]
 
     effect = "Allow"

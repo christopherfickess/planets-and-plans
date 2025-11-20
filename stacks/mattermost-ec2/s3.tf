@@ -48,9 +48,15 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   bucket = aws_s3_bucket.mattermost_bucket.id
+
   rule {
     id     = "Expire old versions"
     status = "Enabled"
+
+    filter {
+      prefix = "logs/"
+    }
+
     noncurrent_version_expiration {
       noncurrent_days = 30
     }
