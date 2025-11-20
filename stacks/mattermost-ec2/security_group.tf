@@ -23,6 +23,11 @@ resource "aws_security_group" "mattermost_rds_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(
+    { Name = local.rds_security_group_name },
+    local.tags
+  )
 }
 
 # EC2 Security Group
@@ -87,7 +92,8 @@ resource "aws_security_group" "mattermost_ec2_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = local.ec2_security_group_name
-  }
+  tags = merge(
+    { Name = local.ec2_security_group_name },
+    local.tags
+  )
 }

@@ -24,4 +24,9 @@ resource "aws_db_instance" "mattermost_rds" {
   # storage_encrypted       = true
   username               = aws_ssm_parameter.mattermost_db_username.name
   vpc_security_group_ids = [aws_security_group.mattermost_rds_sg.id]
+
+  tags = merge(
+    { Name = local.rds_db_name },
+    local.tags
+  )
 }

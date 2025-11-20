@@ -54,6 +54,12 @@ variable "ec2_iam_role_policy_name" {
   default     = "ec2-role-policy"
 }
 
+variable "mattermost_kms_key_alias" {
+  description = "[String]Default KMS Alias"
+  type        = string
+  default     = "alias/ec2-root-key"
+
+}
 variable "mattermost_version" {
   description = "[String]Default Mattermost Version to Install"
   type        = string

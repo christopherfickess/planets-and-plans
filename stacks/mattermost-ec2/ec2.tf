@@ -48,6 +48,9 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
     username_param     = aws_ssm_parameter.mattermost_db_username.name
   })
 
-  tags = local.tags
+  tags = merge(
+    { Name = local.ec2_instance_name },
+    local.tags
+  )
 }
 

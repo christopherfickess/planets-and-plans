@@ -4,6 +4,10 @@
 resource "aws_iam_role" "mattermost_ec2_role" {
   name               = local.ec2_iam_role_name
   assume_role_policy = data.aws_iam_policy_document.assume_ec2.json
+  tags = merge(
+    { Name = local.ec2_iam_role_name },
+    local.tags
+  )
 }
 
 # EC2 Instance Policy

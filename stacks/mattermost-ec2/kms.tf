@@ -15,6 +15,8 @@ resource "aws_kms_alias" "ec2_kms_alias" {
 }
 
 resource "aws_kms_key_policy" "ec2_kms_key_policy" {
+  depends_on = [aws_iam_role.mattermost_ec2_role]
+
   key_id = aws_kms_key.ec2_kms.key_id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -25,7 +27,7 @@ resource "aws_kms_key_policy" "ec2_kms_key_policy" {
         Principal = {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${local.ec2_iam_role_name}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.ec2_iam_role_name}",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}"
           ]
 

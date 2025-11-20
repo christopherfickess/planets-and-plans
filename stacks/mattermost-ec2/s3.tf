@@ -6,9 +6,10 @@
 resource "aws_s3_bucket" "mattermost_bucket" {
   bucket = var.s3_bucket_name
 
-  tags = {
-    Name = local.s3_bucket_name
-  }
+  tags = merge(
+    { Name = local.s3_bucket_name },
+    local.tags
+  )
 }
 
 resource "aws_s3_bucket_policy" "mattermost_s3_policy" {
