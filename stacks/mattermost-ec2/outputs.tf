@@ -20,7 +20,7 @@ output "mattermost_ec2_public_ip" {
 }
 
 output "mattermost_iam_role_name" {
-  value = aws_iam_role.ec2_role.name
+  value = aws_iam_role.mattermost_ec2_role.name
 }
 
 output "mattermost_s3_bucket" {
@@ -42,6 +42,16 @@ output "mattermost_rds_port" {
   value = aws_db_instance.mattermost_rds.port
 }
 
+###############################################
+# Extra Data
+###############################################
+output "domain" {
+  value = local.domain
+}
+
+output "deployment_date" {
+  value = time_static.deployment_date.rfc3339
+}
 ###############################################
 # End of outputs.tf
 ###############################################

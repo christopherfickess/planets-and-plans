@@ -16,6 +16,7 @@ data "aws_ami" "ami_type" {
   }
 }
 
+# S3 Policy for EC2 Access to bucket
 data "aws_iam_policy_document" "mattermost_s3_policy" {
   statement {
     actions = [
@@ -24,14 +25,6 @@ data "aws_iam_policy_document" "mattermost_s3_policy" {
 
     resources = [aws_s3_bucket.mattermost_bucket.arn]
     effect    = "Allow"
-    principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.ec2_role.name}",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}"
-      ]
-    }
   }
 
   statement {
@@ -43,17 +36,10 @@ data "aws_iam_policy_document" "mattermost_s3_policy" {
 
     resources = ["${aws_s3_bucket.mattermost_bucket.arn}/*"]
     effect    = "Allow"
-    principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.ec2_role.name}",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}"
-      ]
-    }
   }
 }
 
+# Assume EC2 Role Trust Relationship
 data "aws_iam_policy_document" "assume_ec2" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -64,6 +50,7 @@ data "aws_iam_policy_document" "assume_ec2" {
   }
 }
 
+# RDS Policy for EC2 to Access the Database
 data "aws_iam_policy_document" "mattermost_rds_policy" {
   statement {
     actions = [
@@ -80,14 +67,5 @@ data "aws_iam_policy_document" "mattermost_rds_policy" {
     ]
 
     effect = "Allow"
-
-    principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.ec2_role.name}",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}"
-      ]
-    }
   }
 }

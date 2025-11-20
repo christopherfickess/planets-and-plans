@@ -4,29 +4,29 @@
 # Security Groups (Multiple Support)
 ###############################################
 # Database Security Group
-resource "aws_security_group" "rds_sg" {
-  depends_on = [aws_security_group.ec2_sg]
+resource "aws_security_group" "mattermost_rds_sg" {
+  depends_on = [aws_security_group.mattermost_ec2_sg]
 
   name   = local.rds_security_group_name
   vpc_id = var.vpc_id
 
   ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [aws_security_group.ec2_sg.id]
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.mattermost_ec2_sg.id]
   }
 
   egress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [aws_security_group.ec2_sg.id]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 # EC2 Security Group
-resource "aws_security_group" "ec2_sg" {
+resource "aws_security_group" "mattermost_ec2_sg" {
   name   = "ec2-main-sg"
   vpc_id = var.vpc_id
 

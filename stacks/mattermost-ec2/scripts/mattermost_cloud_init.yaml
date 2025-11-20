@@ -112,7 +112,7 @@ runcmd:
 
   # Update Mattermost config.json DataSource
   - MATTERMOST_CONFIG_FILE="/opt/mattermost/config/config.json"
-  - MATTERMOST_DATASOURCE="postgres://${MATTERMOST_DB_USERNAME}:${MATTERMOST_DB_PASSWORD}@${MATTERMOST_DB_ENDPOINT}:5432/mattermost?sslmode=require&connect_timeout=10"
+  - MATTERMOST_DATASOURCE="postgres://$MATTERMOST_DB_USERNAME:$MATTERMOST_DB_PASSWORD@$MATTERMOST_DB_ENDPOINT:5432/mattermost?sslmode=require&connect_timeout=10"
   - TMP_FILE=$(mktemp)
   - |
     jq --arg dsn "$DATASOURCE" \
