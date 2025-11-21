@@ -19,7 +19,7 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
   iam_instance_profile = aws_iam_instance_profile.mattermost_ec2_profile.name
   subnet_id            = data.aws_subnet.public_mattermost_subnet.id
 
-  vpc_security_group_ids = [aws_security_group.mattermost_ec2_sg.name]
+  vpc_security_group_ids = [aws_security_group.mattermost_ec2_sg.id]
 
   instance_market_options {
     market_type = "spot"
