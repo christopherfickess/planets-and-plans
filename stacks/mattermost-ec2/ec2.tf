@@ -15,18 +15,18 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
     aws_security_group.mattermost_ec2_sg
   ]
 
-  ami                  = data.aws_ami.ami_type.id
-  iam_instance_profile = aws_iam_instance_profile.mattermost_ec2_profile.name
-  subnet_id            = data.aws_subnet.public_mattermost_subnet.id
-
+  ami                    = data.aws_ami.ami_type.id
+  iam_instance_profile   = aws_iam_instance_profile.mattermost_ec2_profile.name
+  subnet_id              = data.aws_subnet.public_mattermost_subnet.id
+  key_name               = aws_key_pair.mattermost_key_pair.key_name
   vpc_security_group_ids = [aws_security_group.mattermost_ec2_sg.id]
 
-  instance_market_options {
-    market_type = "spot"
-    spot_options {
-      max_price = 0.05
-    }
-  }
+  # instance_market_options {
+  #   market_type = "spot"
+  #   spot_options {
+  #     max_price = 0.05
+  #   }
+  # }
 
   root_block_device {
     volume_size = var.root_volume_size
@@ -42,9 +42,9 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
     mattermost_email   = var.domain_user_email
     mattermost_domain  = local.domain
     mattermost_version = var.mattermost_version
-    password_param     = aws_ssm_parameter.mattermost_db_password.value
+    password_param     = aws_ssm_parameter.mattermost_db_password.name
     rds_endpoint       = aws_db_instance.mattermost_rds.address
-    username_param     = aws_ssm_parameter.mattermost_db_username.value
+    username_param     = aws_ssm_parameter.mattermost_db_username.name
   })
 
   tags = merge(

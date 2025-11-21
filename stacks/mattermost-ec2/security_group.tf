@@ -32,7 +32,7 @@ resource "aws_security_group" "mattermost_rds_sg" {
 
 # EC2 Security Group
 resource "aws_security_group" "mattermost_ec2_sg" {
-  name   = "ec2-main-sg"
+  name   = local.ec2_security_group_name
   vpc_id = data.aws_vpc.mattermost_vpc.id
 
 
@@ -41,6 +41,13 @@ resource "aws_security_group" "mattermost_ec2_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["104.62.96.124/32"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {

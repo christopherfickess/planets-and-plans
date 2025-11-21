@@ -52,6 +52,10 @@ output "domain" {
 output "deployment_date" {
   value = time_static.deployment_date.rfc3339
 }
+
+output "my_public_ip" {
+  value = trimspace(data.http.my_ip.response_body)
+}
 ###############################################
 # End of outputs.tf
 ###############################################

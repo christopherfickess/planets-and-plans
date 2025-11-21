@@ -29,6 +29,33 @@ data "aws_iam_policy_document" "mattermost_ec2_s3_policy" {
     resources = ["${aws_s3_bucket.mattermost_bucket.arn}/*"]
     effect    = "Allow"
   }
+
+  statement {
+    actions = [
+      "ssm:DescribeAssociation",
+      "ssm:GetDeployablePatchSnapshotForInstance",
+      "ssm:GetDocument",
+      "ssm:DescribeDocument",
+      "ssm:GetManifest",
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:ListAssociations",
+      "ssm:ListInstanceAssociations",
+      "ssm:UpdateInstanceInformation",
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel",
+      "ec2messages:AcknowledgeMessage",
+      "ec2messages:DeleteMessage",
+      "ec2messages:FailMessage",
+      "ec2messages:GetEndpoint",
+      "ec2messages:GetMessages",
+      "ec2messages:SendReply"
+    ]
+    resources = ["*"]
+    effect    = "Allow"
+  }
 }
 
 # Assume EC2 Role Trust Relationship
@@ -74,13 +101,22 @@ data "aws_subnet" "public_mattermost_subnet" {
     name   = "tag:Name"
     values = [var.subnet_public_tag_name]
   }
-}
 
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.mattermost_vpc.id]
+  }
+}
 
 data "aws_subnet" "private_mattermost_subnet_1" {
   filter {
     name   = "tag:Name"
     values = [var.subnet_private_tag_name_1]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.mattermost_vpc.id]
   }
 }
 
@@ -89,4 +125,13 @@ data "aws_subnet" "private_mattermost_subnet_2" {
     name   = "tag:Name"
     values = [var.subnet_private_tag_name_2]
   }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.mattermost_vpc.id]
+  }
+}
+
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"
 }

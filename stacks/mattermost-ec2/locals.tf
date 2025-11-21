@@ -1,12 +1,14 @@
 locals {
   base_identifier = "${var.unique_name_suffix}-mattermost-${var.unique_id}"
 
-  domain                       = "chat.dev.${var.unique_name_suffix}.com"
+  base_domain                  = "dev.cloud.mattermost.com"
+  domain                       = "chris-fickess.chat.${local.base_domain}"
   ec2_instance_name            = "${var.ec2_instance_name}-${local.base_identifier}"
   ec2_instance_profile_name    = "${var.ec2_instance_profile_name}-${local.base_identifier}"
   ec2_security_group_name      = "${var.ec2_security_group_name}-${local.base_identifier}"
   ec2_iam_role_name            = "${var.ec2_iam_role_name}-${local.base_identifier}"
   ec2_iam_role_policy_name     = "${var.ec2_iam_role_policy_name}-${local.base_identifier}"
+  key_pair_name                = "${var.key_pair_name}-${local.base_identifier}"
   kms_mattermost_kms_key_alias = "${var.mattermost_kms_key_alias}-${local.base_identifier}"
   rds_db_name                  = "${var.rds_db_identifier}-${local.base_identifier}"
   subnet_rds_private_tag_name  = "${var.subnet_rds_private_tag_name}-${local.base_identifier}"

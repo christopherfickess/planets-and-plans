@@ -4,7 +4,7 @@ resource "aws_ssm_parameter" "mattermost_db_username" {
   value = var.mattermost_db_username
 
   tags = merge(
-    { Name = "${var.parameter_store_path_prefix}/db_password" },
+    { Name = "${var.parameter_store_path_prefix}/db_username" },
     local.tags
   )
 }

@@ -63,7 +63,7 @@ variable "mattermost_kms_key_alias" {
 variable "mattermost_version" {
   description = "[String]Default Mattermost Version to Install"
   type        = string
-  default     = "7.10.0"
+  default     = "11.1.0"
 }
 
 variable "region" {
@@ -140,19 +140,22 @@ variable "ssm_run_command_name" {
 variable "subnet_public_tag_name" {
   description = "[String]Default Subnet Tag Name"
   type        = string
-  default     = "mattermost-cloud-dev-shared-services-public-us-east-1a"
+  # default     = "mattermost-cloud-dev-shared-services-public-us-east-1a"
+  default = "mattermost-cloud-dev-provisioning-102401280-private-1a"
 }
 
 variable "subnet_private_tag_name_1" {
   description = "[String]Default Subnet Tag Name"
   type        = string
-  default     = "mattermost-cloud-dev-shared-services-private-us-east-1a"
+  # default     = "mattermost-cloud-dev-shared-services-private-us-east-1a"
+  default = "mattermost-cloud-dev-provisioning-102401280-private-1a"
 }
 
 variable "subnet_private_tag_name_2" {
   description = "[String]Default Subnet Tag Name"
   type        = string
-  default     = "mattermost-cloud-dev-shared-services-private-us-east-1b"
+  # default     = "mattermost-cloud-dev-shared-services-private-us-east-1b"
+  default = "mattermost-cloud-dev-provisioning-102401280-private-1c"
 }
 
 variable "subnet_rds_private_tag_name" {
@@ -161,17 +164,10 @@ variable "subnet_rds_private_tag_name" {
   default     = "mattermost-rds-subnet-group"
 }
 
-
-variable "vpc_id" {
-  description = "The ID of the VPC where resources will be deployed."
-  type        = string
-  default     = "vpc-0c8715be654dea405"
-}
-
 variable "vpc_tag_name" {
   description = "[String]Default VPC Tag Name"
   type        = string
-  default     = "mattermost-cloud-dev-shared-services"
+  default     = "mattermost-cloud-dev-provisioning-102401280"
 }
 
 
@@ -197,6 +193,18 @@ variable "parameter_store_path_prefix" {
   default     = "/mattermost-dev-chris-self-hosted"
 }
 
+variable "key_pair_local_path" {
+  description = "The local path to the SSH key pair file."
+  type        = string
+  default     = "~/.ssh/mattermost-ec2-key.pem"
+}
+
+variable "key_pair_name" {
+  description = "The name of the SSH key pair to use for the EC2 instance."
+  type        = string
+  default     = "mattermost-ec2-key"
+}
+
 variable "domain_user_email" {
   description = "[String]Admin User Email Address for Forwarding"
   type        = string
@@ -211,6 +219,12 @@ variable "mattermost_db_password" {
   description = "The password for the RDS database admin Password."
   type        = string
   sensitive   = true
+}
+
+variable "validation_method" {
+  description = "Method to validate the certificate (DNS or EMAIL)"
+  type        = string
+  default     = "DNS"
 }
 #####################################################################
 # End of variables.tf
