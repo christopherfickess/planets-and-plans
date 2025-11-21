@@ -8,7 +8,7 @@ resource "aws_security_group" "mattermost_rds_sg" {
   depends_on = [aws_security_group.mattermost_ec2_sg]
 
   name   = local.rds_security_group_name
-  vpc_id = var.vpc_id
+  vpc_id = data.aws_vpc.mattermost_vpc.id
 
   ingress {
     from_port       = 5432
@@ -33,14 +33,14 @@ resource "aws_security_group" "mattermost_rds_sg" {
 # EC2 Security Group
 resource "aws_security_group" "mattermost_ec2_sg" {
   name   = "ec2-main-sg"
-  vpc_id = var.vpc_id
+  vpc_id = data.aws_vpc.mattermost_vpc.id
 
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["172.25.144.1/32"]
+    cidr_blocks = ["104.62.96.124/32"]
   }
 
   ingress {

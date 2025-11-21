@@ -17,15 +17,14 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
 
   ami                  = data.aws_ami.ami_type.id
   iam_instance_profile = aws_iam_instance_profile.mattermost_ec2_profile.name
+  subnet_id            = data.aws_subnet.public_mattermost_subnet.id
 
-  security_groups = [
-    aws_security_group.mattermost_ec2_sg.name
-  ]
+  vpc_security_group_ids = [aws_security_group.mattermost_ec2_sg.name]
 
   instance_market_options {
     market_type = "spot"
     spot_options {
-      max_price = 0.0031
+      max_price = 0.05
     }
   }
 
@@ -43,9 +42,9 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
     mattermost_email   = var.domain_user_email
     mattermost_domain  = local.domain
     mattermost_version = var.mattermost_version
-    password_param     = aws_ssm_parameter.mattermost_db_password.name
+    password_param     = aws_ssm_parameter.mattermost_db_password.value
     rds_endpoint       = aws_db_instance.mattermost_rds.address
-    username_param     = aws_ssm_parameter.mattermost_db_username.name
+    username_param     = aws_ssm_parameter.mattermost_db_username.value
   })
 
   tags = merge(

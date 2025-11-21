@@ -75,7 +75,25 @@ variable "region" {
 variable "rds_db_name" {
   description = "The name of the RDS database."
   type        = string
+  default     = "MattermostdbEC2ChrisDev"
+}
+
+variable "rds_db_identifier" {
+  description = "The name of the RDS database."
+  type        = string
   default     = "mattermostdb-ec2"
+}
+
+variable "rds_db_type" {
+  description = "[String]Default RDS Database type"
+  type        = string
+  default     = "postgres"
+}
+
+variable "rds_db_version" {
+  description = "[String]Default RDS Database Postgres Version"
+  type        = string
+  default     = "default.postgres17"
 }
 
 variable "rds_db_policy_name" {
@@ -119,11 +137,45 @@ variable "ssm_run_command_name" {
   default     = "MattermostDevDeployment"
 }
 
+variable "subnet_public_tag_name" {
+  description = "[String]Default Subnet Tag Name"
+  type        = string
+  default     = "mattermost-cloud-dev-shared-services-public-us-east-1a"
+}
+
+variable "subnet_private_tag_name_1" {
+  description = "[String]Default Subnet Tag Name"
+  type        = string
+  default     = "mattermost-cloud-dev-shared-services-private-us-east-1a"
+}
+
+variable "subnet_private_tag_name_2" {
+  description = "[String]Default Subnet Tag Name"
+  type        = string
+  default     = "mattermost-cloud-dev-shared-services-private-us-east-1b"
+}
+
+variable "subnet_rds_private_tag_name" {
+  description = "[String]Default Subnet Tag Name"
+  type        = string
+  default     = "mattermost-rds-subnet-group"
+}
+
+
 variable "vpc_id" {
   description = "The ID of the VPC where resources will be deployed."
   type        = string
-  default     = "vpc-5be87621"
+  default     = "vpc-0c8715be654dea405"
 }
+
+variable "vpc_tag_name" {
+  description = "[String]Default VPC Tag Name"
+  type        = string
+  default     = "mattermost-cloud-dev-shared-services"
+}
+
+
+
 # Variables for Unique Naming in tfvars
 
 variable "unique_name_suffix" {

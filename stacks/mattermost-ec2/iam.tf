@@ -12,11 +12,11 @@ resource "aws_iam_role" "mattermost_ec2_role" {
 
 # EC2 Instance Policy
 resource "aws_iam_policy" "mattermost_ec2_policy" {
-  depends_on = [data.aws_iam_policy_document.mattermost_s3_policy]
+  depends_on = [data.aws_iam_policy_document.mattermost_ec2_s3_policy]
 
   name        = local.ec2_iam_role_policy_name
   description = "IAM policy to allow Mattermost EC2 instances to access Mattermost S3 bucket"
-  policy      = data.aws_iam_policy_document.mattermost_s3_policy.json
+  policy      = data.aws_iam_policy_document.mattermost_ec2_s3_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "attach_ec2_policy" {
@@ -41,18 +41,4 @@ resource "aws_iam_role_policy_attachment" "attach_mattermost_rds_policy" {
   depends_on = [aws_iam_role.mattermost_ec2_role, aws_iam_policy.mattermost_rds_policy]
   role       = aws_iam_role.mattermost_ec2_role.name
   policy_arn = aws_iam_policy.mattermost_rds_policy.arn
-}
-
-# S3 Policy Attachment
-resource "aws_iam_policy" "mattermost_s3_policy" {
-  depends_on  = [data.aws_iam_policy_document.mattermost_s3_policy]
-  name        = local.s3_bucket_policy_name
-  description = "Allow Mattermost EC2 instance (and admins) to connect to S3 using IAM authentication"
-  policy      = data.aws_iam_policy_document.mattermost_s3_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "attach_mattermost_s3_policy" {
-  depends_on = [aws_iam_role.mattermost_ec2_role, aws_iam_policy.mattermost_s3_policy]
-  role       = aws_iam_role.mattermost_ec2_role.name
-  policy_arn = aws_iam_policy.mattermost_s3_policy.arn
 }

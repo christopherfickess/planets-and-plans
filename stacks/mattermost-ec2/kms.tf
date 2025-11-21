@@ -7,10 +7,14 @@ resource "aws_kms_key" "ec2_kms" {
   description             = "KMS key for EC2 root volume encryption"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+  tags = merge(
+    { Name = local.ec2_iam_role_name },
+    local.tags
+  )
 }
 
 resource "aws_kms_alias" "ec2_kms_alias" {
-  name          = "alias/ec2-root-key"
+  name          = local.kms_mattermost_kms_key_alias
   target_key_id = aws_kms_key.ec2_kms.key_id
 }
 

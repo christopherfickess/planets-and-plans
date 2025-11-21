@@ -12,14 +12,44 @@ resource "aws_s3_bucket" "mattermost_bucket" {
   )
 }
 
-resource "aws_s3_bucket_policy" "mattermost_s3_policy" {
-  depends_on = [
-    data.aws_iam_policy_document.mattermost_s3_policy,
-    aws_s3_bucket.mattermost_bucket
-  ]
-
-  bucket = aws_s3_bucket.mattermost_bucket.id
-  policy = data.aws_iam_policy_document.mattermost_s3_policy.json
+resource "aws_s3_bucket_policy" "mattermost_s3_bucket_policy" {
+  depends_on = [aws_s3_bucket.mattermost_bucket]
+  bucket     = aws_s3_bucket.mattermost_bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = [
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.mattermost_ec2_role.name}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          ]
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "${aws_s3_bucket.mattermost_bucket.arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = [
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.mattermost_ec2_role.name}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          ]
+        }
+        Action   = ["s3:ListBucket"]
+        Resource = [aws_s3_bucket.mattermost_bucket.arn]
+      }
+    ]
+  })
 }
 
 resource "aws_s3_bucket_versioning" "bucket_versioning" {

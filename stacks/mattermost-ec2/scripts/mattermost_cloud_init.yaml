@@ -68,9 +68,15 @@ write_files:
       }
 
 runcmd:
+  # Logging
+  - LOG_DIR=/var/log/
+  - LOG_FILE="$LOG_DIR/cloud-init-$(date +%Y%m%d-%H%M%S).log"
+  - exec > >(tee -a $LOG_FILE) 2>&1
+
   # Enable and start SSM Agent
   - systemctl enable amazon-ssm-agent
   - systemctl start amazon-ssm-agent
+  - systemctl restart sshd
 
   # Update System
   - dnf update -y
@@ -86,6 +92,11 @@ runcmd:
       nginx \
       certbot \
       python3-certbot-nginx
+
+  # Enable and start SSM Agent
+  - systemctl enable amazon-ssm-agent
+  - systemctl start amazon-ssm-agent
+  - systemctl restart sshd
 
   # Download and install Mattermost
   - wget https://releases.mattermost.com/${mattermost_version}/mattermost-${mattermost_version}-linux-amd64.tar.gz
@@ -141,6 +152,7 @@ runcmd:
   - nginx -t
   - systemctl enable nginx
   - systemctl restart nginx
+  - systemctl restart sshd
 
   # Obtain SSL certificates via Certbot
   - |

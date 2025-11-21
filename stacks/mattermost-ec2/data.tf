@@ -8,7 +8,7 @@ data "aws_ami" "ami_type" {
   owners      = ["amazon"]
   filter {
     name   = "architecture"
-    values = ["arm64"]
+    values = ["x86_64"]
   }
   filter {
     name   = "name"
@@ -17,7 +17,7 @@ data "aws_ami" "ami_type" {
 }
 
 # S3 Policy for EC2 Access to bucket
-data "aws_iam_policy_document" "mattermost_s3_policy" {
+data "aws_iam_policy_document" "mattermost_ec2_s3_policy" {
   statement {
     actions   = ["s3:ListBucket"]
     resources = [aws_s3_bucket.mattermost_bucket.arn]
@@ -59,5 +59,34 @@ data "aws_iam_policy_document" "mattermost_rds_policy" {
     ]
 
     effect = "Allow"
+  }
+}
+
+data "aws_vpc" "mattermost_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = [var.vpc_tag_name]
+  }
+}
+
+data "aws_subnet" "public_mattermost_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = [var.subnet_public_tag_name]
+  }
+}
+
+
+data "aws_subnet" "private_mattermost_subnet_1" {
+  filter {
+    name   = "tag:Name"
+    values = [var.subnet_private_tag_name_1]
+  }
+}
+
+data "aws_subnet" "private_mattermost_subnet_2" {
+  filter {
+    name   = "tag:Name"
+    values = [var.subnet_private_tag_name_2]
   }
 }
