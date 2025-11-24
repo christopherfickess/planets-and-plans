@@ -24,8 +24,8 @@ write_files:
       Type=simple
       User=mattermost
       Group=mattermost
-      WorkingDirectory=/home/mattermost/mattermost
-      ExecStart=/home/mattermost/mattermost/bin/mattermost
+      WorkingDirectory=/opt/mattermost
+      ExecStart=/opt/mattermost/bin/mattermost
       Restart=always
       RestartSec=10
 
@@ -35,37 +35,57 @@ write_files:
   - path: /etc/nginx/sites-available/mattermost
     owner: root:root
     permissions: "0644"
+    # HTTP configuration
     content: |
       server {
           listen 80;
-          server_name ${mattermost_domain};  
+          server_name _;
 
-          # Redirect all HTTP requests to HTTPS
-          return 301 https://$host$request_uri;
-      }
-
-      server {
-          listen 443 ssl;
-          server_name ${mattermost_domain};
-
-          ssl_certificate /etc/letsencrypt/live/${mattermost_domain}/fullchain.pem;
-          ssl_certificate_key /etc/letsencrypt/live/${mattermost_domain}/privkey.pem;
-
-          # Increase upload size limit
           client_max_body_size 100M;
 
           location / {
-              proxy_pass http://localhost:8065;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header Host $host;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_buffering off;
+              proxy_pass http://127.0.0.1:8065;
               proxy_http_version 1.1;
               proxy_set_header Upgrade $http_upgrade;
               proxy_set_header Connection "upgrade";
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
           }
       }
+    # HTTPS configuration with Certbot will handle this
+    # content: |
+    #   server {
+    #       listen 80;
+    #       server_name ${mattermost_domain};
+
+    #       # Redirect all HTTP requests to HTTPS
+    #       return 301 https://$host$request_uri;
+    #   }
+
+    #   server {
+    #       listen 443 ssl;
+    #       server_name _;
+
+    #       ssl_certificate /etc/letsencrypt/live/${mattermost_domain}/fullchain.pem;
+    #       ssl_certificate_key /etc/letsencrypt/live/${mattermost_domain}/privkey.pem;
+
+    #       # Increase upload size limit
+    #       client_max_body_size 100M;
+
+    #       location / {
+    #           proxy_pass http://localhost:8065;
+    #           proxy_set_header X-Real-IP $remote_addr;
+    #           proxy_set_header Host $host;
+    #           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #           proxy_set_header X-Forwarded-Proto $scheme;
+    #           proxy_buffering off;
+    #           proxy_http_version 1.1;
+    #           proxy_set_header Upgrade $http_upgrade;
+    #           proxy_set_header Connection "upgrade";
+    #       }
+    #   }
 
 runcmd:
   # Logging
@@ -89,21 +109,26 @@ runcmd:
       gnupg2 \
       postgresql15 \
       jq \
-      nginx \
-      certbot \
-      python3-certbot-nginx
+      nginx
+  # \
+  #    certbot \
+  #    python3-certbot-nginx
 
-  # Enable and start SSM Agent
-  - systemctl enable amazon-ssm-agent
-  - systemctl start amazon-ssm-agent
-  - systemctl restart sshd
+  - dnf clean all
 
   # Download and install Mattermost
   # - wget https://releases.mattermost.com/${mattermost_version}/mattermost-${mattermost_version}-linux-amd64.tar.gz
   # - tar -xvzf mattermost-${mattermost_version}-linux-amd64.tar.gz
-  - wget https://releases.mattermost.com/${mattermost_version}/mattermost-enterprise-${mattermost_version}-linux-amd64.tar.gz
-  - tar -xvzf mattermost-enterprise-${mattermost_version}-linux-amd64.tar.gz
-  - mv mattermost /opt
+  - |
+    wget -P /tmp/ https://releases.mattermost.com/${mattermost_version}/mattermost-enterprise-${mattermost_version}-linux-amd64.tar.gz \
+    && echo "Mattermost tarball downloaded successfully." \
+    || echo "Failed to download Mattermost tarball."
+
+  - |
+    tar -xvzf /tmp/mattermost-enterprise-${mattermost_version}-linux-amd64.tar.gz -C /tmp/ \
+    && echo "Untar Mattermost successfully." \
+    || echo "Failed to untar Mattermost."
+  - mv -f /tmp/mattermost/ /opt/mattermost
   - mkdir /opt/mattermost/data
   - useradd --system --user-group mattermost
   - chown -R mattermost:mattermost /opt/mattermost
@@ -125,13 +150,13 @@ runcmd:
 
   # Update Mattermost config.json DataSource
   - MATTERMOST_CONFIG_FILE="/opt/mattermost/config/config.json"
-  - MATTERMOST_DATASOURCE="postgres://$MATTERMOST_DB_USERNAME:$MATTERMOST_DB_PASSWORD@$MATTERMOST_DB_ENDPOINT:5432/mattermost?sslmode=require&connect_timeout=10"
-  - TMP_FILE=$(mktemp)
+  - MATTERMOST_DATASOURCE="postgres://$MATTERMOST_DB_USERNAME:$MATTERMOST_DB_PASSWORD@$MATTERMOST_DB_ENDPOINT:5432/${mattermost_db_name}?sslmode=require&connect_timeout=10"
   - |
     jq --arg dsn "$MATTERMOST_DATASOURCE" \
         '.SqlSettings.DataSource = $dsn' \
-        "$MATTERMOST_CONFIG_FILE" > "$TMP_FILE"
-  - mv "$TMP_FILE" "$MATTERMOST_CONFIG_FILE"
+        "$MATTERMOST_CONFIG_FILE" > "$MATTERMOST_CONFIG_FILE.tmp"
+
+  - mv -f "$MATTERMOST_CONFIG_FILE.tmp" "$MATTERMOST_CONFIG_FILE"
   - chown mattermost:mattermost "$MATTERMOST_CONFIG_FILE"
 
   # Start Mattermost service
@@ -145,7 +170,6 @@ runcmd:
   # - aws s3 cp s3://my-mattermost-config-bucket/config.json /home/mattermost/mattermost/config/config.json
   # - chown mattermost:mattermost /home/mattermost/mattermost/config/config.json
   # ----------------------------------------------------------------------------
-  - systemctl restart mattermost
   # Setup NQINX Configuration and Deploy Load Balancer
 
   # Setup Nginx
@@ -154,13 +178,12 @@ runcmd:
   - nginx -t
   - systemctl enable nginx
   - systemctl restart nginx
-  - systemctl restart sshd
 
   # Obtain SSL certificates via Certbot
-  - |
-    certbot --nginx -d ${mattermost_domain} \
-      --non-interactive \
-      --agree-tos \
-      --email ${mattermost_email} \
-      --redirect
-  - systemctl status certbot.timer
+  # - |
+  #   certbot --nginx -d ${mattermost_domain} \
+  #     --non-interactive \
+  #     --agree-tos \
+  #     --email ${mattermost_email} \
+  #     --redirect
+  # - systemctl status certbot.timer

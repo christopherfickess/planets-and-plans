@@ -42,6 +42,7 @@ resource "aws_instance" "ami_instance_mattermost_ec2_spot" {
     mattermost_email   = var.domain_user_email
     mattermost_domain  = local.domain
     mattermost_version = var.mattermost_version
+    mattermost_db_name = var.rds_db_name
     password_param     = aws_ssm_parameter.mattermost_db_password.name
     rds_endpoint       = aws_db_instance.mattermost_rds.address
     username_param     = aws_ssm_parameter.mattermost_db_username.name

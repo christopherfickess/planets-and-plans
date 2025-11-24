@@ -2,7 +2,7 @@ locals {
   base_identifier = "${var.unique_name_suffix}-mattermost-${var.unique_id}"
 
   base_domain                  = "dev.cloud.mattermost.com"
-  domain                       = "chris-fickess.chat.${local.base_domain}"
+  domain                       = "chris-fickess.${local.base_domain}"
   ec2_instance_name            = "${var.ec2_instance_name}-${local.base_identifier}"
   ec2_instance_profile_name    = "${var.ec2_instance_profile_name}-${local.base_identifier}"
   ec2_security_group_name      = "${var.ec2_security_group_name}-${local.base_identifier}"
