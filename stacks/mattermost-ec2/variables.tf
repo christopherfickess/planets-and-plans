@@ -214,22 +214,6 @@ variable "mattermost_version" {
   default     = "11.1.0"
 }
 
-
-##############################################
-#                Region Settings             #
-##############################################
-variable "aws_region" {
-  description = "AWS region for deployment."
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "region" {
-  description = "AWS region for deployment (duplicate option)."
-  type        = string
-  default     = "us-east-1"
-}
-
 ##############################################
 #             Unique Naming Values           #
 ##############################################
