@@ -80,7 +80,7 @@ data "aws_iam_policy_document" "mattermost_rds_policy" {
 
     resources = [
       # RDS DB user ARN format: arn:aws:rds-db:region:account-id:dbuser:dbi-resource-id/db-username
-      "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.mattermost_rds.resource_id}/${aws_db_instance.mattermost_rds.username}",
+      "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.mattermost_rds.resource_id}/${aws_db_instance.mattermost_rds.username}",
       aws_ssm_parameter.mattermost_db_username.arn,
       aws_ssm_parameter.mattermost_db_password.arn
     ]
