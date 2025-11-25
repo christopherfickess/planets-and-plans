@@ -139,22 +139,16 @@ variable "ssm_run_command_name" {
 variable "subnet_public_tag_name" {
   description = "[String]Default Subnet Tag Name"
   type        = string
-  # default     = "mattermost-cloud-dev-shared-services-public-us-east-1a"
-  default = "mattermost-cloud-dev-provisioning-102401280-private-1a"
 }
 
 variable "subnet_private_tag_name_1" {
-  description = "[String]Default Subnet Tag Name"
+  description = "[String]Default Subnet Tag Name 1"
   type        = string
-  # default     = "mattermost-cloud-dev-shared-services-private-us-east-1a"
-  default = "mattermost-cloud-dev-provisioning-102401280-private-1a"
 }
 
 variable "subnet_private_tag_name_2" {
-  description = "[String]Default Subnet Tag Name"
+  description = "[String]Default Subnet Tag Name 2"
   type        = string
-  # default     = "mattermost-cloud-dev-shared-services-private-us-east-1b"
-  default = "mattermost-cloud-dev-provisioning-102401280-private-1c"
 }
 
 variable "subnet_rds_private_tag_name" {
@@ -166,10 +160,7 @@ variable "subnet_rds_private_tag_name" {
 variable "vpc_tag_name" {
   description = "[String]Default VPC Tag Name"
   type        = string
-  default     = "mattermost-cloud-dev-provisioning-102401280"
 }
-
-
 
 # Variables for Unique Naming in tfvars
 
@@ -189,7 +180,7 @@ variable "unique_id" {
 variable "parameter_store_path_prefix" {
   description = "Prefix for SSM parameter names"
   type        = string
-  default     = "/mattermost-dev-chris-self-hosted"
+  default     = "/mattermost-dev-self-hosted"
 }
 
 variable "key_pair_local_path" {
