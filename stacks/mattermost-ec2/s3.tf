@@ -23,7 +23,7 @@ resource "aws_s3_bucket_policy" "mattermost_s3_bucket_policy" {
         Principal = {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.mattermost_ec2_role.name}",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_name}",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
           ]
         }
@@ -41,7 +41,7 @@ resource "aws_s3_bucket_policy" "mattermost_s3_bucket_policy" {
         Principal = {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.mattermost_ec2_role.name}",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_name}",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
           ]
         }

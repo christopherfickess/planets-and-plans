@@ -6,10 +6,9 @@ variable "ami_type" {
   default     = "al2023-ami-2023*"
 }
 
-variable "admin_access" {
-  description = "Enable or disable admin access."
+variable "account_role_name" {
+  description = "[String]AWS Primary Role that needs access to all Resources Deployed."
   type        = string
-  default     = "aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_d1e9700799a73262"
 }
 
 variable "aws_region" {

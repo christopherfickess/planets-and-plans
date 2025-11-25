@@ -39,3 +39,6 @@ terraform.rc
 
 # Lock files
 *.lock.*
+*/tmp/*
+
+*/*/tmp/*

@@ -32,7 +32,7 @@ resource "aws_kms_key_policy" "ec2_kms_key_policy" {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.ec2_iam_role_name}",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}"
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_name}"
           ]
 
         }
@@ -45,7 +45,7 @@ resource "aws_kms_key_policy" "ec2_kms_key_policy" {
         Principal = {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.ec2_iam_role_name}",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_name}",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
           ]
         }
@@ -64,7 +64,7 @@ resource "aws_kms_key_policy" "ec2_kms_key_policy" {
         Principal = {
           AWS = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.ec2_iam_role_name}",
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.admin_access}",
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.account_role_name}",
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
           ]
         }
