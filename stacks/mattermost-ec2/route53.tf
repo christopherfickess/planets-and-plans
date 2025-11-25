@@ -14,15 +14,6 @@ data "aws_route53_zone" "parent" {
   private_zone = false             # true if this is a private hosted zone
 }
 
-output "route53_zone_info" {
-  value = {
-    id           = data.aws_route53_zone.parent.id
-    name         = data.aws_route53_zone.parent.name
-    private_zone = data.aws_route53_zone.parent.private_zone
-    comment      = data.aws_route53_zone.parent.comment
-    name_servers = data.aws_route53_zone.parent.name_servers
-  }
-}
 
 resource "aws_route53_record" "mattermost" {
   zone_id = data.aws_route53_zone.parent.zone_id
