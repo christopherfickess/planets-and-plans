@@ -1,44 +1,10 @@
-# Variables with Defaults and Descriptions
-
+##############################################
+#                 AMI / EC2                  #
+##############################################
 variable "ami_type" {
   description = "The AMI name pattern to use for the EC2 instance."
   type        = string
   default     = "al2023-ami-2023*"
-}
-
-variable "account_role_name" {
-  description = "[String]AWS Primary Role that needs access to all Resources Deployed."
-  type        = string
-}
-
-variable "aws_region" {
-  description = "The AWS region to deploy resources in."
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "ec2_instance_profile_name" {
-  description = "The name of the IAM instance profile to associate with the EC2 instance."
-  type        = string
-  default     = "ec2-instance-profile"
-}
-
-variable "ec2_instance_name" {
-  description = "The name of the EC2 instance."
-  type        = string
-  default     = "mattermost-ec2-instance"
-}
-
-variable "ec2_instance_size" {
-  description = "The size of the EC2 instance."
-  type        = string
-  default     = "t3.medium"
-}
-
-variable "ec2_security_group_name" {
-  description = "The name of the EC2 security group."
-  type        = string
-  default     = "mattermost-ec2-sg"
 }
 
 variable "ec2_iam_role_name" {
@@ -53,134 +19,28 @@ variable "ec2_iam_role_policy_name" {
   default     = "ec2-role-policy"
 }
 
-variable "mattermost_kms_key_alias" {
-  description = "[String]Default KMS Alias"
+variable "ec2_instance_name" {
+  description = "The name of the EC2 instance."
   type        = string
-  default     = "alias/ec2-root-key"
-
-}
-variable "mattermost_version" {
-  description = "[String]Default Mattermost Version to Install"
-  type        = string
-  default     = "11.1.0"
+  default     = "mattermost-ec2-instance"
 }
 
-variable "region" {
-  description = "The AWS region to deploy resources in."
+variable "ec2_instance_profile_name" {
+  description = "The name of the IAM instance profile to associate with the EC2 instance."
   type        = string
-  default     = "us-east-1"
+  default     = "ec2-instance-profile"
 }
 
-variable "rds_db_name" {
-  description = "The name of the RDS database."
+variable "ec2_instance_size" {
+  description = "The size of the EC2 instance."
   type        = string
-  default     = "MattermostdbEC2ChrisDev"
+  default     = "t3.medium"
 }
 
-variable "rds_db_identifier" {
-  description = "The name of the RDS database."
+variable "ec2_security_group_name" {
+  description = "The name of the EC2 security group."
   type        = string
-  default     = "mattermostdb-ec2"
-}
-
-variable "rds_db_type" {
-  description = "[String]Default RDS Database type"
-  type        = string
-  default     = "postgres"
-}
-
-variable "rds_db_version" {
-  description = "[String]Default RDS Database Postgres Version"
-  type        = string
-  default     = "default.postgres17"
-}
-
-variable "rds_db_policy_name" {
-  description = "The name of the RDS database policy"
-  type        = string
-  default     = "Mattermost-RDS-Access-Policy"
-}
-variable "rds_instance_type" {
-  description = "The RDS instance type."
-  type        = string
-  default     = "db.t3.medium"
-}
-
-variable "rds_security_group_name" {
-  description = "The name of the RDS security group."
-  type        = string
-  default     = "mattermost-rds-sg"
-}
-
-variable "root_volume_size" {
-  description = "The size of the root volume in GB."
-  type        = number
-  default     = 25
-}
-
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to use."
-  type        = string
-  default     = "ec2-mattermost-bucket"
-}
-
-variable "s3_bucket_policy_name" {
-  description = "The name of the S3 bucket policy."
-  type        = string
-  default     = "mattermost-s3-bucket-policy"
-}
-
-variable "ssm_run_command_name" {
-  description = "The name of the SSM document to run shell commands."
-  type        = string
-  default     = "MattermostDevDeployment"
-}
-
-variable "subnet_public_tag_name" {
-  description = "[String]Default Subnet Tag Name"
-  type        = string
-}
-
-variable "subnet_private_tag_name_1" {
-  description = "[String]Default Subnet Tag Name 1"
-  type        = string
-}
-
-variable "subnet_private_tag_name_2" {
-  description = "[String]Default Subnet Tag Name 2"
-  type        = string
-}
-
-variable "subnet_rds_private_tag_name" {
-  description = "[String]Default Subnet Tag Name"
-  type        = string
-  default     = "mattermost-rds-subnet-group"
-}
-
-variable "vpc_tag_name" {
-  description = "[String]Default VPC Tag Name"
-  type        = string
-}
-
-# Variables for Unique Naming in tfvars
-
-variable "unique_name_suffix" {
-  description = "A unique identifier for resource naming."
-  type        = string
-}
-
-variable "unique_id" {
-  description = "A unique ID for tagging and naming resources."
-  type        = string
-}
-
-#####################################################################
-#       These will be required variables without defaults           #
-#####################################################################
-variable "parameter_store_path_prefix" {
-  description = "Prefix for SSM parameter names"
-  type        = string
-  default     = "/mattermost-dev-self-hosted"
+  default     = "mattermost-ec2-sg"
 }
 
 variable "key_pair_local_path" {
@@ -195,26 +55,194 @@ variable "key_pair_name" {
   default     = "mattermost-ec2-key"
 }
 
-variable "domain_user_email" {
-  description = "[String]Admin User Email Address for Forwarding"
+variable "root_volume_size" {
+  description = "The size of the root volume in GB."
+  type        = number
+  default     = 25
+}
+
+##############################################
+#                ACCOUNT / IAM               #
+##############################################
+variable "account_role_name" {
+  description = "AWS primary role that needs access to deployed resources."
   type        = string
 }
 
-variable "mattermost_db_username" {
-  description = "The username for the RDS database admin user."
+variable "mattermost_kms_key_alias" {
+  description = "Default KMS alias."
+  type        = string
+  default     = "alias/ec2-root-key"
+}
+
+##############################################
+#               NETWORK / VPC                #
+##############################################
+variable "subnet_private_tag_name_1" {
+  description = "Subnet tag name 1."
   type        = string
 }
 
+variable "subnet_private_tag_name_2" {
+  description = "Subnet tag name 2."
+  type        = string
+}
+
+variable "subnet_public_tag_name" {
+  description = "Public subnet tag name."
+  type        = string
+}
+
+variable "subnet_rds_private_tag_name" {
+  description = "Subnet tag name for the RDS subnet group."
+  type        = string
+  default     = "mattermost-rds-subnet-group"
+}
+
+variable "vpc_tag_name" {
+  description = "VPC tag name."
+  type        = string
+}
+
+##############################################
+#                 RDS / Database             #
+##############################################
 variable "mattermost_db_password" {
-  description = "The password for the RDS database admin Password."
+  description = "Password for the RDS database admin user."
   type        = string
   sensitive   = true
 }
 
+variable "mattermost_db_username" {
+  description = "Username for the RDS database admin user."
+  type        = string
+}
+
+variable "rds_db_identifier" {
+  description = "The identifier for the RDS database instance."
+  type        = string
+  default     = "mattermostdb-ec2"
+}
+
+variable "rds_db_name" {
+  description = "The name of the RDS database."
+  type        = string
+  default     = "MattermostdbEC2ChrisDev"
+}
+
+variable "rds_db_policy_name" {
+  description = "Name of the RDS database policy."
+  type        = string
+  default     = "Mattermost-RDS-Access-Policy"
+}
+
+variable "rds_db_type" {
+  description = "Database engine type."
+  type        = string
+  default     = "postgres"
+}
+
+variable "rds_db_version" {
+  description = "Postgres engine version."
+  type        = string
+  default     = "default.postgres17"
+}
+
+variable "rds_instance_type" {
+  description = "The RDS instance type."
+  type        = string
+  default     = "db.t3.medium"
+}
+
+variable "rds_security_group_name" {
+  description = "The name of the RDS security group."
+  type        = string
+  default     = "mattermost-rds-sg"
+}
+
+##############################################
+#                 ROUTE53 / DNS              #
+##############################################
+
+variable "domain_user_email" {
+  description = "Admin email used for domain-related notifications."
+  type        = string
+}
+
 variable "validation_method" {
-  description = "Method to validate the certificate (DNS or EMAIL)"
+  description = "Certificate validation method."
   type        = string
   default     = "DNS"
 }
-#####################################################################
-# End of variables.tf
+
+##############################################
+#                 S3 / Storage               #
+##############################################
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket."
+  type        = string
+  default     = "ec2-mattermost-bucket"
+}
+
+variable "s3_bucket_policy_name" {
+  description = "Name of the S3 bucket policy."
+  type        = string
+  default     = "mattermost-s3-bucket-policy"
+}
+
+##############################################
+#                 SSM / Automation           #
+##############################################
+variable "parameter_store_path_prefix" {
+  description = "Prefix for SSM parameter names."
+  type        = string
+  default     = "/mattermost-dev-self-hosted"
+}
+
+variable "ssm_run_command_name" {
+  description = "Name of the SSM document that runs shell commands."
+  type        = string
+  default     = "MattermostDevDeployment"
+}
+
+##############################################
+#                Mattermost App              #
+##############################################
+variable "mattermost_version" {
+  description = "Default Mattermost version to install."
+  type        = string
+  default     = "11.1.0"
+}
+
+
+##############################################
+#                Region Settings             #
+##############################################
+variable "aws_region" {
+  description = "AWS region for deployment."
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "region" {
+  description = "AWS region for deployment (duplicate option)."
+  type        = string
+  default     = "us-east-1"
+}
+
+##############################################
+#             Unique Naming Values           #
+##############################################
+variable "unique_id" {
+  description = "Unique ID for tagging and naming."
+  type        = string
+}
+
+variable "unique_name_suffix" {
+  description = "Unique suffix for resource naming."
+  type        = string
+}
+
+##############################################
+#                   END                      #
+##############################################
