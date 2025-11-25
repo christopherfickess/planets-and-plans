@@ -1,61 +1,56 @@
+#################################################
+#                  EC2 Outputs                  
+#################################################
 
-
-###############################################
-# EC2 Outputs
-###############################################
-output "mattermost_ami_type" {
-  value = data.aws_ami.ami_type.id
+output "mattermost_ec2_info" {
+  value = {
+    ami_type  = data.aws_ami.ami_type.id
+    ec2_id    = aws_instance.ami_instance_mattermost_ec2_spot.id
+    ec2_name  = local.ec2_instance_name
+    public_ip = aws_instance.ami_instance_mattermost_ec2_spot.public_ip
+    iam_role  = aws_iam_role.mattermost_ec2_role.name
+    s3_bucket = aws_s3_bucket.mattermost_bucket.id
+  }
 }
 
-output "mattermost_ec2_id" {
-  value = aws_instance.ami_instance_mattermost_ec2_spot.id
+
+#################################################
+#                  RDS Outputs                  
+#################################################
+
+output "mattermost_rds_info" {
+  value = {
+    endpoint = aws_db_instance.mattermost_rds.endpoint
+    id       = aws_db_instance.mattermost_rds.id
+    port     = aws_db_instance.mattermost_rds.port
+  }
 }
 
-output "mattermost_ec2_name" {
-  value = local.ec2_instance_name
+
+#################################################
+#                Route53 Outputs                
+#################################################
+
+output "route53_zone_info" {
+  value = {
+    name = data.aws_route53_zone.parent.name
+  }
 }
 
-output "mattermost_ec2_public_ip" {
-  value = aws_instance.ami_instance_mattermost_ec2_spot.public_ip
+
+#################################################
+#                Auxiliary Outputs              
+#################################################
+
+output "deployment_info" {
+  value = {
+    deployment_date = time_static.deployment_date.rfc3339
+    domain          = local.domain
+    my_public_ip    = trimspace(data.http.my_ip.response_body)
+  }
 }
 
-output "mattermost_iam_role_name" {
-  value = aws_iam_role.mattermost_ec2_role.name
-}
 
-output "mattermost_s3_bucket" {
-  value = aws_s3_bucket.mattermost_bucket.id
-}
-
-###############################################
-# RDS Outputs
-###############################################
-output "mattermost_rds_endpoint" {
-  value = aws_db_instance.mattermost_rds.endpoint
-}
-
-output "mattermost_rds_id" {
-  value = aws_db_instance.mattermost_rds.id
-}
-
-output "mattermost_rds_port" {
-  value = aws_db_instance.mattermost_rds.port
-}
-
-###############################################
-# Extra Data
-###############################################
-output "domain" {
-  value = local.domain
-}
-
-output "deployment_date" {
-  value = time_static.deployment_date.rfc3339
-}
-
-output "my_public_ip" {
-  value = trimspace(data.http.my_ip.response_body)
-}
-###############################################
-# End of outputs.tf
-###############################################
+#################################################
+#                  End of File                  
+#################################################
