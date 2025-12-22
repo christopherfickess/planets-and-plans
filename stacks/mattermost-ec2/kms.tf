@@ -3,6 +3,7 @@
 ###############################################
 # KMS Key
 ###############################################
+
 resource "aws_kms_key" "ec2_kms" {
   description             = "KMS key for EC2 root volume encryption"
   deletion_window_in_days = 7

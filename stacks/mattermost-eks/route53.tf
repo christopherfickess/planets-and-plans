@@ -15,17 +15,10 @@ data "aws_route53_zone" "parent" {
 }
 
 
-resource "aws_route53_record" "mattermost" {
-  zone_id = data.aws_route53_zone.parent.zone_id
-  name    = local.domain
-  type    = "A"
-  ttl     = 60
-  records = [aws_instance.ami_instance_mattermost_ec2_spot.private_ip]
-}
 # resource "aws_route53_record" "mattermost" {
 #   zone_id = data.aws_route53_zone.parent.zone_id
 #   name    = local.domain
-#   type    = "CNAME"
+#   type    = "A"
 #   ttl     = 60
-#   records = [aws_lb.mattermost_alb.dns_name]
+#   records = [aws_instance.ami_instance_mattermost_ec2_spot.private_ip]
 # }

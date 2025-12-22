@@ -57,4 +57,4 @@ aws ec2 describe-nat-gateways --nat-gateway-ids  \
 aws ec2 describe-nat-gateways --query "NatGateways[].{ID:NatGatewayId,Subnet:SubnetId,State:State,ElasticIP:NatGatewayAddresses[0].PublicIp}" --output table | grep "${SUBNET_ID}"
 
 
-aws ec2 describe-route-tables --filters "Name=association.subnet-id,Values=${SUBNET_ID}" --query "RouteTables[].Routes" | grep "${SUBNET_ID}
+aws ec2 describe-route-tables --filters "Name=association.subnet-id,Values=${SUBNET_ID}" --query "RouteTables[].Routes"
