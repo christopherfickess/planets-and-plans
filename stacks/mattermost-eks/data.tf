@@ -51,7 +51,22 @@ data "aws_iam_policy_document" "mattermost_s3_policy" {
       "ec2messages:FailMessage",
       "ec2messages:GetEndpoint",
       "ec2messages:GetMessages",
-      "ec2messages:SendReply"
+      "ec2messages:SendReply",
+      "sts:AssumeRole",
+      "acm:DescribeCertificate",
+      "acm:ListCertificates",
+      "acm:GetCertificate",
+      "elasticloadbalancing:AddListenerCertificates",
+      "elasticloadbalancing:CreateListener",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeSecurityGroups",
+      "elasticloadbalancing:*",
+      "ec2:Describe*",
+      "ec2:CreateNetworkInterface",
+      "ec2:AttachNetworkInterface",
+      "ec2:DeleteNetworkInterface",
+      "ec2:AssignPrivateIpAddresses",
+      "ec2:UnassignPrivateIpAddresses"
     ]
     resources = ["*"]
     effect    = "Allow"
@@ -65,6 +80,26 @@ data "aws_iam_policy_document" "assume_eks" {
     principals {
       type        = "Service"
       identifiers = ["eks.amazonaws.com", "ec2.amazonaws.com"]
+    }
+  }
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub"
+      values   = ["system:serviceaccount:${var.mattermost_app_namespace}:${var.mattermost_app_service_account_name}"]
+    }
+
+    principals {
+      type        = "Federated"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer}"]
     }
   }
 }
@@ -96,6 +131,33 @@ data "aws_vpc" "mattermost_vpc" {
   }
 }
 
+# EKS Public Subnet Data Calls
+
+data "aws_subnet" "public_mattermost_subnet_1" {
+  filter {
+    name   = "tag:Name"
+    values = [var.subnet_public_tag_name_1]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.mattermost_vpc.id]
+  }
+}
+
+data "aws_subnet" "public_mattermost_subnet_2" {
+  filter {
+    name   = "tag:Name"
+    values = [var.subnet_public_tag_name_2]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.mattermost_vpc.id]
+  }
+}
+
+## RDS Subnet Group Data Calls
 data "aws_subnet" "private_mattermost_subnet_1" {
   filter {
     name   = "tag:Name"

@@ -112,8 +112,13 @@ variable "subnet_private_tag_name_2" {
   type        = string
 }
 
-variable "subnet_public_tag_name" {
-  description = "Public subnet tag name."
+variable "subnet_public_tag_name_1" {
+  description = "Public subnet tag name 1."
+  type        = string
+}
+
+variable "subnet_public_tag_name_2" {
+  description = "Public subnet tag name 2."
   type        = string
 }
 
@@ -255,10 +260,20 @@ variable "unique_name_suffix" {
 #         Kubernetes Variables               #
 ##############################################
 
-variable "k8s_namespace" {
+variable "mattermost_app_namespace" {
   description = "Kubernetes namespace for Mattermost deployment."
   type        = string
-  default     = "mattermost"
+}
+
+variable "mattermost_app_service_account_name" {
+  description = "Kubernetes service account name for Mattermost."
+  type        = string
+}
+
+variable "mattermost_operator_namespace" {
+  description = "Kubernetes namespace for Mattermost Operator."
+  type        = string
+  default     = "mattermost-operator"
 }
 
 ##############################################
