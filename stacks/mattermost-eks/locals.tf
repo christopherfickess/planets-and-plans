@@ -18,6 +18,13 @@ locals {
   s3_bucket_name                  = "${var.s3_bucket_name}-${local.base_identifier}"
   s3_bucket_policy_name           = "${var.s3_bucket_policy_name}-${local.base_identifier}"
 
+  eks_ng_policy_attachment_names = [
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  ]
 
   tags = {
     Type   = "Testing"

@@ -1,7 +1,8 @@
+
 resource "aws_eks_cluster" "mattermost_eks_cluster" {
   depends_on = [
-    aws_iam_role_policy_attachment.mattermost_eks_cluster_AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.mattermost_eks_cluster_AmazonEKSServicePolicy,
+    # aws_iam_role.mattermost_eks_cluster_role,
+    aws_iam_policy.mattermost_eks_cluster_policy
   ]
 
   name     = local.eks_cluster_name
@@ -23,11 +24,7 @@ resource "aws_eks_cluster" "mattermost_eks_cluster" {
 }
 
 resource "aws_eks_node_group" "mattermost_eks_node_group" {
-  depends_on = [
-    aws_iam_role_policy_attachment.mattermost_eks_node_AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.mattermost_eks_node_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.mattermost_eks_node_AmazonEC2ContainerRegistryReadOnly,
-  ]
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_ng_policy_attachments]
 
   cluster_name    = aws_eks_cluster.mattermost_eks_cluster.name
   node_group_name = local.eks_node_group_name
@@ -49,41 +46,4 @@ resource "aws_eks_node_group" "mattermost_eks_node_group" {
   instance_types = [var.eks_node_instance_type]
 }
 
-###############################################
-# IAM Role + Policy for EKS Cluster and Nodes
-###############################################
-resource "aws_iam_role" "mattermost_eks_node_role" {
-  name               = local.eks_node_role_name
-  assume_role_policy = data.aws_iam_policy_document.assume_eks.json
-
-  tags = merge(
-    { Name = local.eks_node_role_name },
-    local.tags
-  )
-}
-
-resource "aws_iam_role_policy_attachment" "mattermost_eks_cluster_AmazonEKSClusterPolicy" {
-  role       = aws_iam_role.mattermost_eks_cluster_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "mattermost_eks_cluster_AmazonEKSServicePolicy" {
-  role       = aws_iam_role.mattermost_eks_cluster_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "mattermost_eks_node_AmazonEKSWorkerNodePolicy" {
-  role       = aws_iam_role.mattermost_eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "mattermost_eks_node_AmazonEKS_CNI_Policy" {
-  role       = aws_iam_role.mattermost_eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "mattermost_eks_node_AmazonEC2ContainerRegistryReadOnly" {
-  role       = aws_iam_role.mattermost_eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
 
