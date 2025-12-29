@@ -34,26 +34,34 @@ resource "aws_iam_role" "mattermost_eks_node_role" {
 }
 
 # EKS NG Policy
-resource "aws_iam_policy" "mattermost_eks_cluster_policy" {
+resource "aws_iam_policy" "mattermost_eks_node_policy" {
 
   name        = local.eks_iam_role_policy_name
   description = "IAM policy to allow Mattermost EC2 instances to access Mattermost S3 bucket"
   policy      = data.aws_iam_policy_document.mattermost_s3_policy.json
 }
 
+resource "aws_iam_role_policy_attachment" "eks_cluster_role_policy_attachments" {
+  count = length(local.eks_role_policy_attachment_names)
+
+  role       = aws_iam_role.mattermost_eks_cluster_role.name
+  policy_arn = local.eks_role_policy_attachment_names[count.index]
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_sa_role_policy_attachments" {
+  depends_on = [aws_iam_policy.mattermost_eks_node_policy]
+
+  role       = aws_iam_role.mattermost_eks_node_role.name
+  policy_arn = aws_iam_policy.mattermost_eks_node_policy.arn
+}
+
 resource "aws_iam_role_policy_attachment" "eks_cluster_ng_policy_attachments" {
   count = length(local.eks_ng_policy_attachment_names)
 
-  role       = aws_iam_role.mattermost_eks_cluster_role.name
+  role       = aws_iam_role.mattermost_eks_node_role.name
   policy_arn = local.eks_ng_policy_attachment_names[count.index]
 }
 
-resource "aws_iam_role_policy_attachment" "mattermost_service_account_policy_attachments" {
-  depends_on = [aws_iam_policy.mattermost_eks_cluster_policy]
-
-  role       = aws_iam_role.mattermost_eks_cluster_role.name
-  policy_arn = aws_iam_policy.mattermost_eks_cluster_policy.arn
-}
 
 # RDS Policy Process
 resource "aws_iam_policy" "mattermost_rds_policy" {
