@@ -1,6 +1,6 @@
 locals {
-  base_identifier = "${var.unique_name_suffix}-mattermost-${var.unique_id}"
-
+  date                            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+  base_identifier                 = "${var.unique_name_suffix}-mattermost-${local.date}"
   base_domain                     = "dev.cloud.mattermost.com"
   domain                          = "chris-fickess.${local.base_domain}"
   eks_cluster_name                = "mattermost-eks-${local.base_identifier}"
