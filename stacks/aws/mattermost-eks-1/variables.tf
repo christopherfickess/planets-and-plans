@@ -246,10 +246,10 @@ variable "mattermost_version" {
 ##############################################
 #             Unique Naming Values           #
 ##############################################
-variable "unique_id" {
-  description = "Unique ID for tagging and naming."
-  type        = string
-}
+# variable "unique_id" {
+#   description = "Unique ID for tagging and naming."
+#   type        = string
+# }
 
 variable "unique_name_suffix" {
   description = "Unique suffix for resource naming."

@@ -1,6 +1,6 @@
 locals {
-  base_identifier = "${var.unique_name_suffix}-mattermost-${var.unique_id}"
-
+  date                            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+  base_identifier                 = "${var.unique_name_suffix}-mattermost-${local.date}"
   base_domain                     = "dev.cloud.mattermost.com"
   domain                          = "chris-fickess.${local.base_domain}"
   eks_cluster_name                = "mattermost-eks-${local.base_identifier}"
@@ -18,6 +18,16 @@ locals {
   s3_bucket_name                  = "${var.s3_bucket_name}-${local.base_identifier}"
   s3_bucket_policy_name           = "${var.s3_bucket_policy_name}-${local.base_identifier}"
 
+  eks_role_policy_attachment_names = [
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  ]
+
+  eks_ng_policy_attachment_names = [
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  ]
 
   tags = {
     Type   = "Testing"
