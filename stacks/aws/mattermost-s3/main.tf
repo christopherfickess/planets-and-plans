@@ -1,5 +1,5 @@
 module "s3_bucket" {
-  source = "../../modules/common/s3"
+  source = "../../../modules/aws/common/s3"
 
   s3_bucket_name        = local.s3_bucket_name
   s3_bucket_policy_name = local.s3_bucket_policy_name
