@@ -1,51 +1,13 @@
-#################################################
-#                  EC2 Outputs                  
-#################################################
-output "mattermost_eks_info" {
+
+
+output "aks_variables" {
   value = {
-    cluster_name = local.eks_cluster_name
-    iam_role     = aws_iam_role.mattermost_eks_cluster_role.name
-    s3_bucket    = aws_s3_bucket.mattermost_bucket.id
+    cluster_name           = module.mattermost_aks.name
+    resource_group_name    = module.mattermost_aks.resource_group_name
+    location               = module.mattermost_aks.location
+    dns_prefix             = module.mattermost_aks.dns_prefix
+    default_node_pool_name = module.mattermost_aks.default_node_pool_name
+    node_count             = module.mattermost_aks.node_count
+    vm_size                = module.mattermost_aks.vm_size
   }
 }
-
-#################################################
-#                  RDS Outputs                  
-#################################################
-
-output "mattermost_rds_info" {
-  value = {
-    endpoint = aws_db_instance.mattermost_rds.endpoint
-    id       = aws_db_instance.mattermost_rds.id
-    port     = aws_db_instance.mattermost_rds.port
-  }
-}
-
-
-#################################################
-#                Route53 Outputs                
-#################################################
-
-output "route53_zone_info" {
-  value = {
-    name = data.aws_route53_zone.parent.name
-  }
-}
-
-
-#################################################
-#                Auxiliary Outputs              
-#################################################
-
-output "deployment_info" {
-  value = {
-    deployment_date = time_static.deployment_date.rfc3339
-    domain          = local.domain
-    my_public_ip    = trimspace(data.http.my_ip.response_body)
-  }
-}
-
-
-#################################################
-#                  End of File                  
-#################################################
