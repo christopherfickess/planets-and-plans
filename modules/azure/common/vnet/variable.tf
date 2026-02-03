@@ -55,10 +55,22 @@ variable "address_space" {
   # ["10.0.0.0/16"]
 }
 
+variable "aks_subnet_name" {
+  description = "The name of the AKS subnet."
+  type        = string
+  # default     = "aks-subnet"
+}
+
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
   # ["10.0.0.0/24"]
+}
+
+variable "pod_subnet_name" {
+  description = "The name of the Pod subnet."
+  type        = string
+  # default     = "pods-subnet"
 }
 
 variable "pod_subnet_addresses" {

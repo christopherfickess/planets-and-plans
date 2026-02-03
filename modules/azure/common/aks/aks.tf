@@ -2,9 +2,8 @@
 
 
 module "aks" {
-  depends_on = [azuread_group.aks_admins, azuread_group.aks_users]
-  source     = "Azure/aks/azurerm"
-  version    = "11.0.0" # pick the version you want
+  source  = "Azure/aks/azurerm"
+  version = "11.0.0" # pick the version you want
 
   # ------------------------------------------------------------------
   # CORE SETTINGS
@@ -57,6 +56,7 @@ module "aks" {
   load_balancer_sku         = "standard"
   network_plugin_mode       = var.network_plugin_mode
 
+
   vnet_subnet = var.vnet_subnet # Fix
   pod_subnet  = var.pod_subnet  # Fix
 
@@ -70,7 +70,7 @@ module "aks" {
 
   rbac_aad_tenant_id              = var.rbac_aad_tenant_id
   rbac_aad_azure_rbac_enabled     = true
-  rbac_aad_admin_group_object_ids = [azuread_group.aks_admins.id]
+  rbac_aad_admin_group_object_ids = [data.azuread_group.aks_admins.object_id]
 
   local_account_disabled = true
 

@@ -84,7 +84,7 @@ variable "pod_subnet" {
 variable "network_plugin_mode" {
   description = "The network plugin mode for AKS cluster."
   type        = string
-  default     = "overlay"
+  default     = null
 }
 
 # -------------------------------
@@ -140,7 +140,7 @@ variable "system_node_pool" {
     min_count            = 1
     max_count            = 5
     node_type            = "System"
-    os_type              = "Linux"
+    os_type              = "AzureLinux3"
     os_disk_size_gb      = 100
     os_disk_type         = "Managed"
     availability_zones   = ["1", "2", "3"]
@@ -171,7 +171,7 @@ variable "node_pools" {
 #     auto_scaling_enabled = true
 #     min_count            = 2
 #     max_count            = 6
-#     os_type              = "Linux"
+#     os_type              = "AzureLinux3"
 #     os_disk_size_gb      = 100
 #     node_labels          = { role = "workloads" }
 #   }
