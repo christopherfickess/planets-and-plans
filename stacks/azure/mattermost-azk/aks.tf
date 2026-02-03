@@ -24,11 +24,10 @@ module "mattermost_aks" {
 
   # Subnets from VNet module
   vnet_subnet = {
-    id = module.mattermost_vnet.subnets["aks"]
+    id = data.azurerm_subnet.aks.id
   }
-
   pod_subnet = {
-    id = module.mattermost_vnet.subnets["pods"]
+    id = data.azurerm_subnet.pods.id
   }
 
 

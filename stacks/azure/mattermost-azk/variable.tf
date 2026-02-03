@@ -62,10 +62,22 @@ variable "address_space" {
   # ["10.0.0.0/16"]
 }
 
+variable "aks_subnet_name" {
+  description = "The name of the AKS subnet."
+  type        = string
+  default     = "aks-subnet"
+}
+
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
   # ["10.0.0.0/24"]
+}
+
+variable "pod_subnet_name" {
+  description = "The name of the Pod subnet."
+  type        = string
+  default     = "pods-subnet"
 }
 
 variable "pod_subnet_addresses" {
@@ -122,16 +134,16 @@ variable "system_node_pool" {
   })
   default = {
     name                 = "system"
-    vm_size              = "Standard_D2s_v5"
+    vm_size              = "Standard_DS2_v2"
     node_count           = 3
     auto_scaling_enabled = true
     min_count            = 3
     max_count            = 10
     node_type            = "System"
-    os_type              = "Linux"
+    os_type              = "AzureLinux3"
     os_disk_size_gb      = 100
     os_disk_type         = "Managed"
-    availability_zones   = ["1", "2", "3"]
+    availability_zones   = []
     node_labels          = { nodepool = "system" }
   }
 }
@@ -159,7 +171,7 @@ variable "node_pools" {
   #     auto_scaling_enabled = true
   #     min_count            = 2
   #     max_count            = 6
-  #     os_type              = "Linux"
+  #     os_type              = "AzureLinux3"
   #     os_disk_size_gb      = 100
   #     node_labels          = { role = "workloads" }
   #   }

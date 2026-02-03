@@ -26,9 +26,13 @@ azure.dev
 # Terraform Commands
 
 TF_VARS="dev-chris"
-terraform init -backend-config=tfvars/${TF_VARS}/backend.hcl
+terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
 
 terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
 
 terraform apply plan.tfplan
+
+terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
+
+terraform force-unlock <LOCK_ID>
 ```

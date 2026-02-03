@@ -1,7 +1,7 @@
 
 locals {
   date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-  base_identifier = "${var.environment}-mattermost-${local.date}"
+  base_identifier = "${var.environment}-mattermost"
 
   nat_public_ip_name = "${local.base_identifier}-nat-pip"
   nat_gateway_name   = "${local.base_identifier}-nat"

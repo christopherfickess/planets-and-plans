@@ -6,7 +6,7 @@ module "mattermost_vnet" {
 
   unique_name_prefix = local.base_identifier
 
-  vnet_name           = "${local.base_identifier}-vnet"
+  vnet_name           = var.vnet_name
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = data.azurerm_resource_group.mattermost_location.location
 
@@ -21,6 +21,9 @@ module "mattermost_vnet" {
   nat_gateway_enabled = true
   nat_gateway_name    = local.nat_gateway_name
   nat_public_ip_name  = local.nat_public_ip_name
+
+  aks_subnet_name = var.aks_subnet_name
+  pod_subnet_name = var.pod_subnet_name
 
 
   tags = merge({ name = "${local.base_identifier}-vnet" }, local.tags)
