@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RESOURCE_GROUP_NAME=chrisfickess-tfstate-azk
-STORAGE_ACCOUNT_NAME=tfstateChrisFickess
+STORAGE_ACCOUNT_NAME=tfstatechrisfickess
 CONTAINER_NAME=azure-azk-tfstate
 LOCATION=eastus
 

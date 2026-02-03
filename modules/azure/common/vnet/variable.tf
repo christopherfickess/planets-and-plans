@@ -1,3 +1,8 @@
+# modules/azure/common/vnet/variable.tf
+
+# -------------------------------
+# General Variables
+# -------------------------------
 variable "module_version" {
   description = "Version of the module."
   type        = string
@@ -61,6 +66,27 @@ variable "pod_subnet_addresses" {
   type        = list(string)
   # ["10.0.1.0/24"]
 }
+
+# -------------------------------
+# Nat Gateway Variables
+# -------------------------------
+variable "nat_gateway_enabled" {
+  description = "Enable NAT Gateway for the VNet."
+  type        = bool
+  default     = true
+}
+
+variable "nat_public_ip_name" {
+  description = "The name of the Public IP for the NAT Gateway."
+  type        = string
+}
+
+variable "nat_gateway_name" {
+  description = "The name of the NAT Gateway."
+  type        = string
+}
+
+
 # -------------------------------
 # End of Azure VNet Variables
 # -------------------------------

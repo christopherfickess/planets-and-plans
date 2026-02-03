@@ -1,14 +1,13 @@
-
+# modules/azure/common/aks/aks.tf
 
 
 module "aks" {
-  source = "Azure/aks/azurerm"
-
-  version = var.module_version
-
+  depends_on = [azuread_group.aks_admins, azuread_group.aks_users]
+  source     = "Azure/aks/azurerm"
+  version    = "11.0.0" # pick the version you want
 
   # ------------------------------------------------------------------
-  # CORE
+  # CORE SETTINGS
   # ------------------------------------------------------------------
   prefix              = var.unique_name_prefix
   location            = var.location
@@ -16,7 +15,6 @@ module "aks" {
   kubernetes_version  = var.kubernetes_version
 
   aci_connector_linux_enabled = false
-  automatic_channel_upgrade   = "stable"
   sku_tier                    = "Standard"
   support_plan                = "KubernetesOfficial"
 
@@ -29,25 +27,21 @@ module "aks" {
   # identity_type = "UserAssigned"
   # identity_ids  = [azurerm_user_assigned_identity.aks.id]
 
-
   # ------------------------------------------------------------------
   # DEFAULT (SYSTEM) NODE POOL
   # ------------------------------------------------------------------
-  agents_pool_name          = "system"
-  agents_size               = "Standard_D4s_v5"
-  agents_count              = 3
-  auto_scaling_enabled      = true
-  agents_min_count          = 3
-  agents_max_count          = 10
-  agents_type               = "VirtualMachineScaleSets"
-  os_disk_size_gb           = 100
-  os_disk_type              = "Managed"
-  os_sku                    = "Ubuntu"
-  agents_availability_zones = ["1", "2", "3"]
-
-  agents_labels = {
-    nodepool = "system"
-  }
+  agents_pool_name          = var.system_node_pool.name
+  agents_size               = var.system_node_pool.vm_size
+  agents_count              = var.system_node_pool.node_count
+  auto_scaling_enabled      = var.system_node_pool.auto_scaling_enabled
+  agents_min_count          = var.system_node_pool.min_count
+  agents_max_count          = var.system_node_pool.max_count
+  agents_type               = "VirtualMachineScaleSets" # or could be var.system_node_pool.node_type if needed
+  os_disk_size_gb           = var.system_node_pool.os_disk_size_gb
+  os_disk_type              = var.system_node_pool.os_disk_type
+  os_sku                    = var.system_node_pool.os_type
+  agents_availability_zones = var.system_node_pool.availability_zones
+  agents_labels             = var.system_node_pool.node_labels
 
   # ------------------------------------------------------------------
   # ADDITIONAL NODE POOLS
@@ -55,15 +49,16 @@ module "aks" {
   node_pools = var.node_pools
 
   # ------------------------------------------------------------------
-  # NETWORKING (AZURE CNI)
+  # NETWORKING
   # ------------------------------------------------------------------
   network_plugin            = "azure"
   network_policy            = "azure"
   net_profile_outbound_type = "loadBalancer"
   load_balancer_sku         = "standard"
+  network_plugin_mode       = var.network_plugin_mode
 
-  vnet_subnet = var.vnet_subnets # Fix
-  pod_subnet  = var.pod_subnets  # fix
+  vnet_subnet = var.vnet_subnet # Fix
+  pod_subnet  = var.pod_subnet  # Fix
 
   net_profile_service_cidr   = var.net_profile_service_cidr
   net_profile_dns_service_ip = var.net_profile_dns_service_ip
@@ -73,11 +68,9 @@ module "aks" {
   # ------------------------------------------------------------------
   role_based_access_control_enabled = true
 
-  # fix
-  rbac_aad_tenant_id = {
-    managed                = true
-    admin_group_object_ids = var.admin_group_object_ids
-  }
+  rbac_aad_tenant_id              = var.rbac_aad_tenant_id
+  rbac_aad_azure_rbac_enabled     = true
+  rbac_aad_admin_group_object_ids = [azuread_group.aks_admins.id]
 
   local_account_disabled = true
 
@@ -87,9 +80,9 @@ module "aks" {
   azure_policy_enabled = true
   oms_agent_enabled    = true
 
+  # Work on this in the future
   key_vault_secrets_provider_enabled = false
-
-  kms_key_vault_key_id = null
+  kms_key_vault_key_id               = null
 
   # ------------------------------------------------------------------
   # STORAGE / CSI DRIVERS
@@ -112,6 +105,18 @@ module "aks" {
   }
 
   # ------------------------------------------------------------------
+  # SECURITY SETTINGS
+  # ------------------------------------------------------------------
+  workload_identity_enabled = var.workload_identity_enabled
+  oidc_issuer_enabled       = var.oidc_issuer_enabled
+  private_cluster_enabled   = var.private_cluster_enabled
+
+  # DNS PRIVATE ZONE Examples:
+  # private_dns_zone_id = "System"   # Let Azure manage the private DNS zone
+  # OR
+  # private_dns_zone_id = <your_dns_zone_id>  # Bring your own
+
+  # ------------------------------------------------------------------
   # TAGS
   # ------------------------------------------------------------------
   tags = {
@@ -123,3 +128,4 @@ module "aks" {
     module_version = var.module_version
   }
 }
+

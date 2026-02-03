@@ -1,3 +1,6 @@
+# modules/azure/common/vnet/vnet.tf
+
+
 module "avm-res-network-virtualnetwork" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "0.17.1" # pick the version you want
@@ -5,25 +8,32 @@ module "avm-res-network-virtualnetwork" {
   address_space = var.address_space
   location      = var.location
   name          = var.vnet_name
-  parent_id     = var.resource_group_name
+  parent_id     = data.azurerm_resource_group.mattermost_location.id
+
+  # Nat Gateway and Subnet Configuration
+
 
   subnets = {
     "aks-subnet" = {
       name             = "aks-subnet"
       address_prefixes = var.aks_subnet_addresses
+
+      nat_gateway_enabled = var.nat_gateway_enabled
+      nat_gateway = {
+        id = azurerm_nat_gateway.nat_gateway.id
+      }
+
     }
     "pods-subnet" = {
       name             = "pods-subnet"
       address_prefixes = var.pod_subnet_addresses
+
+      nat_gateway_enabled = var.nat_gateway_enabled
+      nat_gateway = {
+        id = azurerm_nat_gateway.nat_gateway.id
+      }
     }
   }
 
-  tags = {
-    environment    = var.environment
-    owner          = "platform"
-    managed_by     = "terraform"
-    email_contact  = var.email_contact
-    location       = var.location
-    module_version = var.module_version
-  }
+  tags = var.tags
 }

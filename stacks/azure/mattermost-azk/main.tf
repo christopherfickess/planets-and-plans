@@ -1,20 +1,4 @@
-
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.9"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.8"
-    }
-  }
-}
+# stacks/azure/mattermost-azk/main.tf
 
 terraform {
   backend "azurerm" {
@@ -23,18 +7,35 @@ terraform {
   }
 }
 
-locals {
-  date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-  base_identifier = "${var.environment}-mattermost-${local.date}"
-
-  tags = {
-    Date           = time_static.deployment_date.rfc3339,
-    Email          = var.email_contact,
-    Env            = var.environment,
-    Resource_Group = var.resource_group_name,
-    Type           = "AKS Cluster Testing"
+provider "azurerm" {
+  features {
+    # Example setup
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
 }
+
+terraform {
+  required_version = ">= 1.5.0"
+
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.16.0, < 5.0.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
+    # helm = {
+    #   source  = "hashicorp/helm"
+    #   version = "~> 2.8"
+    # }
+  }
+}
+
 
 # Used to point to the resource group for storing Terraform state
 resource "azurerm_resource_group" "mattermost_location" {
