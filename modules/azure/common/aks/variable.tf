@@ -1,4 +1,4 @@
-# stacks/azure/mattermost-azk/variable.tf
+# modules/azure/common/aks/variable.tf
 
 # -------------------------------
 # General / Environment Variables
@@ -19,9 +19,21 @@ variable "location" {
   # default     = "East US"
 }
 
+variable "module_version" {
+  description = "Version of the module."
+  type        = string
+  default     = "11.0.0"
+}
+
 variable "resource_group_name" {
   description = "Name of the resource group for Terraform state."
   type        = string
+}
+
+variable "tags" {
+  description = "Tags to apply to resources."
+  type        = map(string)
+  default     = {}
 }
 
 variable "unique_name_prefix" {
@@ -42,11 +54,6 @@ variable "aks_admin_rbac_name" {
   type        = string
 }
 
-variable "azure_group_principal_id" {
-  description = "The Object ID of the Azure AD group for Mattermost admins."
-  type        = string
-}
-
 variable "admin_group_display_name" {
   description = "Display name for the Azure AD admin group."
   type        = string
@@ -57,49 +64,43 @@ variable "user_group_display_name" {
   type        = string
 }
 
+variable "rbac_aad_tenant_id" {
+  description = "The Azure AD tenant ID for AKS RBAC."
+  type        = string
+}
+
 
 # -------------------------------
-# Networking / Virtual Network Variables
+# Networking / VNet Variables
 # -------------------------------
-variable "vnet_name" {
-  description = "The name of the Virtual Network."
+variable "vnet_subnet" {
+  type = object({
+    id = string
+  })
+  # default = {
+  #   id = "10.0.0.0/24"
+  # }
+}
+
+variable "pod_subnet" {
+  type = object({
+    id = string
+  })
+  # default = {
+  #   id = "10.0.1.0/24"
+  # }
+}
+
+variable "network_plugin_mode" {
+  description = "The network plugin mode for AKS cluster."
   type        = string
+  default     = null
 }
-
-variable "address_space" {
-  description = "The address space that is used by the Virtual Network."
-  type        = list(string)
-  # ["10.0.0.0/16"]
-}
-
-variable "aks_subnet_name" {
-  description = "The name of the AKS subnet."
-  type        = string
-  default     = "aks-subnet"
-}
-
-variable "aks_subnet_addresses" {
-  description = "The address prefixes for the AKS subnet."
-  type        = list(string)
-  # ["10.0.0.0/24"]
-}
-
-variable "pod_subnet_name" {
-  description = "The name of the Pod subnet."
-  type        = string
-  default     = "pods-subnet"
-}
-
-variable "pod_subnet_addresses" {
-  description = "The address prefixes for the Pod subnet."
-  type        = list(string)
-  # ["10.0.1.0/24"]
-}
-
 
 # -------------------------------
 # AKS Cluster Core Variables
 # -------------------------------
+
 variable "kubernetes_version" {
   description = "Kubernetes version for the AKS cluster."
   type        = string
@@ -116,16 +117,15 @@ variable "net_profile_dns_service_ip" {
   type        = string
 }
 
-# Changes access to the cluster API endpoint (bastion required if true)
 variable "private_cluster_enabled" {
   description = "Enable Private Cluster for the AKS cluster."
   type        = bool
-  default     = false
 }
 
 # -------------------------------
 # AKS Node Pool Variables
 # -------------------------------
+
 variable "system_node_pool" {
   description = "Configuration for the AKS system (default) node pool."
   type = object({
@@ -144,22 +144,21 @@ variable "system_node_pool" {
   })
   default = {
     name                 = "system"
-    vm_size              = "Standard_DS2_v2"
-    node_count           = 3
+    vm_size              = "Standard_D2s_v5"
+    node_count           = 2
     auto_scaling_enabled = true
-    min_count            = 3
-    max_count            = 10
+    min_count            = 1
+    max_count            = 5
     node_type            = "System"
     os_type              = "AzureLinux3"
     os_disk_size_gb      = 100
     os_disk_type         = "Managed"
-    availability_zones   = []
+    availability_zones   = ["1", "2", "3"]
     node_labels          = { nodepool = "system" }
   }
 }
 
 variable "node_pools" {
-  description = "List of additional node pools for the AKS cluster."
   type = map(object({
     name                 = string
     vm_size              = string
@@ -172,22 +171,22 @@ variable "node_pools" {
     os_disk_size_gb      = number
     node_labels          = map(string)
   }))
-  # default = {
-  #     workloads = {
-  #     name                 = "workloads"
-  #     vm_size              = "Standard_D2s_v5"
-  #     mode                 = "User"
-  #     node_count           = 2
-  #     auto_scaling_enabled = true
-  #     min_count            = 2
-  #     max_count            = 6
-  #     os_type              = "AzureLinux3"
-  #     os_disk_size_gb      = 100
-  #     node_labels          = { role = "workloads" }
-  #   }
-  # }
-  default = {}
+  # default = {}
 }
+#   workloads = {
+#     name                 = "workloads"
+#     vm_size              = "Standard_D2s_v5"
+#     mode                 = "User"
+#     node_count           = 2
+#     auto_scaling_enabled = true
+#     min_count            = 2
+#     max_count            = 6
+#     os_type              = "AzureLinux3"
+#     os_disk_size_gb      = 100
+#     node_labels          = { role = "workloads" }
+#   }
+# }
+
 
 # -------------------------------
 # Azure Security / Identity Variables
@@ -195,17 +194,17 @@ variable "node_pools" {
 variable "workload_identity_enabled" {
   description = "Enable Azure AD Workload Identity for AKS."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "oidc_issuer_enabled" {
   description = "Enable OIDC issuer for the AKS cluster."
   type        = bool
-  default     = true
+  default     = false
 }
 
 # -------------------------------
-# Other Managed / AZK Resources Variables
+# Other / Managed Resources
 # -------------------------------
 variable "firewall_rules" {
   description = "List of firewall rules for PostgreSQL server."
@@ -218,5 +217,5 @@ variable "firewall_rules" {
 }
 
 # -------------------------------
-# End of Azure Mattermost AZK Variables
+# End of Variables
 # -------------------------------
