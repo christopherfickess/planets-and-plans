@@ -1,5 +1,13 @@
 # modules/azure/common/aks/irsa.tf
 
+resource "azurerm_role_assignment" "aks_users" {
+  depends_on = [module.aks.aks_id]
+
+  scope                = module.aks.aks_id
+  role_definition_name = "Azure Kubernetes Service Cluster User Role"
+  principal_id         = data.azuread_group.aks_users.object_id
+}
+
 # resource "azuread_group" "aks_admins" {
 #   display_name     = var.admin_group_display_name
 #   security_enabled = true
@@ -9,14 +17,6 @@
 #   display_name     = var.user_group_display_name
 #   security_enabled = true
 # }
-
-resource "azurerm_role_assignment" "aks_users" {
-  depends_on = [module.aks.aks_id]
-
-  scope                = module.aks.aks_id
-  role_definition_name = "Azure Kubernetes Service Cluster User Role"
-  principal_id         = data.azuread_group.aks_users.object_id
-}
 
 
 ## Sample IRSA Role Assignment

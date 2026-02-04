@@ -8,6 +8,15 @@
 #   value = module.avm-res-network-virtualnetwork.subnets
 # }
 
+output "aks_module" {
+  value     = module.mattermost_aks
+  sensitive = true
+}
+
+output "vnet_module" {
+  value     = module.mattermost_vnet
+  sensitive = true
+}
 
 # Output AKS Variables
 output "aks_variables" {

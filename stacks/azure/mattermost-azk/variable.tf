@@ -32,6 +32,16 @@ variable "unique_name_prefix" {
 # -------------------------------
 # Azure AD / Group Variables
 # -------------------------------
+variable "azure_pde_admin_group_display_name" {
+  description = "Display name for the Azure PDE admin group."
+  type        = string
+}
+
+variable "aks_admin_rbac_name" {
+  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
+  type        = string
+}
+
 variable "azure_group_principal_id" {
   description = "The Object ID of the Azure AD group for Mattermost admins."
   type        = string

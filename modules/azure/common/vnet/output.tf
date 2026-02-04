@@ -3,6 +3,10 @@
 #   value = data.azurerm_virtual_network.vnet.id
 # }
 
+output "vnet" {
+  value = module.avm-res-network-virtualnetwork
+}
+
 # output "subnets" {
 #   value = {
 #     aks  = data.azurerm_subnet.aks.id
