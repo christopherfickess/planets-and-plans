@@ -42,3 +42,4 @@ terraform.rc
 */tmp/*
 
 */*/tmp/*
+*.outputs

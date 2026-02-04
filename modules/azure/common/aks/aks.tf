@@ -55,10 +55,12 @@ module "aks" {
   net_profile_outbound_type = "loadBalancer"
   load_balancer_sku         = "standard"
   network_plugin_mode       = var.network_plugin_mode
+  # node_resource_group       = "${var.unique_name_prefix}-nodes"
 
 
-  vnet_subnet = var.vnet_subnet # Fix
-  pod_subnet  = var.pod_subnet  # Fix
+  vnet_subnet = var.vnet_subnet                                # Fix
+  pod_subnet  = var.pod_subnet != null ? var.pod_subnet : null # Fix
+
 
   net_profile_service_cidr   = var.net_profile_service_cidr
   net_profile_dns_service_ip = var.net_profile_dns_service_ip
