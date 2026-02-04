@@ -1,28 +1,32 @@
 
-# output "vnet_id" {
-#   value = data.azurerm_virtual_network.vnet.id
-# }
-
-output "vnet" {
-  value = module.avm-res-network-virtualnetwork
+output "address_spaces" {
+  value = module.avm-res-network-virtualnetwork.address_spaces
 }
 
-# output "subnets" {
-#   value = {
-#     aks  = data.azurerm_subnet.aks.id
-#     pods = data.azurerm_subnet.pods.id
-#   }
-#   description = "Map of subnets in the VNet."
-# }
+output "vnet_name" {
+  value = module.avm-res-network-virtualnetwork.name
+}
 
-# output "vnet_name" {
-#   value = azurerm_virtual_network.vnet.name
-# }
+output "peerings" {
+  value = module.avm-res-network-virtualnetwork.peerings
+}
 
-# output "aks_subnet_id" {
-#   value = module.avm-res-network-virtualnetwork.subnets["aks-subnet"].id
-# }
+output "vnet_id" {
+  value = module.avm-res-network-virtualnetwork.resource_id
+}
 
-# output "pods_subnet_id" {
-#   value = module.avm-res-network-virtualnetwork.subnets["pods-subnet"].id
-# }
+output "resource" {
+  value = module.avm-res-network-virtualnetwork.resource
+}
+
+output "subnets" {
+  value = module.avm-res-network-virtualnetwork.subnets
+}
+
+output "nat_gateway_id" {
+  value = azurerm_nat_gateway.nat_gateway.id
+}
+
+output "nat_public_ip_id" {
+  value = azurerm_public_ip.nat_public_ip.id
+}

@@ -11,38 +11,8 @@ module "avm-res-network-virtualnetwork" {
   parent_id     = data.azurerm_resource_group.mattermost_location.id
 
   # Nat Gateway and Subnet Configuration
-
-
-  subnets = {
-    "aks-subnet" = {
-      name             = var.aks_subnet_name
-      address_prefixes = var.aks_subnet_addresses
-
-      nat_gateway_enabled = var.nat_gateway_enabled
-      nat_gateway = {
-        id = azurerm_nat_gateway.nat_gateway.id
-      }
-
-    }
-    "pods-subnet" = {
-      name             = var.pod_subnet_name
-      address_prefixes = var.pod_subnet_addresses
-
-      nat_gateway_enabled = var.nat_gateway_enabled
-      nat_gateway = {
-        id = azurerm_nat_gateway.nat_gateway.id
-      }
-      delegations = [{
-        name = "aks-pods-delegation"
-        service_delegation = {
-          name = "Microsoft.ContainerService/managedClusters"
-          actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action"
-          ]
-        }
-      }]
-    }
-  }
+  # multiple subnets can be defined with their own nat gateway settings
+  subnets = var.subnet_configs
 
   tags = var.tags
 }
