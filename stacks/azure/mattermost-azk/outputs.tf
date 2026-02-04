@@ -1,12 +1,7 @@
 
-# Module Outputs for VNet
-# output "vnet_id" {
-#   value = module.mattermost_vnet.vnet_name
-# }
-
-# output "subnets" {
-#   value = module.avm-res-network-virtualnetwork.subnets
-# }
+output "aks_id" {
+  value = module.mattermost_aks.aks_id
+}
 
 output "aks_module" {
   value     = module.mattermost_aks

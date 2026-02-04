@@ -42,10 +42,10 @@ variable "aks_admin_rbac_name" {
   type        = string
 }
 
-variable "azure_group_principal_id" {
-  description = "The Object ID of the Azure AD group for Mattermost admins."
-  type        = string
-}
+# variable "azure_group_principal_id" {
+#   description = "The Object ID of the Azure AD group for Mattermost admins."
+#   type        = string
+# }
 
 variable "admin_group_display_name" {
   description = "Display name for the Azure AD admin group."
