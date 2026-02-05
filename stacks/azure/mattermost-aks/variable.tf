@@ -3,8 +3,8 @@
 variable "bad_naming_convention" {
   description = "Will be removed"
   type        = string
+  default     = "chrisfickess-azk-dev"
 }
-
 
 # -------------------------------
 # General / Environment Variables
@@ -46,6 +46,7 @@ variable "azure_pde_admin_group_display_name" {
 variable "aks_admin_rbac_name" {
   description = "User or service principal UPN that should have cluster-admin binding inside AKS"
   type        = string
+  default     = "aks-admin"
 }
 
 # -------------------------------
@@ -54,6 +55,7 @@ variable "aks_admin_rbac_name" {
 variable "address_space" {
   description = "The address space that is used by the Virtual Network."
   type        = list(string)
+  default     = ["172.16.12.0/23"]
   # ["10.0.0.0/16"]
 }
 
@@ -66,6 +68,7 @@ variable "aks_subnet_name" {
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
+  default     = ["172.16.12.0/24"]
   # ["10.0.0.0/24"]
 }
 
@@ -82,11 +85,13 @@ variable "kubernetes_version" {
 variable "net_profile_service_cidr" {
   description = "The service CIDR for the AKS cluster."
   type        = string
+  default     = "10.2.0.0/16"
 }
 
 variable "net_profile_dns_service_ip" {
   description = "The DNS service IP for the AKS cluster."
   type        = string
+  default     = "10.2.0.10"
 }
 
 # Changes access to the cluster API endpoint (bastion required if true)

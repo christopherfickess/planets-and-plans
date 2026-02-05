@@ -35,6 +35,7 @@ variable "unique_name_prefix" {
 variable "aks_admin_rbac_name" {
   description = "User or service principal UPN that should have cluster-admin binding inside AKS"
   type        = string
+  default     = "aks-admin"
 }
 
 # -------------------------------
@@ -43,7 +44,7 @@ variable "aks_admin_rbac_name" {
 variable "address_space" {
   description = "The address space that is used by the Virtual Network."
   type        = list(string)
-  # ["10.0.0.0/16"]
+  default     = ["172.16.12.0/23"]
 }
 
 variable "aks_subnet_name" {
@@ -55,7 +56,7 @@ variable "aks_subnet_name" {
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
-  # ["10.0.0.0/24"]
+  default     = ["172.16.12.0/24"]
 }
 
 variable "db_subnet_name" {
@@ -67,7 +68,7 @@ variable "db_subnet_name" {
 variable "db_subnet_addresses" {
   description = "The address prefixes for the database subnet."
   type        = list(string)
-  # ["10.0.1.0/24"]
+  default     = ["172.16.13.16/28"]
 }
 # -------------------------------
 # End of Azure Mattermost AZK Variables
