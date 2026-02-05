@@ -27,6 +27,12 @@ module "mattermost_vnet" {
       nat_gateway_enabled = true
       nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
     }
+    "db-subnet" = {
+      name                = var.db_subnet_name
+      address_prefixes    = var.db_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = ""
+    }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {
     #   name                = var.pod_subnet_name

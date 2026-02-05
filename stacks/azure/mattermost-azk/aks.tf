@@ -52,8 +52,8 @@ module "mattermost_aks" {
   rbac_aad_tenant_id = data.azurerm_client_config.current.tenant_id
   # azure_pde_admin_group_display_name = var.azure_pde_admin_group_display_name
   aks_admin_rbac_name      = var.aks_admin_rbac_name
-  admin_group_display_name = var.admin_group_display_name
-  user_group_display_name  = var.user_group_display_name
+  admin_group_display_name = local.admin_group_display_name
+  user_group_display_name  = local.user_group_display_name
 
   system_node_pool = var.system_node_pool
   node_pools       = var.node_pools

@@ -26,18 +26,10 @@ module "postgresql" {
   vnet_rule_name_prefix = "postgresql-vnet-rule-"
   vnet_rules            = var.vnet_rules
 
-  tags = {
-    Environment         = var.environment,
-    Owner               = var.email_contact,
-    Location            = var.location,
-    Module              = "postgresql",
-    Version             = var.module_version,
-    Resource_Group_Name = var.resource_group_name
-  }
 
   postgresql_configurations = {
     backslash_quote = "on",
   }
 
-  depends_on = [azurerm_resource_group.example]
+  tags = var.tags
 }

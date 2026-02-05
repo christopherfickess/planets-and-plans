@@ -8,16 +8,17 @@ terraform {
 }
 
 provider "azurerm" {
-  features {
-    # Example setup
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
+  features {}
+  # features {
+  #   # Example setup
+  #   resource_group {
+  #     prevent_deletion_if_contains_resources = false
+  #   }
+  # }
 }
 
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.14.0"
 
 
   required_providers {

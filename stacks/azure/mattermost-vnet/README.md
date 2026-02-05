@@ -49,30 +49,13 @@ This guide walks you through deploying Mattermost on Postgres using Terraform wi
 
 ## 2️⃣ Deploy Terraform Stacks
 
-How to deploy the Terraform stacks for the AKS components.
+How to deploy the Terraform stacks for the VNet components.
 
 ```bash
-pushd stacks/azure/mattermost-aks/
+pushd stacks/azure/mattermost-vnet/
     TF_VARS="dev-chris"
     terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
-
-    terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
-    terraform force-unlock <LOCK_ID>
 popd
-```
-
-# Notes 
-
-Need to figure out how to allow RBAC access to the Key Vault for the AKS cluster. This is required for the cluster to retrieve the Postgres password stored in Key Vault.
-
-Need to add this to the AKS admin role assignment:
-
-```
-resource "azurerm_role_assignment" "aks_kv" {
-  principal_id   = module.aks.identity_principal_id
-  role_definition_name = "Key Vault Secrets User"
-  scope          = data.azurerm_key_vault.mattermost_key_vault.id
-}
 ```

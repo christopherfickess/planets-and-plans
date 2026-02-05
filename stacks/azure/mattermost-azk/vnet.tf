@@ -10,9 +10,7 @@ module "mattermost_vnet" {
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = data.azurerm_resource_group.mattermost_location.location
 
-  address_space        = var.address_space
-  aks_subnet_addresses = var.aks_subnet_addresses
-  pod_subnet_addresses = var.pod_subnet_addresses
+  address_space = var.address_space
 
   environment   = var.environment
   email_contact = var.email_contact
@@ -22,9 +20,23 @@ module "mattermost_vnet" {
   nat_gateway_name    = local.nat_gateway_name
   nat_public_ip_name  = local.nat_public_ip_name
 
-  aks_subnet_name = var.aks_subnet_name
-  pod_subnet_name = var.pod_subnet_name
 
+
+  subnet_configs = {
+    "aks-subnet" = {
+      name                = var.aks_subnet_name
+      address_prefixes    = var.aks_subnet_addresses
+      nat_gateway_enabled = true
+      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
+    }
+    # Make a second subnet for pods if needed
+    "pods-subnet" = {
+      name                = var.pod_subnet_name
+      address_prefixes    = var.pod_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
+    }
+  }
 
   tags = merge({ name = "${local.base_identifier}-vnet" }, local.tags)
 }

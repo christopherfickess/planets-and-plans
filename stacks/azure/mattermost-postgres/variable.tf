@@ -30,32 +30,12 @@ variable "unique_name_prefix" {
 }
 
 # -------------------------------
-# Azure AD / Group Variables
-# -------------------------------
-variable "aks_admin_rbac_name" {
-  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
-  type        = string
-}
-
-# -------------------------------
 # Networking / Virtual Network Variables
 # -------------------------------
-variable "address_space" {
-  description = "The address space that is used by the Virtual Network."
-  type        = list(string)
-  # ["10.0.0.0/16"]
-}
-
 variable "aks_subnet_name" {
   description = "The name of the AKS subnet."
   type        = string
   default     = "aks-subnet"
-}
-
-variable "aks_subnet_addresses" {
-  description = "The address prefixes for the AKS subnet."
-  type        = list(string)
-  # ["10.0.0.0/24"]
 }
 
 variable "db_subnet_name" {
@@ -64,11 +44,43 @@ variable "db_subnet_name" {
   default     = "db-subnet"
 }
 
-variable "db_subnet_addresses" {
-  description = "The address prefixes for the database subnet."
+variable "database_names" {
+  description = "List of database names to create on the PostgreSQL server. Example: [\"my_db1\", \"my_db2\"]"
   type        = list(string)
-  # ["10.0.1.0/24"]
+  default     = ["mattermost"]
 }
+
+variable "server_version" {
+  description = "The version of the PostgreSQL server."
+  type        = string
+  default     = "11"
+}
+
+# variable "vnet_rules" {
+#   description = "List of VNet rules to apply to the PostgreSQL server."
+#   type = list(object({
+#     name      = string
+#     subnet_id = string
+#   }))
+#   # default = []
+#   # { name = "subnet1", subnet_id = "<subnet_id>" }
+# }
+
+# -------------------------------
+# Storage Size Variable
+# -------------------------------
+variable "storage_mb" {
+  description = "The storage size in MB for the PostgreSQL server."
+  type        = number
+  default     = 5120
+}
+
+variable "sku_name" {
+  description = "The SKU name for the PostgreSQL server."
+  type        = string
+  default     = "B_Gen5_1"
+}
+
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

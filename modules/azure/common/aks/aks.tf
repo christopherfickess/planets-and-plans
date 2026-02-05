@@ -121,13 +121,6 @@ module "aks" {
   # ------------------------------------------------------------------
   # TAGS
   # ------------------------------------------------------------------
-  tags = {
-    environment    = var.environment
-    owner          = "platform"
-    managed_by     = "terraform"
-    email_contact  = var.email_contact
-    location       = var.location
-    module_version = var.module_version
-  }
+  tags = var.tags
 }
 
