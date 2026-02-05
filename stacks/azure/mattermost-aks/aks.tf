@@ -54,5 +54,5 @@ module "mattermost_aks" {
   # Security Settings
   private_cluster_enabled = var.private_cluster_enabled # (bastion required if true)
 
-  tags = merge({ name = "${local.base_identifier}-aks" }, local.tags)
+  tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

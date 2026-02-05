@@ -47,17 +47,6 @@ variable "aks_admin_rbac_name" {
 #   type        = string
 # }
 
-variable "admin_group_display_name" {
-  description = "Display name for the Azure AD admin group."
-  type        = string
-}
-
-variable "user_group_display_name" {
-  description = "Display name for the Azure AD user group."
-  type        = string
-}
-
-
 # -------------------------------
 # Networking / Virtual Network Variables
 # -------------------------------

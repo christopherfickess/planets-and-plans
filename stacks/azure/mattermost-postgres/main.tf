@@ -20,11 +20,10 @@ provider "azurerm" {
 terraform {
   required_version = ">= 1.14.0"
 
-
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 4.16.0, < 5.0.0"
+      version = ">= 3.0.0"
     }
     time = {
       source  = "hashicorp/time"
@@ -41,10 +40,3 @@ terraform {
   }
 }
 
-
-# Used to point to the resource group for storing Terraform state
-# resource "azurerm_resource_group" "mattermost_location" {
-#   name     = var.resource_group_name
-#   location = var.location
-#   tags     = local.tags
-# }

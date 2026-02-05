@@ -90,6 +90,23 @@ variable "vnet_rules" {
   # { name = "subnet1", subnet_id = "<subnet_id>" }
 }
 
+# --------------------------------
+# Storage and SKU Variables
+# --------------------------------
+
+variable "storage_mb" {
+  description = "The storage size in MB for the PostgreSQL server."
+  type        = number
+  # default     = 5120
+}
+
+variable "sku_name" {
+  description = "The SKU name for the PostgreSQL server."
+  type        = string
+  # default     = "B_Gen5_1"
+}
+
+
 # -------------------------------
 # End of Azure PostgreSQL Variables
 # -------------------------------
