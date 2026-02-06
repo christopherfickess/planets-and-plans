@@ -59,6 +59,18 @@ variable "aks_subnet_addresses" {
   default     = ["172.16.12.0/24"]
 }
 
+variable "bastion_subnet_name" {
+  description = "The name of the bastion subnet."
+  type        = string
+  default     = "AzureBastionSubnet"
+}
+
+variable "bastion_subnet_addresses" {
+  description = "The address prefixes for the bastion subnet."
+  type        = list(string)
+  default     = ["172.16.13.0/26"]
+}
+
 variable "db_subnet_name" {
   description = "The name of the database subnet."
   type        = string
@@ -68,8 +80,21 @@ variable "db_subnet_name" {
 variable "db_subnet_addresses" {
   description = "The address prefixes for the database subnet."
   type        = list(string)
-  default     = ["172.16.13.16/28"]
+  default     = ["172.16.13.64/27"]
 }
+
+variable "jumpbox_subnet_name" {
+  description = "The name of the jumpbox subnet."
+  type        = string
+  default     = "jumpbox-subnet"
+}
+
+variable "jumpbox_subnet_addresses" {
+  description = "The address prefixes for the jumpbox subnet."
+  type        = list(string)
+  default     = ["172.16.13.96/28"]
+}
+
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

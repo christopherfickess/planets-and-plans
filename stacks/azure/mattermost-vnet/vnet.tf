@@ -27,11 +27,32 @@ module "mattermost_vnet" {
       nat_gateway_enabled = true
       nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
     }
+    "bastion-subnet" = {
+      name                = var.bastion_subnet_name
+      address_prefixes    = var.bastion_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = ""
+    }
     "db-subnet" = {
       name                = var.db_subnet_name
       address_prefixes    = var.db_subnet_addresses
       nat_gateway_enabled = false
       nat_gateway_id      = ""
+    }
+    "jumpbox-subnet" = {
+      name                = var.jumpbox_subnet_name
+      address_prefixes    = var.jumpbox_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = ""
+      nsg = {
+        inbound_rules = [
+          {
+            name        = "AllowBastion"
+            priority    = 100
+            source_cidr = var.bastion_subnet_addresses
+          }
+        ]
+      }
     }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {

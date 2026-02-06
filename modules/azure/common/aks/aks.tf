@@ -113,10 +113,10 @@ module "aks" {
   oidc_issuer_enabled       = var.oidc_issuer_enabled
   private_cluster_enabled   = var.private_cluster_enabled
 
-  # DNS PRIVATE ZONE Examples:
-  # private_dns_zone_id = "System"   # Let Azure manage the private DNS zone
-  # OR
-  # private_dns_zone_id = <your_dns_zone_id>  # Bring your own
+  # Private DNS Zone Configuration
+  # For private clusters, use System-managed private DNS zone
+  # This allows resources in the same VNet (like jumpbox) to resolve the AKS API server
+  private_dns_zone_id = var.private_cluster_enabled ? "System" : null
 
   # ------------------------------------------------------------------
   # TAGS

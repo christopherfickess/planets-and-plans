@@ -58,10 +58,10 @@ The deployment requires two Terraform stacks: VNet first, then AZK.
 
 ```bash
 pushd stacks/azure/mattermost-vnet/
-TF_VARS="dev-chris"
-terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
-terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
-terraform apply plan.tfplan
+    TF_VARS="dev-chris"
+    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
+    terraform apply plan.tfplan
 popd
 ```
 
@@ -69,10 +69,10 @@ popd
 
 ```bash
 pushd stacks/azure/mattermost-azk/
-TF_VARS="dev-chris"
-terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
-terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
-terraform apply plan.tfplan
+    TF_VARS="dev-chris"
+    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
+    terraform apply plan.tfplan
 popd
 ```
 
@@ -142,6 +142,17 @@ az storage container create \
 ```bash
 storage_account_name="tfstatechrisfickess"
 container_name="azure-aks-tfstate"
+
+az storage container create \
+    --name ${container_name} \
+    --account-name ${storage_account_name}
+```
+
+### 5.4.4 Create Storage Container for AKS Terraform State
+
+```bash
+storage_account_name="tfstatechrisfickess"
+container_name="azure-bastion-tfstate"
 
 az storage container create \
     --name ${container_name} \
