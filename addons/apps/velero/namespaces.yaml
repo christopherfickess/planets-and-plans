@@ -1,6 +1,0 @@
-# addons/apps/velero/namespaces.yaml
-
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: velero
