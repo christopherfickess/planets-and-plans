@@ -12,4 +12,5 @@ resource "azurerm_storage_share" "mattermost_share" {
   name               = var.storage_share_name
   storage_account_id = azurerm_storage_account.mattermost_storage.id
   quota              = var.storage_share_quota_gb
+  # enabled_protocols  = ["NFS"]
 }

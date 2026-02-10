@@ -28,3 +28,22 @@ output "aks_user_group_object_id" {
   value       = module.mattermost_aks.aks_user_group_object_id
   description = "Object ID of the Azure AD group with user access to AKS"
 }
+
+
+output "connect_cluster" {
+  value       = <<-EOT
+Set the subscription context to the AKS cluster's subscription:
+
+az account set --subscription ${data.azurerm_subscription.current.subscription_id}
+
+To connect to the AKS cluster, run the following command:
+az aks get-credentials \
+  --resource-group ${var.resource_group_name} \
+  --name ${module.mattermost_aks.aks_name} \
+  --admin
+
+Update your kubeconfig with the AKS cluster credentials:
+kubelogin azurecli --subscription-id ${data.azurerm_subscription.current.subscription_id} --resource-group ${var.resource_group_name} --name ${module.mattermost_aks.aks_name}
+EOT
+  description = "Instructions for connecting to the AKS cluster using Azure CLI and kubectl."
+}

@@ -58,6 +58,10 @@ pushd stacks/azure/mattermost-aks/
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
 
+    # To connect to the cluster after deployment:
+    terraform output connect_cluster
+
+    # To destroy the stack:
     terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
     terraform force-unlock <LOCK_ID>
 popd
@@ -112,25 +116,4 @@ resource "azurerm_role_assignment" "aks_kv" {
   role_definition_name = "Key Vault Secrets User"
   scope          = data.azurerm_key_vault.mattermost_key_vault.id
 }
-```
-
-
-# Debugging
-
-RBAC access issues to the cluster
-
-```
-environment="dev-chris"
-cluster_name="mattermost-${environment}-aks"
-resource_group="chrisfickess-tfstate-azk"
-
-# Nothing
-az aks show --name  $cluster_name --resource-group "${resource_group}" --query "apiServerAccessProfile.authorizedIpRanges"
-
-# get aks resource id
-aks_resource_id=$(az aks show --name  $cluster_name --resource-group "${resource_group}" --query "id" -o tsv)
-
-az role assignment list --assignee christopher.fickess@mattermost.com --scope $aks_resource_id
-
-
 ```
