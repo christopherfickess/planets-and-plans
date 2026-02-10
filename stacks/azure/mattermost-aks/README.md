@@ -58,10 +58,51 @@ pushd stacks/azure/mattermost-aks/
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
 
+    # To connect to the cluster after deployment:
+    terraform output connect_cluster
+
+    # To destroy the stack:
     terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
     terraform force-unlock <LOCK_ID>
 popd
 ```
+
+---
+
+## 🔒 Private Cluster Configuration
+
+This stack is configured to deploy a **private AKS cluster** that is only accessible via the Azure Bastion host and jumpbox VM.
+
+### Key Features
+
+- **Private API Server**: AKS API server endpoint is not exposed to the internet
+- **System-Managed Private DNS**: Azure automatically manages private DNS zone for cluster resolution
+- **Bastion-Only Access**: All cluster access goes through Azure Bastion (no public IPs)
+- **VNet-Only Access**: Only resources within the VNet can access the cluster
+
+### Configuration
+
+In `tfvars/dev-chris/base.tfvars`:
+
+```hcl
+# Enable private cluster
+private_cluster_enabled = true
+
+# Network profile (must match existing values to prevent replacement)
+net_profile_service_cidr   = "10.2.0.0/16"
+net_profile_dns_service_ip = "10.2.0.10"
+```
+
+### Accessing the Private Cluster
+
+1. **Deploy Bastion Stack**: See `../mattermost-bastion/README.md`
+2. **Connect via Azure Bastion**: Portal → VMs → Connect → Bastion
+3. **Authenticate**: Use managed identity on jumpbox
+4. **Get Credentials**: `az aks get-credentials --resource-group <rg> --name <cluster>`
+
+For detailed instructions, see [PRIVATE_CLUSTER_SETUP.md](./PRIVATE_CLUSTER_SETUP.md)
+
+---
 
 # Notes 
 

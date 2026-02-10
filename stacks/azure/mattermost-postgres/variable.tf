@@ -82,5 +82,25 @@ variable "sku_name" {
 }
 
 # -------------------------------
+# Key Vault Variables
+# -------------------------------
+variable "keyvault_name_user" {
+  description = "Admin username for the PostgreSQL server."
+  type        = string
+  default     = "postgres-username"
+}
+
+variable "keyvault_name_password" {
+  description = "keyvault name for postgres password."
+  type        = string
+  default     = "postgres-password"
+}
+
+variable "db_username" {
+  description = "database username."
+  type        = string
+  default     = "mmcloudadmin"
+}
+# -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

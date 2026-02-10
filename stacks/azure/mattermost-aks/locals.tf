@@ -3,6 +3,11 @@ locals {
   date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
   base_identifier = "mattermost-${var.environment}"
 
+  base_identifier_lower_case_only = "mattermost${var.environment_special}"
+
+  storage_account_name = "${local.base_identifier_lower_case_only}store"
+  storage_share_name   = "${local.base_identifier_lower_case_only}share"
+
   nat_public_ip_name = "${local.base_identifier}-nat-pip"
   nat_gateway_name   = "${local.base_identifier}-nat"
   vnet_name          = "${local.base_identifier}-vnet"

@@ -3,8 +3,8 @@
 variable "bad_naming_convention" {
   description = "Will be removed"
   type        = string
+  default     = "chrisfickess-azk-dev"
 }
-
 
 # -------------------------------
 # General / Environment Variables
@@ -16,6 +16,11 @@ variable "email_contact" {
 
 variable "environment" {
   description = "Environment type (e.g., dev, prod)."
+  type        = string
+}
+
+variable "environment_special" {
+  description = "Special environment identifier for unique naming."
   type        = string
 }
 
@@ -41,11 +46,13 @@ variable "unique_name_prefix" {
 variable "azure_pde_admin_group_display_name" {
   description = "Display name for the Azure PDE admin group."
   type        = string
+  default     = "Azure PDE"
 }
 
 variable "aks_admin_rbac_name" {
   description = "User or service principal UPN that should have cluster-admin binding inside AKS"
   type        = string
+  default     = "aks-admin"
 }
 
 # -------------------------------
@@ -54,6 +61,7 @@ variable "aks_admin_rbac_name" {
 variable "address_space" {
   description = "The address space that is used by the Virtual Network."
   type        = list(string)
+  default     = ["172.16.12.0/23"]
   # ["10.0.0.0/16"]
 }
 
@@ -66,6 +74,7 @@ variable "aks_subnet_name" {
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
+  default     = ["172.16.12.0/24"]
   # ["10.0.0.0/24"]
 }
 
@@ -82,11 +91,13 @@ variable "kubernetes_version" {
 variable "net_profile_service_cidr" {
   description = "The service CIDR for the AKS cluster."
   type        = string
+  default     = "10.2.0.0/16"
 }
 
 variable "net_profile_dns_service_ip" {
   description = "The DNS service IP for the AKS cluster."
   type        = string
+  default     = "10.2.0.10"
 }
 
 # Changes access to the cluster API endpoint (bastion required if true)
@@ -118,10 +129,10 @@ variable "system_node_pool" {
   default = {
     name                 = "system"
     vm_size              = "Standard_DS2_v2"
-    node_count           = 3
+    node_count           = 2
     auto_scaling_enabled = true
-    min_count            = 3
-    max_count            = 10
+    min_count            = 2
+    max_count            = 3
     node_type            = "System"
     os_type              = "AzureLinux3"
     os_disk_size_gb      = 100
@@ -188,6 +199,29 @@ variable "firewall_rules" {
     end_ip   = string
   }))
   default = []
+}
+
+# --------------------------------
+# Storage
+# --------------------------------
+variable "storage_share_quota_gb" {
+  description = "Quota for the Azure Files share in GB."
+  type        = number
+  default     = 50
+}
+
+variable "storage_account_tier" {
+  description = "SKU for the Azure Storage Account used for Azure Files."
+  type        = string
+  default     = "Standard"
+  # Options: Standard, Premium, BlockBlobStorage, or FileStorage.
+}
+
+variable "storage_account_replication_type" {
+  description = "Replication type for the Azure Storage Account used for Azure Files."
+  type        = string
+  default     = "LRS"
+  # Options: LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.
 }
 
 # -------------------------------

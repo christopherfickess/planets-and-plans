@@ -58,10 +58,10 @@ The deployment requires two Terraform stacks: VNet first, then AZK.
 
 ```bash
 pushd stacks/azure/mattermost-vnet/
-TF_VARS="dev-chris"
-terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
-terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
-terraform apply plan.tfplan
+    TF_VARS="dev-chris"
+    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
+    terraform apply plan.tfplan
 popd
 ```
 
@@ -69,10 +69,10 @@ popd
 
 ```bash
 pushd stacks/azure/mattermost-azk/
-TF_VARS="dev-chris"
-terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
-terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
-terraform apply plan.tfplan
+    TF_VARS="dev-chris"
+    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
+    terraform apply plan.tfplan
 popd
 ```
 
@@ -148,6 +148,17 @@ az storage container create \
     --account-name ${storage_account_name}
 ```
 
+### 5.4.4 Create Storage Container for Bastion Terraform State
+
+```bash
+storage_account_name="tfstatechrisfickess"
+container_name="azure-bastion-tfstate"
+
+az storage container create \
+    --name ${container_name} \
+    --account-name ${storage_account_name}
+```
+
 ### 5.5 Create Service Principal
 
 ```bash
@@ -180,6 +191,16 @@ az role assignment create \
     --scope "/subscriptions/$subscription_id/resourceGroups/$rg_name"
 ```
 
+### 5.7 Assign Contributor Role to Azure AD Groups
+
+```bash
+appId=$(az ad sp list --display-name "${service_principal_name}" --query "[0].appId" -o tsv)
+
+az role assignment create \
+    --assignee "$appId" \
+    --role "Contributor" \
+    --scope "/subscriptions/$subscription_id/resourceGroups/$rg_name/providers/Microsoft.KeyVault/vaults/mattermost-dev-chris-kv"
+```
 ### 5.8 Assign User Access Administrator Role
 
 ```bash
