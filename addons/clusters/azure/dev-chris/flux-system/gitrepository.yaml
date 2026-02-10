@@ -1,0 +1,27 @@
+# addons/clusters/azure/dev-chris/flux-system/gitrepository.yaml
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: base-config
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: feature/base-addons-deployment
+  secretRef:
+    name: base-config
+  url: ssh://git@ssh.github.com:443/mattermost/mattermost-byoc-infra.git
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: cluster-config
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: feature/deploy-flux-tests
+  secretRef:
+    name: cluster-config
+  url: ssh://git@ssh.github.com:443/christopherfickess/planets-and-plans.git

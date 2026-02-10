@@ -1,0 +1,16 @@
+# addons/clusters/azure/dev-chris/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../../../apps/velero
+
+patches:
+  - path: helmrelease-patches.yaml
+    target:
+      kind: HelmRelease
+      name: velero
+
+generatorOptions:
+  disableNameSuffixHash: true

@@ -1,0 +1,25 @@
+# addons/clusters/azure/dev-chris/flux-system/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # - apps/grafana
+  # - apps/alloy
+  # - apps/cluster-autoscaler
+  # - apps/aws-load-balancer-controller
+  # - apps/external-secrets
+  # - apps/alb-cilium-gateway
+  # - apps/fluent-bit
+  # - apps/mattermost-operator
+  # - apps/mattermost
+  # - apps/mattermost-ext
+  # - apps/prometheus
+  # - apps/metrics-server
+  # - apps/rtcd
+  # - apps/teleport
+  # - apps/thanos
+  - apps/velero
+
+generatorOptions:
+  disableNameSuffixHash: true
