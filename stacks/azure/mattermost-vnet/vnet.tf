@@ -42,8 +42,8 @@ module "mattermost_vnet" {
     "jumpbox-subnet" = {
       name                = var.jumpbox_subnet_name
       address_prefixes    = var.jumpbox_subnet_addresses
-      nat_gateway_enabled = false
-      nat_gateway_id      = ""
+      nat_gateway_enabled = true
+      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
       nsg = {
         inbound_rules = [
           {

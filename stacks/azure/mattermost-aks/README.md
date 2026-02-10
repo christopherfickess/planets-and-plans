@@ -113,3 +113,24 @@ resource "azurerm_role_assignment" "aks_kv" {
   scope          = data.azurerm_key_vault.mattermost_key_vault.id
 }
 ```
+
+
+# Debugging
+
+RBAC access issues to the cluster
+
+```
+environment="dev-chris"
+cluster_name="mattermost-${environment}-aks"
+resource_group="chrisfickess-tfstate-azk"
+
+# Nothing
+az aks show --name  $cluster_name --resource-group "${resource_group}" --query "apiServerAccessProfile.authorizedIpRanges"
+
+# get aks resource id
+aks_resource_id=$(az aks show --name  $cluster_name --resource-group "${resource_group}" --query "id" -o tsv)
+
+az role assignment list --assignee christopher.fickess@mattermost.com --scope $aks_resource_id
+
+
+```

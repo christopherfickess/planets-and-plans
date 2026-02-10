@@ -8,4 +8,3 @@ data "azuread_group" "aks_users" {
   display_name = var.user_group_display_name
 }
 
-

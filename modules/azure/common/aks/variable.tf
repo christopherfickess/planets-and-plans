@@ -213,6 +213,37 @@ variable "firewall_rules" {
   default = []
 }
 
+# --------------------------------
+# Storage
+# --------------------------------
+variable "storage_account_name" {
+  description = "Name for the Azure Storage Account used for Azure Files."
+  type        = string
+}
+
+variable "storage_share_name" {
+  description = "Name for the Azure Files share."
+  type        = string
+}
+
+variable "storage_share_quota_gb" {
+  description = "Quota for the Azure Files share in GB."
+  type        = number
+  # default     = 512
+}
+
+variable "storage_account_tier" {
+  description = "SKU for the Azure Storage Account used for Azure Files."
+  type        = string
+  # Options: Standard, Premium, BlockBlobStorage, or FileStorage.
+}
+
+variable "storage_account_replication_type" {
+  description = "Replication type for the Azure Storage Account used for Azure Files."
+  type        = string
+  # Options: LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.
+}
+
 # -------------------------------
 # End of Variables
 # -------------------------------

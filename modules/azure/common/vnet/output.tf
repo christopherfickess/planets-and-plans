@@ -30,3 +30,4 @@ output "nat_gateway_id" {
 output "nat_public_ip_id" {
   value = azurerm_public_ip.nat_public_ip.id
 }
+

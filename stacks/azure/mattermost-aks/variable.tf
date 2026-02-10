@@ -19,6 +19,11 @@ variable "environment" {
   type        = string
 }
 
+variable "environment_special" {
+  description = "Special environment identifier for unique naming."
+  type        = string
+}
+
 variable "location" {
   description = "Azure region for resource deployment."
   type        = string
@@ -41,6 +46,7 @@ variable "unique_name_prefix" {
 variable "azure_pde_admin_group_display_name" {
   description = "Display name for the Azure PDE admin group."
   type        = string
+  default     = "Azure PDE"
 }
 
 variable "aks_admin_rbac_name" {
@@ -123,10 +129,10 @@ variable "system_node_pool" {
   default = {
     name                 = "system"
     vm_size              = "Standard_DS2_v2"
-    node_count           = 3
+    node_count           = 2
     auto_scaling_enabled = true
-    min_count            = 3
-    max_count            = 10
+    min_count            = 2
+    max_count            = 3
     node_type            = "System"
     os_type              = "AzureLinux3"
     os_disk_size_gb      = 100
@@ -193,6 +199,29 @@ variable "firewall_rules" {
     end_ip   = string
   }))
   default = []
+}
+
+# --------------------------------
+# Storage
+# --------------------------------
+variable "storage_share_quota_gb" {
+  description = "Quota for the Azure Files share in GB."
+  type        = number
+  default     = 50
+}
+
+variable "storage_account_tier" {
+  description = "SKU for the Azure Storage Account used for Azure Files."
+  type        = string
+  default     = "Standard"
+  # Options: Standard, Premium, BlockBlobStorage, or FileStorage.
+}
+
+variable "storage_account_replication_type" {
+  description = "Replication type for the Azure Storage Account used for Azure Files."
+  type        = string
+  default     = "LRS"
+  # Options: LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.
 }
 
 # -------------------------------

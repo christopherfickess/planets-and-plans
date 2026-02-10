@@ -39,3 +39,7 @@ data "azurerm_subnet" "aks" {
   resource_group_name  = data.azurerm_virtual_network.vnet.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.vnet.name
 }
+
+data "azuread_group" "pde_group" {
+  display_name = var.azure_pde_admin_group_display_name
+}

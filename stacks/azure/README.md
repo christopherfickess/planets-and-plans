@@ -148,7 +148,7 @@ az storage container create \
     --account-name ${storage_account_name}
 ```
 
-### 5.4.4 Create Storage Container for AKS Terraform State
+### 5.4.4 Create Storage Container for Bastion Terraform State
 
 ```bash
 storage_account_name="tfstatechrisfickess"
@@ -191,6 +191,16 @@ az role assignment create \
     --scope "/subscriptions/$subscription_id/resourceGroups/$rg_name"
 ```
 
+### 5.7 Assign Contributor Role to Azure AD Groups
+
+```bash
+appId=$(az ad sp list --display-name "${service_principal_name}" --query "[0].appId" -o tsv)
+
+az role assignment create \
+    --assignee "$appId" \
+    --role "Contributor" \
+    --scope "/subscriptions/$subscription_id/resourceGroups/$rg_name/providers/Microsoft.KeyVault/vaults/mattermost-dev-chris-kv"
+```
 ### 5.8 Assign User Access Administrator Role
 
 ```bash

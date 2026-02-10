@@ -10,14 +10,13 @@ resource "azurerm_role_assignment" "aks_pde_admins" {
   principal_id         = data.azuread_group.aks_pde_admins.object_id
 }
 
+resource "azurerm_role_assignment" "aks_admin" {
+  depends_on = [module.mattermost_aks]
 
-# resource "azurerm_role_assignment" "aks_admin" {
-#   depends_on = [module.mattermost_aks]
-
-#   scope                = module.mattermost_aks.aks_id
-#   role_definition_name = "Azure Kubernetes Service Cluster Admin Role"
-#   principal_id         = var.azure_group_principal_id # Mattermost Admins Group Object ID
-# }
+  scope                = module.mattermost_aks.aks_id
+  role_definition_name = "Azure Kubernetes Service Cluster Admin Role"
+  principal_id         = data.azuread_group.pde_group.object_id
+}
 
 module "mattermost_aks" {
   source = "../../../modules/azure/common/aks"
@@ -53,6 +52,13 @@ module "mattermost_aks" {
 
   # Security Settings
   private_cluster_enabled = var.private_cluster_enabled # (bastion required if true)
+
+  # Storage settings for Azure Files
+  storage_account_name             = local.storage_account_name
+  storage_share_name               = local.storage_share_name
+  storage_share_quota_gb           = var.storage_share_quota_gb
+  storage_account_tier             = var.storage_account_tier
+  storage_account_replication_type = var.storage_account_replication_type
 
   tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

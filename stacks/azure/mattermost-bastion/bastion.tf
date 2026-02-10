@@ -166,11 +166,10 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
     identity_ids = [azurerm_user_assigned_identity.jumpbox.id]
   }
 
-  # Use Ubuntu Server
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts-gen2"
+    publisher = "RedHat"
+    offer     = "RHEL"
+    sku       = "9_7"
     version   = "latest"
   }
 
@@ -190,11 +189,12 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
   disable_password_authentication = true
 
   # Custom data script to install kubectl, Azure CLI, and configure AKS access
-  custom_data = base64encode(templatefile("${path.module}/scripts/jumpbox-setup.sh", {
+  custom_data = base64encode(templatefile("${path.module}/scripts/jumpbox-centos-setup.yaml", {
     AKS_NAME            = local.aks_cluster_name
-    RESOURCE_GROUP_NAME = data.azurerm_resource_group.mattermost_location.name
-    MANAGED_IDENTITY_ID = azurerm_user_assigned_identity.jumpbox.client_id
     ADMIN_USERNAME      = var.jumpbox_admin_username
+    MANAGED_IDENTITY_ID = azurerm_user_assigned_identity.jumpbox.client_id
+    PUBLIC_KEY_CONTENT  = tls_private_key.jumpbox.public_key_openssh
+    RESOURCE_GROUP_NAME = data.azurerm_resource_group.mattermost_location.name
   }))
 
   tags = merge({ name = local.jumpbox_name }, local.tags)

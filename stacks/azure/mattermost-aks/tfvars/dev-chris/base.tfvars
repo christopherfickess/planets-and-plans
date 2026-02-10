@@ -2,6 +2,7 @@
 
 # General / Environment Variables
 email_contact       = "christopher.fickess@mattermost.com"
+environment_special = "devchris"
 environment         = "dev-chris"
 location            = "eastus"
 resource_group_name = "chrisfickess-tfstate-azk"
@@ -24,7 +25,7 @@ net_profile_dns_service_ip = "10.2.0.10"
 
 # Enable private cluster - API server only accessible from within VNet
 # Requires bastion host for access
-private_cluster_enabled = true
+private_cluster_enabled = false
 
 # AKS Node Pool Variables (using defaults if not specified)
 # system_node_pool = {

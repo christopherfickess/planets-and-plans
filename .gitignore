@@ -43,3 +43,6 @@ terraform.rc
 
 */*/tmp/*
 *.outputs
+
+*.key
+*.pem

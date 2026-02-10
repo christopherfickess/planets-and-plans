@@ -94,208 +94,57 @@ terraform plan -var-file="tfvars/dev-chris/base.tfvars" -out="plan.tfplan"
 terraform apply plan.tfplan
 ```
 
-### 4. Get Connection Information
+## Connecting to the Jumpbox
+
+The following is how to connect to the jumpbox VM via Azure Bastion and configure AKS access.
+
+### Using Terraform Outputs
+
+How to get terraform outputs and connect to the jumpbox via Azure Bastion.
 
 ```bash
 # Get SSH private key (if Terraform generated it)
 terraform output -raw jumpbox_ssh_private_key > jumpbox_key.pem
 chmod 600 jumpbox_key.pem
 
-# Get connection instructions
+# Get connection instructions from terraform
 terraform output bastion_connection_instructions
 ```
 
-## Connecting to the Jumpbox
+### Manual Connection Steps
 
-### Via Azure Portal
-
-1. Navigate to **Azure Portal** → **Virtual Machines**
-2. Find your jumpbox VM: `{prefix}-jumpbox`
-3. Click **Connect** → Select **Bastion**
-4. Enter:
-   - **Username**: `azureuser` (or your custom username)
-   - **SSH Private Key**: Paste the private key from Terraform output
-      - ```bash
-         az keyvault secret show \
-            --vault-name <kv-name> \
-            --name jumpbox-ssh-private-key \
-            --query value \
-            -o tsv > jumpbox.pem
-
-            chmod 600 jumpbox.pem
-         ```
-5. Click **Connect**
-
-### Via Azure CLI
+This method is useful if you want to connect manually or troubleshoot connection issues.
 
 ```bash
-# Get the VM resource ID
-VM_ID=$(terraform output -raw jumpbox_vm_id)
+__environment__="dev-chris"
+__resource_group__="chrisfickess-tfstate-azk"
+__bastion_name__="mattermost-${__environment__}-bastion"
+__key_vault_name__="mattermost-$__environment__-kv"
+__secret_name__="mattermost-$__environment__-jumpbox-ssh-private-key"
+__jumpbox_vm_name__="mattermost-$__environment__-jumpbox"
 
-# Connect via Azure CLI (requires Azure CLI extension)
-az vm connect --ids $VM_ID --bastion
+mkdir -p ssh/jumpbox_$__environment__;
+
+az keyvault secret show \
+   --vault-name $__key_vault_name__ \
+   --name $__secret_name__ \
+   --query value -o tsv > ssh/jumpbox_$__environment__/jumpbox_$__environment__.key
+
+chmod 600 ssh/jumpbox_$__environment__/jumpbox_$__environment__.key
+
+target_id=$(az vm show \
+  --name $__jumpbox_vm_name__ \
+  --resource-group $__resource_group__ \
+  --query id -o tsv)
+
+az network bastion ssh \
+  --name $__bastion_name__ \
+  --resource-group $__resource_group__ \
+  --target-resource-id "${target_id}" \
+  --auth-type ssh-key \
+  --username azureuser \
+  --ssh-key ssh/jumpbox_$__environment__/jumpbox_$__environment__.key
 ```
-
-## Accessing AKS from Jumpbox
-
-If you provided `aks_cluster_name`, the jumpbox is pre-configured for AKS access.
-
-### Quick Setup
-
-```bash
-# Run the automated setup script
-./setup-aks-access.sh
-```
-
-### Manual Setup
-
-```bash
-# Get the managed identity client ID
-MANAGED_IDENTITY_ID=$(terraform output -raw jumpbox_managed_identity_id)
-
-# Login with managed identity
-az login --identity --username $MANAGED_IDENTITY_ID
-
-# Get AKS credentials
-az aks get-credentials \
-  --resource-group <your-resource-group> \
-  --name <your-aks-cluster-name> \
-  --overwrite-existing
-
-# Verify access
-kubectl cluster-info
-kubectl get nodes
-```
-
-## Deploying Applications
-
-After AKS access is configured:
-
-```bash
-# Create a namespace
-kubectl create namespace my-app
-
-# Deploy an application
-kubectl create deployment nginx \
-  --image=nginx \
-  --namespace=my-app
-
-# Expose as LoadBalancer
-kubectl expose deployment nginx \
-  --port=80 \
-  --type=LoadBalancer \
-  --namespace=my-app
-```
-
-## Security Features
-
-✅ **No Public IPs**: Jumpbox VM has no public IP address  
-✅ **NSG Protection**: Only Azure Bastion subnet can access jumpbox  
-✅ **Managed Identity**: No passwords or keys stored on VM  
-✅ **SSH Key Only**: Password authentication disabled  
-✅ **Private Access**: All resources use private networking  
-
-## Cost Optimization
-
-### Estimated Monthly Costs
-
-- **Azure Bastion**: ~$140/month (when running)
-- **Jumpbox VM (Standard_B2s)**: ~$30/month
-- **Total**: ~$170/month
-
-### Stop When Not in Use
-
-To save costs, stop the jumpbox VM when not in use:
-
-```bash
-# Stop the VM
-az vm stop \
-  --resource-group <resource-group> \
-  --name <jumpbox-name>
-
-# Start when needed
-az vm start \
-  --resource-group <resource-group> \
-  --name <jumpbox-name>
-```
-
-**Note**: Azure Bastion charges apply even when not actively used. Consider deleting and recreating if not needed for extended periods.
-
-## Troubleshooting
-
-### Cannot connect via Bastion
-
-1. **Check Bastion status**:
-   ```bash
-   az network bastion show \
-     --resource-group <resource-group> \
-     --name <bastion-name> \
-     --query "provisioningState"
-   ```
-
-2. **Verify NSG rules**: Ensure jumpbox NSG allows traffic from bastion subnet
-
-3. **Check VM status**:
-   ```bash
-   az vm show \
-     --resource-group <resource-group> \
-     --name <jumpbox-name> \
-     --query "powerState"
-   ```
-
-### Cannot access AKS
-
-1. **Verify managed identity permissions**:
-   ```bash
-   az role assignment list \
-     --assignee <managed-identity-client-id> \
-     --scope <aks-resource-id>
-   ```
-
-2. **Check AKS cluster status**:
-   ```bash
-   az aks show \
-     --resource-group <resource-group> \
-     --name <aks-name> \
-     --query "powerState.code"
-   ```
-
-### Tools not installed
-
-If tools aren't installed, check logs:
-
-```bash
-# Check cloud-init logs
-sudo cat /var/log/cloud-init-output.log
-sudo cat /var/log/jumpbox-setup.log
-```
-
-## Integration with Other Stacks
-
-This bastion stack can be used independently or integrated with other stacks:
-
-### Standalone Deployment
-
-Deploy bastion first, then reference it from other stacks:
-
-```bash
-# Deploy bastion
-cd stacks/azure/mattermost-bastion
-terraform apply
-
-# Get outputs for use in other stacks
-terraform output -json > ../bastion-outputs.json
-```
-
-### With AKS Stack
-
-If deploying with the AKS stack, provide the AKS cluster name:
-
-```hcl
-aks_cluster_name = "mattermost-dev-aks-cluster"
-```
-
-The bastion will automatically configure role assignments for AKS access.
 
 ## Additional Resources
 

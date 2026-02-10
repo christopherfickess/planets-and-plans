@@ -17,14 +17,15 @@ resource "azurerm_key_vault" "jumpbox" {
   tags = merge(local.tags, { name = local.keyvault_name })
 }
 
-resource "azurerm_role_assignment" "kv_secrets_user" {
+resource "azurerm_role_assignment" "kv_secrets_officer" {
+  depends_on           = [azurerm_key_vault.jumpbox]
   scope                = azurerm_key_vault.jumpbox.id
-  role_definition_name = "Key Vault Secrets User"
+  role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_key_vault_secret" "jumpbox_private_key" {
-  depends_on   = [azurerm_role_assignment.kv_secrets_user]
+  depends_on   = [azurerm_role_assignment.kv_secrets_officer]
   name         = local.keyvault_private_key_secret_name
   value        = tls_private_key.jumpbox.private_key_pem
   key_vault_id = azurerm_key_vault.jumpbox.id
@@ -32,7 +33,7 @@ resource "azurerm_key_vault_secret" "jumpbox_private_key" {
 }
 
 resource "azurerm_key_vault_secret" "jumpbox_public_key" {
-  depends_on   = [azurerm_role_assignment.kv_secrets_user]
+  depends_on   = [azurerm_role_assignment.kv_secrets_officer]
   name         = local.keyvault_pub_key_secret_name
   value        = tls_private_key.jumpbox.public_key_openssh
   key_vault_id = azurerm_key_vault.jumpbox.id

@@ -116,7 +116,7 @@ module "aks" {
   # Private DNS Zone Configuration
   # For private clusters, use System-managed private DNS zone
   # This allows resources in the same VNet (like jumpbox) to resolve the AKS API server
-  private_dns_zone_id = var.private_cluster_enabled ? "System" : null
+  # private_dns_zone_id = var.private_cluster_enabled ? "System" : null
 
   # ------------------------------------------------------------------
   # TAGS

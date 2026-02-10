@@ -61,16 +61,68 @@ output "jumpbox_ssh_public_key" {
 
 # Connection Instructions
 output "bastion_connection_instructions" {
-  value       = <<-EOT
-    To connect to the jumpbox via Azure Bastion:
-    
-    1. Go to Azure Portal -> Virtual Machines -> ${azurerm_linux_virtual_machine.jumpbox.name}
-    2. Click "Connect" -> "Bastion"
-    3. Enter username: ${var.jumpbox_admin_username}
-    4. Use your SSH key for authentication
-    5. Click "Connect"
-    
-    ${local.aks_cluster_name != "" ? "Once connected, run:\n      ./setup-aks-access.sh\n\n    Or manually:\n      az login --identity --username ${azurerm_user_assigned_identity.jumpbox.client_id}\n      az aks get-credentials --resource-group ${data.azurerm_resource_group.mattermost_location.name} --name ${local.aks_cluster_name}\n      kubectl get nodes" : "Note: AKS cluster name was not provided. Configure AKS access manually if needed."}
-  EOT
-  description = "Instructions for connecting to the jumpbox via Azure Bastion"
+  value = <<-EOT
+To connect to the jumpbox using Azure Bastion (CLI):
+
+Prerequisites:
+- Azure CLI installed
+- Logged into the correct subscription
+
+Steps:
+
+1. Create a local SSH key directory
+   mkdir -p ssh/jumpbox_${var.environment}
+
+2. Download the private SSH key from Key Vault
+   az keyvault secret show \
+     --vault-name ${azurerm_key_vault.jumpbox.name} \
+     --name ${azurerm_key_vault_secret.jumpbox_private_key.name} \
+     --query value -o tsv > ssh/jumpbox_${var.environment}/jumpbox_${var.environment}.key
+
+3. Secure the SSH key
+   chmod 600 ssh/jumpbox_${var.environment}/jumpbox_${var.environment}.key
+
+4. Connect using Azure Bastion
+   az network bastion ssh \
+     --name ${azurerm_bastion_host.main.name} \
+     --resource-group ${azurerm_bastion_host.main.resource_group_name} \
+     --target-resource-id ${azurerm_linux_virtual_machine.jumpbox.id} \
+     --auth-type ssh-key \
+     --username ${var.jumpbox_admin_username} \
+     --ssh-key ssh/jumpbox_${var.environment}/jumpbox_${var.environment}.key
+
+${local.aks_cluster_name != "" ? <<-AKS
+
+Once connected to the jumpbox, configure AKS access:
+
+Option 1: Using Builtin Scripts and README
+
+1. The jumpbox is pre-configured with a setup script and README located in the home directory. Follow the instructions in the README for AKS access.
+
+cat README.md
+
+source setup-aks-access.sh
+
+Option 2: Manual Steps if you want to configure manually or troubleshoot:
+
+1. Login using the VM managed identity
+   az login --identity --username ${azurerm_user_assigned_identity.jumpbox.client_id}
+
+2. Fetch AKS credentials
+   az aks get-credentials \
+     --resource-group ${data.azurerm_resource_group.mattermost_location.name} \
+     --name ${local.aks_cluster_name} \
+     --overwrite-existing
+
+3. Convert kubeconfig for Azure AD
+   kubelogin convert-kubeconfig -l azurecli
+
+4. Verify access
+   kubectl get nodes
+AKS
+: ""}
+EOT
+
+description = "Instructions for connecting to the jumpbox via Azure Bastion and configuring AKS access"
 }
+
