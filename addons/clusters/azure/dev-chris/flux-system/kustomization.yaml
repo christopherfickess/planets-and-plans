@@ -8,4 +8,5 @@ metadata:
 resources:
   - gotk-components.yaml
   - gitrepository.yaml
+  - kustomization-base.yaml
   - kustomization-customer.yaml
