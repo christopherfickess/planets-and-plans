@@ -1,0 +1,10 @@
+# addons/apps/velero/helmrepositories.yaml
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: vmware-tanzu
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://vmware-tanzu.github.io/helm-charts

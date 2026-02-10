@@ -1,0 +1,18 @@
+# addons/apps/velero/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespaces.yaml
+  - helmrepositories.yaml
+  - release.yaml
+
+configMapGenerator:
+  - name: velero-values
+    namespace: velero
+    files:
+      - values.yaml=values.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
