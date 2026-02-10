@@ -113,32 +113,34 @@ variable "private_cluster_enabled" {
 variable "system_node_pool" {
   description = "Configuration for the AKS system (default) node pool."
   type = object({
-    name                 = string
-    vm_size              = string
-    node_count           = number
-    auto_scaling_enabled = bool
-    min_count            = number
-    max_count            = number
-    node_type            = string # "System" or "User"
-    os_type              = string
-    os_disk_size_gb      = number
-    os_disk_type         = string
-    availability_zones   = list(string)
-    node_labels          = map(string)
+    name                        = string
+    vm_size                     = string
+    node_count                  = number
+    auto_scaling_enabled        = bool
+    min_count                   = number
+    max_count                   = number
+    node_type                   = string # "System" or "User"
+    os_type                     = string
+    os_disk_size_gb             = number
+    os_disk_type                = string
+    availability_zones          = list(string)
+    node_labels                 = map(string)
+    temporary_name_for_rotation = string
   })
   default = {
-    name                 = "system"
-    vm_size              = "Standard_DS2_v2"
-    node_count           = 2
-    auto_scaling_enabled = true
-    min_count            = 2
-    max_count            = 3
-    node_type            = "System"
-    os_type              = "AzureLinux3"
-    os_disk_size_gb      = 100
-    os_disk_type         = "Managed"
-    availability_zones   = []
-    node_labels          = { nodepool = "system" }
+    name                        = "system"
+    vm_size                     = "standard_d8s_v6"
+    node_count                  = 2
+    auto_scaling_enabled        = true
+    min_count                   = 2
+    max_count                   = 3
+    node_type                   = "System"
+    os_type                     = "AzureLinux3"
+    os_disk_size_gb             = 100
+    os_disk_type                = "Managed"
+    availability_zones          = []
+    node_labels                 = { nodepool = "system" }
+    temporary_name_for_rotation = "systemtmp"
   }
 }
 
