@@ -9,6 +9,7 @@ resources:
 configMapGenerator:
   - name: velero-values
     namespace: velero
+    behavior: merge
     files:
       - values.yaml=../../values.yaml
 
