@@ -1,47 +1,49 @@
-# velero:
-namespace:
-  labels:
-    environment: chris-dev
-podAnnotations:
-  app.kubernetes.io/environment: chris-dev
-configuration:
-  podLabels:
-    app.kubernetes.io/environment: chris-dev
-
-  backupStorageLocation:
-    - provider: aws
-      name: default
-      bucket: cloud-velero-chris-dev
-      config:
-        region: us-east-2
-      default: true
-
-  volumeSnapshotLocation:
-    - provider: aws
-      name: default
-      config:
-        region: us-east-2
-
-resources:
-  requests:
-    cpu: 1000m
-    memory: 512Mi
-  limits:
-    cpu: 2000m
-    memory: 16G
-schedules:
-  backup:
-    disabled: false
-    schedule: "0 8 * * *"
+# addons/clusters/azure/dev-chris/values.yaml
+velero:
+  enabled: true
+  namespace:
     labels:
       environment: chris-dev
-    annotations:
-      environment: chris-dev
-    template:
-      ttl: "720h0m0s"
-    useOwnerReferencesInBackup: true
-tolerations:
-  - key: "utilities"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
+  podAnnotations:
+    app.kubernetes.io/environment: chris-dev
+  configuration:
+    podLabels:
+      app.kubernetes.io/environment: chris-dev
+
+    backupStorageLocation:
+      - provider: aws
+        name: default
+        bucket: cloud-velero-chris-dev
+        config:
+          region: us-east-2
+        default: true
+
+    volumeSnapshotLocation:
+      - provider: aws
+        name: default
+        config:
+          region: us-east-2
+
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 16G
+  schedules:
+    backup:
+      disabled: false
+      schedule: "0 8 * * *"
+      labels:
+        environment: chris-dev
+      annotations:
+        environment: chris-dev
+      template:
+        ttl: "720h0m0s"
+      useOwnerReferencesInBackup: true
+  tolerations:
+    - key: "utilities"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
