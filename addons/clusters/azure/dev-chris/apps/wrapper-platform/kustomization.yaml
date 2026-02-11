@@ -9,7 +9,7 @@ configMapGenerator:
     namespace: flux-system
     behavior: merge
     files:
-      - values.yaml=values.yaml
+      - values.yaml=../../values.yaml
 
 # patches:
 #   - path: helmrelease-patches.yaml
