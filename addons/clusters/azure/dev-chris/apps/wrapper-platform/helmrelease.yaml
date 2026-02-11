@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: wrapper-platform
+  namespace: flux-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: addons/apps/wrapper-platform # path relative to root of base Git repo
+      sourceRef:
+        kind: GitRepository
+        name: base-apps-repo # GitRepository pointing to base charts
+        namespace: flux-system
+      # version: "0.1.0"                  # optional
+  valuesFrom:
+    - kind: ConfigMap
+      name: wrapper-values
+      valuesKey: values.yaml
