@@ -19,7 +19,8 @@ resources:
   # - apps/rtcd
   # - apps/teleport
   # - apps/thanos
-  - apps/velero
+  # - apps/velero
+  - apps/platform-wrapper
 
 generatorOptions:
   disableNameSuffixHash: true
