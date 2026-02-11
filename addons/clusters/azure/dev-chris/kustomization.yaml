@@ -20,7 +20,7 @@ resources:
   # - apps/teleport
   # - apps/thanos
   # - apps/velero
-  - apps/platform-wrapper
+  - apps/wrapper-platform
 
 generatorOptions:
   disableNameSuffixHash: true
