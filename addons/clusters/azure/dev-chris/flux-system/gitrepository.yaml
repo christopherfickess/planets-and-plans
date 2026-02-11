@@ -1,7 +1,7 @@
 # addons/clusters/azure/dev-chris/flux-system/gitrepository.yaml
 # addons/clusters/azure/dev-chris/flux-system/gitrepository.yaml
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
   name: base-config
@@ -18,7 +18,7 @@ spec:
     examples/*
     addons/clusters/*
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
   name: cluster-config
