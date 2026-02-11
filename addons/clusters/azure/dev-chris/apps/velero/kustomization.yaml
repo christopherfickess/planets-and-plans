@@ -6,13 +6,6 @@ kind: Kustomization
 resources:
   - ../../../../../base-apps/velero
 
-configMapGenerator:
-  - name: velero-values
-    namespace: velero
-    behavior: merge
-    files:
-      - values.yaml=../../values.yaml
-
 patches:
   - path: helmrelease-patches.yaml
     target:
