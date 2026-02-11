@@ -3,17 +3,17 @@ velero:
   enabled: true
   namespace:
     labels:
-      environment: chris-dev
+      environment: dev-chris
   podAnnotations:
-    app.kubernetes.io/environment: chris-dev
+    app.kubernetes.io/environment: dev-chris
   configuration:
     podLabels:
-      app.kubernetes.io/environment: chris-dev
+      app.kubernetes.io/environment: dev-chris
 
     backupStorageLocation:
       - provider: aws
         name: default
-        bucket: cloud-velero-chris-dev
+        bucket: cloud-velero-dev-chris
         config:
           region: us-east-2
         default: true
@@ -36,9 +36,9 @@ velero:
       disabled: false
       schedule: "0 8 * * *"
       labels:
-        environment: chris-dev
+        environment: dev-chris
       annotations:
-        environment: chris-dev
+        environment: dev-chris
       template:
         ttl: "720h0m0s"
       useOwnerReferencesInBackup: true
