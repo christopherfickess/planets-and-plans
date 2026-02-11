@@ -12,7 +12,7 @@ configMapGenerator:
       - values.yaml=../../values.yaml
 
 patches:
-  - path: helmrelease-patch.yaml
+  - path: helmrelease-patches.yaml
     target:
       kind: HelmRelease
       name: wrapper-platform
