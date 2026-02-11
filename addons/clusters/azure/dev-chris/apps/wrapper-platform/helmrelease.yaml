@@ -11,7 +11,7 @@ spec:
       chart: addons/base-apps/wrapper-platform # path relative to root of base Git repo
       sourceRef:
         kind: GitRepository
-        name: base-apps-repo # GitRepository pointing to base charts
+        name: base-config # GitRepository pointing to base charts
         namespace: flux-system
       # version: "0.1.0"                  # optional
   valuesFrom:
