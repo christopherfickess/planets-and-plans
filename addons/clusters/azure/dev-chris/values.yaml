@@ -2,6 +2,7 @@
 velero:
   enabled: true
   namespace:
+    name: velero
     labels:
       environment: dev-chris
   podAnnotations:
