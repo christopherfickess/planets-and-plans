@@ -6,10 +6,6 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  # valuesFrom:
-  #   - kind: ConfigMap
-  #     name: velero-values
-  #     valuesKey: values.yaml
   values:
     namespace:
       labels:
