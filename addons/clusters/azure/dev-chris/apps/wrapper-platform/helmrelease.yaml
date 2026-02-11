@@ -8,7 +8,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: addons/base-apps/wrapper-platform # path relative to root of base Git repo
+      chart: addons/apps/wrapper-platform # path relative to root of base Git repo
       sourceRef:
         kind: GitRepository
         name: base-config # GitRepository pointing to base charts
