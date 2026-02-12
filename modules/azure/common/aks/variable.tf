@@ -218,6 +218,12 @@ variable "firewall_rules" {
 # --------------------------------
 # Storage
 # --------------------------------
+variable "deploy_storage" {
+  description = "Whether to deploy Azure Storage Account and File Share for AKS."
+  type        = bool
+  # default     = false
+}
+
 variable "storage_account_name" {
   description = "Name for the Azure Storage Account used for Azure Files."
   type        = string

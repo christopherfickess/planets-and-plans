@@ -54,6 +54,7 @@ module "mattermost_aks" {
   private_cluster_enabled = var.private_cluster_enabled # (bastion required if true)
 
   # Storage settings for Azure Files
+  deploy_storage                   = var.deploy_storage
   storage_account_name             = local.storage_account_name
   storage_share_name               = local.storage_share_name
   storage_share_quota_gb           = var.storage_share_quota_gb

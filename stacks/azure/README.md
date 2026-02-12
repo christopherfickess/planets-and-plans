@@ -159,6 +159,17 @@ az storage container create \
     --account-name ${storage_account_name}
 ```
 
+### 5.4.5 Create Storage Container for NFS Terraform State
+
+```bash
+storage_account_name="tfstatechrisfickess"
+container_name="azure-nfs-tfstate"
+
+az storage container create \
+    --name ${container_name} \
+    --account-name ${storage_account_name}
+```
+
 ### 5.5 Create Service Principal
 
 ```bash

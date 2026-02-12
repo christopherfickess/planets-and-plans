@@ -206,6 +206,12 @@ variable "firewall_rules" {
 # --------------------------------
 # Storage
 # --------------------------------
+variable "deploy_storage" {
+  description = "Whether to deploy Azure Storage Account and File Share for AKS."
+  type        = bool
+  default     = false
+}
+
 variable "storage_share_quota_gb" {
   description = "Quota for the Azure Files share in GB."
   type        = number

@@ -13,15 +13,6 @@ data "azurerm_resource_group" "mattermost_location" {
   name = var.resource_group_name
 }
 
-resource "time_static" "deployment_date" {
-  triggers = {
-    always_run = "true" # optional, to force creation only once
-  }
-}
-
-output "current_time" {
-  value = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-}
 output "aks_subnet_id" {
   value       = data.azurerm_subnet.aks.id
   description = "The ID of the AKS subnet."

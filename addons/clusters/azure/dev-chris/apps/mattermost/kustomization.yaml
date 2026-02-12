@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mattermost
+
+resources:
+  - ../../../../base-apps/mattermost
+
+patches:
+  - path: patches.yaml
+  - target:
+      kind: ExternalSecret
+      name: mattermost-license
+      namespace: mattermost
+    path: externalsecret-license.yaml
+  - target:
+      kind: ExternalSecret
+      name: database
+      namespace: mattermost
+    path: externalsecret-database.yaml

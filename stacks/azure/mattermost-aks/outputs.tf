@@ -19,6 +19,10 @@ output "aks_variables" {
   sensitive = true
 }
 
+output "current_time" {
+  value = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+}
+
 output "aks_admin_group_object_id" {
   value       = module.mattermost_aks.aks_admin_group_object_id
   description = "Object ID of the Azure AD group with admin access to AKS"
