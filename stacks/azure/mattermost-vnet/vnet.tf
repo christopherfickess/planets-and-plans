@@ -12,6 +12,9 @@ module "mattermost_vnet" {
 
   address_space = var.address_space
 
+  private_dns_zone_name                      = var.private_dns_zone_name
+  private_dns_zone_virtual_network_link_name = local.private_dns_zone_virtual_network_link_name
+
   environment   = var.environment
   email_contact = var.email_contact
 

@@ -18,3 +18,12 @@ patches:
       name: database
       namespace: mattermost
     path: externalsecret-database.yaml
+  # Remove the default Ingress since we'll be using a Different method for exposing the application in this environment
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1alpha2
+      kind: HTTPRoute
+      name: my-app
+    patch: |-
+      - op: remove
+        path: /spec

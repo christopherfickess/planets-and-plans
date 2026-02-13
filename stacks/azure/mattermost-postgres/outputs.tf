@@ -12,3 +12,15 @@ output "postgres_variables" {
   }
   sensitive = true
 }
+
+# output "postgresql_role_mm_cloud" {
+#   value       = azurerm_key_vault_secret.postgres_internal_user.value
+#   description = "The name of the PostgreSQL role created for Mattermost internal use."
+#   sensitive   = true
+# }
+
+# output "postgresql_role_mm_cloud_password" {
+#   value       = azurerm_key_vault_secret.postgres_internal_password.value
+#   description = "The password of the PostgreSQL role created for Mattermost internal use."
+#   sensitive   = true
+# }

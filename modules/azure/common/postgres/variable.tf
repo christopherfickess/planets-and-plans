@@ -1,8 +1,3 @@
-variable "module_version" {
-  description = "Version of the module."
-  type        = string
-  default     = "11.0.0"
-}
 
 variable "unique_name_prefix" {
   description = "Unique prefix for resource naming."
@@ -110,3 +105,40 @@ variable "sku_name" {
 # -------------------------------
 # End of Azure PostgreSQL Variables
 # -------------------------------
+
+variable "backup_retention_days" {
+  description = "Number of days to retain automated backups."
+  type        = number
+}
+
+variable "geo_redundant_backup_enabled" {
+  description = "Enable geo redundant backup replication across regions."
+  type        = bool
+}
+
+variable "delegated_subnet_id" {
+  description = "ID of the subnet delegated to Microsoft.DBforPostgreSQL/flexibleServers."
+  type        = string
+}
+
+variable "private_dns_zone_id" {
+  description = "ID of the private DNS zone used for internal name resolution."
+  type        = string
+}
+
+variable "db_collation" {
+  description = "Database collation for sorting and comparison rules."
+  type        = string
+}
+
+variable "db_charset" {
+  description = "Character set encoding for the databases."
+  type        = string
+}
+
+
+variable "public_network_access_enabled" {
+  description = "Enable or disable public network access to the PostgreSQL server."
+  type        = bool
+  default     = false
+}

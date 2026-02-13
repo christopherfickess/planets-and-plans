@@ -53,7 +53,7 @@ variable "database_names" {
 variable "server_version" {
   description = "The version of the PostgreSQL server."
   type        = string
-  default     = "11"
+  default     = "13"
 }
 
 # variable "vnet_rules" {
@@ -72,35 +72,119 @@ variable "server_version" {
 variable "storage_mb" {
   description = "The storage size in MB for the PostgreSQL server."
   type        = number
-  default     = 5120
+  default     = 32768
 }
 
 variable "sku_name" {
   description = "The SKU name for the PostgreSQL server."
   type        = string
-  default     = "B_Gen5_1"
+  default     = "B_Standard_B1ms"
 }
 
 # -------------------------------
 # Key Vault Variables
 # -------------------------------
-variable "keyvault_name_user" {
+variable "keyvault_name_admin_user" {
   description = "Admin username for the PostgreSQL server."
   type        = string
-  default     = "postgres-username"
+  default     = "postgresadmin"
 }
 
-variable "keyvault_name_password" {
-  description = "keyvault name for postgres password."
+variable "keyvault_name_admin_password" {
+  description = "Key vault name for PostgreSQL admin password."
   type        = string
-  default     = "postgres-password"
+  default     = "postgres-admin-password"
 }
 
-variable "db_username" {
-  description = "database username."
+variable "db_admin_username" {
+  description = "Database admin username."
   type        = string
   default     = "mmcloudadmin"
 }
+
+# Internal DB user and password variables
+variable "keyvault_name_internal_user" {
+  description = "Internal username for the PostgreSQL server."
+  type        = string
+  default     = "postgresinternaluser"
+}
+
+variable "keyvault_name_internal_password" {
+  description = "Key vault name for PostgreSQL internal password."
+  type        = string
+  default     = "postgres-internal-password"
+}
+
+variable "db_internal_username" {
+  description = "Database internal username."
+  type        = string
+  default     = "mm_cloud"
+}
+
+variable "db_internal_schema_name" {
+  description = "Database internal schema name."
+  type        = string
+  default     = "mattermost_internal"
+}
+
+
+# -------------------------------
+# DNS Variables
+# -------------------------------
+variable "private_dns_zone_name" {
+  description = "The name of the private DNS zone."
+  type        = string
+  default     = "privatelink.postgres.database.azure.com"
+}
+
+variable "postgres_dns_name" {
+  description = "The DNS name for the PostgreSQL server."
+  type        = string
+  default     = "mattermost-postgres"
+}
+
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------
+
+variable "backup_retention_days" {
+  description = "Number of days to retain automated backups."
+  type        = number
+  default     = 7
+}
+
+variable "geo_redundant_backup_enabled" {
+  description = "Enable geo redundant backup replication across regions."
+  type        = bool
+  default     = false
+}
+
+variable "delegated_subnet_id" {
+  description = "ID of the subnet delegated to Microsoft.DBforPostgreSQL/flexibleServers."
+  type        = string
+  default     = "value"
+}
+
+variable "private_dns_zone_id" {
+  description = "ID of the private DNS zone used for internal name resolution."
+  type        = string
+}
+
+variable "db_collation" {
+  description = "Database collation for sorting and comparison rules."
+  type        = string
+  default     = "English_United States.1252"
+}
+
+variable "db_charset" {
+  description = "Character set encoding for the databases."
+  type        = string
+  default     = "UTF8"
+}
+
+
+variable "public_network_access_enabled" {
+  description = "Enable or disable public network access to the PostgreSQL server."
+  type        = bool
+  default     = false
+}

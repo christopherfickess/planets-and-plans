@@ -31,3 +31,8 @@ output "nat_public_ip_id" {
   value = azurerm_public_ip.nat_public_ip.id
 }
 
+
+output "postgres_private_dns_zone_id" {
+  description = "ID of the PostgreSQL private DNS zone."
+  value       = azurerm_private_dns_zone.postgres.id
+}

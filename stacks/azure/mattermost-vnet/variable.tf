@@ -96,5 +96,13 @@ variable "jumpbox_subnet_addresses" {
 }
 
 # -------------------------------
+# DNS Variables
+# -------------------------------
+variable "private_dns_zone_name" {
+  description = "The name of the private DNS zone."
+  type        = string
+  default     = "privatelink.postgres.database.azure.com"
+}
+# -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

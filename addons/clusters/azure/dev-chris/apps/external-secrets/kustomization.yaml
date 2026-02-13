@@ -1,0 +1,15 @@
+# addons/clusters/byoc-staging-internal/apps/external-secrets/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# resources:
+#   - base
+#   - stack
+
+resources:
+  - ../../../../base-apps/external-secrets
+  - clustersecretstore.yaml
+
+patches:
+  - path: patches.yaml
