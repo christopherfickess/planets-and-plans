@@ -8,7 +8,7 @@ spec:
       bucket: byoc-staging-internal-staging-app-data
   ingress:
     enabled: false
-    host: byoc-staging.dev.cloud.mattermost.com
+    host: chris-dev.dev.cloud.mattermost.com
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -16,4 +16,4 @@ metadata:
   name: mattermost
 spec:
   hostnames:
-    - byoc-staging.dev.cloud.mattermost.com
+    - chris-dev.dev.cloud.mattermost.com
