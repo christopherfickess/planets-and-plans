@@ -3,12 +3,13 @@ locals {
   date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
   base_identifier = "mattermost-${var.environment}"
 
-  keyvault_name = "${local.base_identifier}-kv"
+  keyvault_name = "${local.base_identifier}-pgs"
 
   # Postgres Variables
-  database_names = ["${local.base_identifier}-db"]
-  server_name    = "${local.base_identifier}-postgres"
-  vnet_name      = "${local.base_identifier}-vnet"
+  server_name = "${local.base_identifier}-postgres-flex"
+  vnet_name   = "${local.base_identifier}-vnet"
+
+  private_dns_zone_virtual_network_link_name = "${local.base_identifier}-postgres-link"
 
 
   # Create method for this password securely

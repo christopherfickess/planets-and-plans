@@ -1,8 +1,3 @@
-variable "module_version" {
-  description = "Version of the module."
-  type        = string
-  default     = "11.0.0"
-}
 
 variable "unique_name_prefix" {
   description = "Unique prefix for resource naming."
@@ -36,9 +31,28 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "availability_zone" {
+  description = "The availability zone to deploy the PostgreSQL server in (e.g., 1, 2, 3)."
+  type        = string
+  default     = "2"
+}
+
 # -------------------------------
 # Azure PostgreSQL Variables
 # -------------------------------
+variable "high_availability" {
+  type = object({
+    mode                      = string # either "ZoneRedundant" or "SameZone"
+    standby_availability_zone = string # optional, required if mode is SameZone
+  })
+  default = {
+    mode                      = "Disabled"
+    standby_availability_zone = ""
+  }
+
+  # default = null
+}
+
 variable "server_name" {
   description = "The name of the PostgreSQL server."
   type        = string
@@ -58,7 +72,7 @@ variable "administrator_password" {
 variable "server_version" {
   description = "The version of the PostgreSQL server."
   type        = string
-  default     = "11"
+  # default     = "11"
 }
 
 variable "database_names" {
@@ -78,16 +92,6 @@ variable "firewall_rules" {
   #   { name = var.firewall_name, start_ip = "10.0.0.5", end_ip = "10.0.0.8" },
   #   { start_ip = "127.0.0.0", end_ip = "127.0.1.0" },
   # ]
-}
-
-variable "vnet_rules" {
-  description = "List of VNet rules to apply to the PostgreSQL server."
-  type = list(object({
-    name      = string
-    subnet_id = string
-  }))
-  # default = []
-  # { name = "subnet1", subnet_id = "<subnet_id>" }
 }
 
 # --------------------------------
@@ -110,3 +114,40 @@ variable "sku_name" {
 # -------------------------------
 # End of Azure PostgreSQL Variables
 # -------------------------------
+
+variable "backup_retention_days" {
+  description = "Number of days to retain automated backups."
+  type        = number
+}
+
+variable "geo_redundant_backup_enabled" {
+  description = "Enable geo redundant backup replication across regions."
+  type        = bool
+}
+
+variable "delegated_subnet_id" {
+  description = "ID of the subnet delegated to Microsoft.DBforPostgreSQL/flexibleServers."
+  type        = string
+}
+
+variable "private_dns_zone_id" {
+  description = "ID of the private DNS zone used for internal name resolution."
+  type        = string
+}
+
+variable "db_collation" {
+  description = "Database collation for sorting and comparison rules."
+  type        = string
+}
+
+variable "db_charset" {
+  description = "Character set encoding for the databases."
+  type        = string
+}
+
+
+variable "public_network_access_enabled" {
+  description = "Enable or disable public network access to the PostgreSQL server."
+  type        = bool
+  default     = false
+}

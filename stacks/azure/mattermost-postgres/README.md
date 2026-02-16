@@ -66,6 +66,21 @@ terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
 terraform force-unlock <LOCK_ID>
 ```
 
+# Configuration Steps
+
+## Database Deployment Steps
+
+Deploy the Post cofiguration scripts in the [Module/common/postgres/scripts](../../../modules/azure/common/postgres/scripts) directory. These scripts will create the necessary database, users, and permissions for the Mattermost application.
+
+- Run the following command to deploy this configuration:
+   - Updated the information as needed in the outputs of the scripts.
+
+```bash
+pushd ${HOME}/git/terraform/planets-and-plans/modules/azure/common/postgres/scripts
+    ./deploy.sh
+popd
+```
+
 # Notes 
 
 Need to figure out how to allow RBAC access to the Key Vault for the AKS cluster. This is required for the cluster to retrieve the Postgres password stored in Key Vault.

@@ -1,0 +1,16 @@
+# addons/clusters/azure/dev-chris/flux-system/kustomization-customer.yaml
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: planets-and-plans
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./addons/clusters/azure/dev-chris
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: planets-and-plans
+---
+

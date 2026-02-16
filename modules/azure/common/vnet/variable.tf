@@ -27,7 +27,7 @@ variable "email_contact" {
 variable "location" {
   description = "Azure region for resource deployment."
   type        = string
-  default     = "East US"
+  default     = "East US 2"
 }
 
 variable "tags" {
@@ -62,6 +62,13 @@ variable "subnet_configs" {
     address_prefixes    = list(string)
     nat_gateway_enabled = bool
     nat_gateway_id      = string
+    delegations = optional(list(object({
+      name = string
+      service_delegation = object({
+        name    = string
+        actions = list(string)
+      })
+    })))
   }))
 }
 
@@ -84,7 +91,20 @@ variable "nat_gateway_name" {
   type        = string
 }
 
+# -------------------------------
+# DNS Variables
+# -------------------------------
+variable "private_dns_zone_virtual_network_link_name" {
+  description = "The name of the virtual network link for the private DNS zone."
+  type        = string
+  # default     = "${var.vnet_name}-postgres-link"
+}
 
+variable "private_dns_zone_name" {
+  description = "The name of the private DNS zone."
+  type        = string
+  # default     = "privatelink.postgres.database.azure.com"
+}
 # -------------------------------
 # End of Azure VNet Variables
 # -------------------------------

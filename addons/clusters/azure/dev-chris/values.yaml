@@ -1,0 +1,66 @@
+# addons/clusters/azure/dev-chris/values.yaml
+grafana:
+  enabled: true
+  namespace:
+    name: grafana
+    labels:
+      environment: dev-chris
+  podAnnotations:
+    app.kubernetes.io/environment: dev-chris
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 16G
+
+velero:
+  enabled: true
+  namespace:
+    name: velero
+    labels:
+      environment: dev-chris
+  podAnnotations:
+    app.kubernetes.io/environment: dev-chris
+  configuration:
+    podLabels:
+      app.kubernetes.io/environment: dev-chris
+
+    backupStorageLocation:
+      - provider: aws
+        name: default
+        bucket: cloud-velero-dev-chris
+        config:
+          region: us-east-2
+        default: true
+
+    volumeSnapshotLocation:
+      - provider: aws
+        name: default
+        config:
+          region: us-east-2
+
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 16G
+  schedules:
+    backup:
+      disabled: false
+      schedule: "0 8 * * *"
+      labels:
+        environment: dev-chris
+      annotations:
+        environment: dev-chris
+      template:
+        ttl: "720h0m0s"
+      useOwnerReferencesInBackup: true
+  tolerations:
+    - key: "utilities"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"

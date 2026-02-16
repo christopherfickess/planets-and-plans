@@ -29,18 +29,19 @@ module "aks" {
   # ------------------------------------------------------------------
   # DEFAULT (SYSTEM) NODE POOL
   # ------------------------------------------------------------------
-  agents_pool_name          = var.system_node_pool.name
-  agents_size               = var.system_node_pool.vm_size
-  agents_count              = var.system_node_pool.node_count
-  auto_scaling_enabled      = var.system_node_pool.auto_scaling_enabled
-  agents_min_count          = var.system_node_pool.min_count
-  agents_max_count          = var.system_node_pool.max_count
-  agents_type               = "VirtualMachineScaleSets" # or could be var.system_node_pool.node_type if needed
-  os_disk_size_gb           = var.system_node_pool.os_disk_size_gb
-  os_disk_type              = var.system_node_pool.os_disk_type
-  os_sku                    = var.system_node_pool.os_type
-  agents_availability_zones = var.system_node_pool.availability_zones
-  agents_labels             = var.system_node_pool.node_labels
+  agents_pool_name            = var.system_node_pool.name
+  agents_size                 = var.system_node_pool.vm_size
+  agents_count                = var.system_node_pool.node_count
+  auto_scaling_enabled        = var.system_node_pool.auto_scaling_enabled
+  agents_min_count            = var.system_node_pool.min_count
+  agents_max_count            = var.system_node_pool.max_count
+  agents_type                 = "VirtualMachineScaleSets" # or could be var.system_node_pool.node_type if needed
+  os_disk_size_gb             = var.system_node_pool.os_disk_size_gb
+  os_disk_type                = var.system_node_pool.os_disk_type
+  os_sku                      = var.system_node_pool.os_type
+  agents_availability_zones   = var.system_node_pool.availability_zones
+  agents_labels               = var.system_node_pool.node_labels
+  temporary_name_for_rotation = var.system_node_pool.temporary_name_for_rotation
 
   # ------------------------------------------------------------------
   # ADDITIONAL NODE POOLS

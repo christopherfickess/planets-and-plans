@@ -18,7 +18,7 @@ provider "azurerm" {
 }
 
 terraform {
-  required_version = ">= 1.14.0"
+  required_version = ">= 1.13.5"
 
   required_providers {
     azurerm = {
@@ -40,3 +40,17 @@ terraform {
   }
 }
 
+provider "postgresql" {
+  alias = "mattermost"
+
+  port     = 5432
+  database = "postgres"
+  host     = module.mattermost_postgres.server_fqdn
+  username = azurerm_key_vault_secret.postgres_admin_user.value
+  password = azurerm_key_vault_secret.postgres_admin_password.value
+  sslmode  = "require"
+}
+
+provider "azuread" {
+  tenant_id = data.azurerm_client_config.current.tenant_id
+}

@@ -1,0 +1,7 @@
+# addons/clusters/byoc-staging-internal/apps/mattermost-operator/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../../base-apps/mattermost-operator

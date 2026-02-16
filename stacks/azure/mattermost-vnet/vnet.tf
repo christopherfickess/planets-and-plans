@@ -8,9 +8,12 @@ module "mattermost_vnet" {
 
   vnet_name           = local.vnet_name
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
-  location            = data.azurerm_resource_group.mattermost_location.location
+  location            = var.location
 
   address_space = var.address_space
+
+  private_dns_zone_name                      = var.private_dns_zone_name
+  private_dns_zone_virtual_network_link_name = local.private_dns_zone_virtual_network_link_name
 
   environment   = var.environment
   email_contact = var.email_contact
@@ -38,6 +41,18 @@ module "mattermost_vnet" {
       address_prefixes    = var.db_subnet_addresses
       nat_gateway_enabled = false
       nat_gateway_id      = ""
+
+      delegations = [{
+        name = "postgres-flex"
+
+        service_delegation = {
+          name = "Microsoft.DBforPostgreSQL/flexibleServers"
+
+          actions = [
+            "Microsoft.Network/virtualNetworks/subnets/join/action"
+        ] }
+        }
+      ]
     }
     "jumpbox-subnet" = {
       name                = var.jumpbox_subnet_name

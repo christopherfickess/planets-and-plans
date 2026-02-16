@@ -1,35 +1,36 @@
-
-module "postgresql" {
-  source = "Azure/postgresql/azurerm"
-
+resource "azurerm_postgresql_flexible_server" "mattermost_postgressql" {
+  name                = var.server_name
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  server_name                   = var.server_name
-  sku_name                      = "GP_Gen5_2"
-  storage_mb                    = 5120
-  auto_grow_enabled             = false
-  backup_retention_days         = 7
-  geo_redundant_backup_enabled  = false
-  administrator_login           = var.administrator_login
-  administrator_password        = var.administrator_password
-  server_version                = var.server_version
-  ssl_enforcement_enabled       = true
-  public_network_access_enabled = true
-  db_names                      = var.database_names
-  db_charset                    = "UTF8"
-  db_collation                  = "English_United States.1252"
+  administrator_login    = var.administrator_login
+  administrator_password = var.administrator_password
 
-  firewall_rule_prefix = "firewall-"
-  firewall_rules       = var.firewall_rules
+  version    = var.server_version
+  sku_name   = var.sku_name
+  storage_mb = var.storage_mb
 
-  vnet_rule_name_prefix = "postgresql-vnet-rule-"
-  vnet_rules            = var.vnet_rules
+  backup_retention_days        = var.backup_retention_days
+  geo_redundant_backup_enabled = var.geo_redundant_backup_enabled
 
+  delegated_subnet_id = var.delegated_subnet_id
+  private_dns_zone_id = var.private_dns_zone_id
 
-  postgresql_configurations = {
-    backslash_quote = "on",
-  }
+  zone = var.availability_zone
+
+  public_network_access_enabled = var.public_network_access_enabled
+
+  # high_availability = var.high_availability
+
 
   tags = var.tags
+}
+
+resource "azurerm_postgresql_flexible_server_database" "mattermost_databases" {
+  for_each = toset(var.database_names)
+
+  name      = each.value
+  server_id = azurerm_postgresql_flexible_server.mattermost_postgressql.id
+  collation = var.db_collation
+  charset   = var.db_charset
 }

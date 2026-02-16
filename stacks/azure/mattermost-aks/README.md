@@ -57,8 +57,8 @@ pushd stacks/azure/mattermost-aks/
     terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
-
-    # To connect to the cluster after deployment:
+  
+  # To connect to the cluster after deployment:
     terraform output connect_cluster
 
     # To destroy the stack:
@@ -116,4 +116,25 @@ resource "azurerm_role_assignment" "aks_kv" {
   role_definition_name = "Key Vault Secrets User"
   scope          = data.azurerm_key_vault.mattermost_key_vault.id
 }
+```
+
+
+# DEBUG
+
+RBAC ISsues
+
+```bash
+scope=$(az aks show   --resource-group chrisfickess-tfstate-azk   --name mattermost-dev-chris-aks   --query id -o tsv)
+
+az role assignment create \
+    --assignee christopher.fickess@mattermost.com \
+    --role "Azure Kubernetes Service RBAC Cluster Admin" \
+    --scope $scope
+
+
+az role assignment create \
+  --assignee christopher.fickess@mattermost.com \
+  --role "Azure Kubernetes Service Cluster Admin Role" \
+  --scope $scope
+
 ```

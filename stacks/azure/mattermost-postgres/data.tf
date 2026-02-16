@@ -40,3 +40,20 @@ data "azurerm_subnet" "aks" {
   virtual_network_name = data.azurerm_virtual_network.vnet.name
 }
 
+data "azurerm_private_dns_zone" "postgres" {
+  name                = "privatelink.postgres.database.azure.com"
+  resource_group_name = var.resource_group_name
+}
+
+# Key vault secrets for Postgres credentials
+data "azurerm_key_vault_secret" "postgres_internal_user" {
+  depends_on   = [azurerm_key_vault_secret.postgres_internal_user]
+  name         = var.keyvault_name_internal_user
+  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+}
+
+data "azurerm_key_vault_secret" "postgres_internal_password" {
+  depends_on   = [azurerm_key_vault_secret.postgres_internal_password]
+  name         = var.keyvault_name_internal_password
+  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+}

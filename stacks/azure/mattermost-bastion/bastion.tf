@@ -21,7 +21,7 @@
 # # Public IP for Azure Bastion 
 # resource "azurerm_public_ip" "bastion" { 
 #   name = "${local.base_identifier}-bastion-pip" 
-#   location = data.azurerm_resource_group.mattermost_location.location 
+#   location = var.location 
 #   resource_group_name = data.azurerm_resource_group.mattermost_location.name 
 #   allocation_method = "Static" 
 #   sku = "Standard" 

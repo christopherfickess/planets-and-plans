@@ -18,7 +18,7 @@ locals {
   jumpbox_os_disk_name                = "${local.base_identifier}-jumpbox-osdisk"
 
   # Key Vault Resources
-  keyvault_name                    = "${local.base_identifier}-kv"
+  keyvault_name                    = "${local.base_identifier}-jb"
   keyvault_pub_key_secret_name     = "${local.base_identifier}-jumpbox-ssh-public-key"
   keyvault_private_key_secret_name = "${local.base_identifier}-jumpbox-ssh-private-key"
 
