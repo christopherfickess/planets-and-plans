@@ -53,7 +53,7 @@ variable "database_names" {
 variable "server_version" {
   description = "The version of the PostgreSQL server."
   type        = string
-  default     = "13"
+  default     = "15"
 }
 
 # variable "vnet_rules" {

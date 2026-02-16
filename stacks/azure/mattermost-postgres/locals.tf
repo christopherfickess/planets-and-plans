@@ -6,9 +6,8 @@ locals {
   keyvault_name = "${local.base_identifier}-pgs"
 
   # Postgres Variables
-  database_names = ["${local.base_identifier}-db"]
-  server_name    = "${local.base_identifier}-postgres-flex"
-  vnet_name      = "${local.base_identifier}-vnet"
+  server_name = "${local.base_identifier}-postgres-flex"
+  vnet_name   = "${local.base_identifier}-vnet"
 
   private_dns_zone_virtual_network_link_name = "${local.base_identifier}-postgres-link"
 

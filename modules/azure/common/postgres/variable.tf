@@ -72,7 +72,7 @@ variable "administrator_password" {
 variable "server_version" {
   description = "The version of the PostgreSQL server."
   type        = string
-  default     = "11"
+  # default     = "11"
 }
 
 variable "database_names" {

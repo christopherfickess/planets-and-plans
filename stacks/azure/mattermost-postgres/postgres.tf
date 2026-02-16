@@ -15,7 +15,7 @@ module "mattermost_postgres" {
   server_name            = local.server_name
   administrator_login    = azurerm_key_vault_secret.postgres_admin_user.value
   administrator_password = azurerm_key_vault_secret.postgres_admin_password.value
-  database_names         = local.database_names
+  database_names         = var.database_names
 
   firewall_rules = [
     # Only if public network access is enabled and you want to allow specific IP ranges (not in same VNet). 
