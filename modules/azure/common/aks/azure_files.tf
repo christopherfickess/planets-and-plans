@@ -8,6 +8,7 @@ resource "azurerm_storage_account" "mattermost_storage" {
   location                 = var.location
   account_tier             = var.storage_account_tier
   account_replication_type = var.storage_account_replication_type
+  tags                     = var.tags
 }
 
 resource "azurerm_storage_share" "mattermost_share" {

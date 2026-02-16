@@ -151,3 +151,9 @@ az network bastion ssh \
 - [Azure Bastion Documentation](https://docs.microsoft.com/azure/bastion/)
 - [AKS Private Cluster](https://docs.microsoft.com/azure/aks/private-clusters)
 - [Azure Managed Identity](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/)
+
+# Force delete Key Vault
+
+```bash
+az keyvault purge --name mattermost-dev-chris-pgs --location eastus 
+```

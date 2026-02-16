@@ -7,6 +7,8 @@ resource "azurerm_key_vault" "mattermost_key_vault" {
   soft_delete_retention_days = 90
   purge_protection_enabled   = false
   enable_rbac_authorization  = false
+
+  tags = merge(local.tags, { Project = "Mattermost Deployment" })
 }
 
 resource "azurerm_key_vault_access_policy" "terraform_sp" {
@@ -18,6 +20,74 @@ resource "azurerm_key_vault_access_policy" "terraform_sp" {
     "Get",
     "List",
     "Set",
+  ]
+}
+
+data "azuread_group" "pde_group" {
+  display_name = var.azure_pde_admin_group_display_name
+}
+
+resource "azurerm_key_vault_access_policy" "pde_group_admin" {
+  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azuread_group.pde_group.object_id
+
+  key_permissions = [
+    "Get",
+    "List",
+    "Create",
+    "Update",
+    "Import",
+    "Delete",
+    "Backup",
+    "Restore",
+    "Recover",
+    "Purge"
+  ]
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete",
+    "Backup",
+    "Restore",
+    "Recover",
+    "Purge"
+  ]
+
+  certificate_permissions = [
+    "Get",
+    "List",
+    "Delete",
+    "Create",
+    "Import",
+    "Update",
+    "ManageContacts",
+    "GetIssuers",
+    "ListIssuers",
+    "SetIssuers",
+    "DeleteIssuers",
+    "ManageIssuers",
+    "Recover",
+    "Purge"
+  ]
+
+  storage_permissions = [
+    "Backup",
+    "Delete",
+    "DeleteSAS",
+    "Get",
+    "GetSAS",
+    "List",
+    "ListSAS",
+    "Purge",
+    "Recover",
+    "RegenerateKey",
+    "Restore",
+    "Set",
+    "SetSAS",
+    "Update"
   ]
 }
 
@@ -47,6 +117,8 @@ resource "azurerm_key_vault_secret" "postgres_admin_password" {
   lifecycle {
     ignore_changes = [value]
   }
+
+  tags = merge(local.tags, { Project = "Mattermost Postgres Admin Password" })
 }
 
 # Second secret: Postgres admin username
@@ -61,6 +133,8 @@ resource "azurerm_key_vault_secret" "postgres_admin_user" {
   lifecycle {
     ignore_changes = [value]
   }
+
+  tags = merge(local.tags, { Project = "Mattermost Postgres Admin User" })
 }
 
 # Mattermost internal DB user and password secrets (optional, for better security practices)
@@ -85,6 +159,8 @@ resource "azurerm_key_vault_secret" "postgres_internal_password" {
   lifecycle {
     ignore_changes = [value]
   }
+
+  tags = merge(local.tags, { Project = "Mattermost Postgres Internal Password" })
 }
 
 resource "azurerm_key_vault_secret" "postgres_internal_user" {
@@ -97,4 +173,13 @@ resource "azurerm_key_vault_secret" "postgres_internal_user" {
   lifecycle {
     ignore_changes = [value]
   }
+
+  tags = merge(local.tags, { Project = "Mattermost Postgres Internal User" })
 }
+
+# List secrets in the key vault (for verification, not typically used in production code)
+# az keyvault secret list \
+#   --vault-name mattermost-dev-chris-pgs \
+#   --query "[].{name:name,id:id}" \
+#   -o table
+# az keyvault secret show --vault-name mattermost-dev-chris-pgs --name postgres-admin-password --query value -o tsv

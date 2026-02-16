@@ -16,16 +16,21 @@ resource "azurerm_postgresql_flexible_server" "mattermost_postgressql" {
   delegated_subnet_id = var.delegated_subnet_id
   private_dns_zone_id = var.private_dns_zone_id
 
+  zone = var.availability_zone
+
   public_network_access_enabled = var.public_network_access_enabled
+
+  # high_availability = var.high_availability
+
 
   tags = var.tags
 }
 
-resource "azurerm_postgresql_flexible_server_database" "databases" {
+resource "azurerm_postgresql_flexible_server_database" "mattermost_databases" {
   for_each = toset(var.database_names)
 
   name      = each.value
-  server_id = azurerm_postgresql_flexible_server.this.id
+  server_id = azurerm_postgresql_flexible_server.mattermost_postgressql.id
   collation = var.db_collation
   charset   = var.db_charset
 }

@@ -3,7 +3,7 @@
 # General / Environment Variables
 email_contact       = "christopher.fickess@mattermost.com"
 environment         = "dev-chris"
-location            = "eastus"
+location            = "East US 2"
 resource_group_name = "chrisfickess-tfstate-azk"
 unique_name_prefix  = "mattermost-dev"
 

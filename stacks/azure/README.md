@@ -96,10 +96,11 @@ chmod +x /usr/local/bin/kubelogin
 
 ```bash
 rg_name="chrisfickess-tfstate-azk"
+location="eastus"
 
 az group create \
     --name ${rg_name} \
-    --location eastus
+    --location ${location}
 ```
 
 ### 5.3 Create Storage Account
@@ -110,7 +111,7 @@ storage_account_name="chrisfickesstfstateazk"
 az storage account create \
     --name ${storage_account_name} \
     --resource-group ${rg_name} \
-    --location eastus \
+    --location ${location} \
     --sku Standard_LRS \
     --kind StorageV2
 ```

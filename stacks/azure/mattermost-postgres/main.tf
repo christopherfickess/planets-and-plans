@@ -50,3 +50,7 @@ provider "postgresql" {
   password = azurerm_key_vault_secret.postgres_admin_password.value
   sslmode  = "require"
 }
+
+provider "azuread" {
+  tenant_id = data.azurerm_client_config.current.tenant_id
+}

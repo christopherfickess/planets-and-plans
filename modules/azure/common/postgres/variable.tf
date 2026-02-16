@@ -31,9 +31,28 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "availability_zone" {
+  description = "The availability zone to deploy the PostgreSQL server in (e.g., 1, 2, 3)."
+  type        = string
+  default     = "2"
+}
+
 # -------------------------------
 # Azure PostgreSQL Variables
 # -------------------------------
+variable "high_availability" {
+  type = object({
+    mode                      = string # either "ZoneRedundant" or "SameZone"
+    standby_availability_zone = string # optional, required if mode is SameZone
+  })
+  default = {
+    mode                      = "Disabled"
+    standby_availability_zone = ""
+  }
+
+  # default = null
+}
+
 variable "server_name" {
   description = "The name of the PostgreSQL server."
   type        = string
@@ -73,16 +92,6 @@ variable "firewall_rules" {
   #   { name = var.firewall_name, start_ip = "10.0.0.5", end_ip = "10.0.0.8" },
   #   { start_ip = "127.0.0.0", end_ip = "127.0.1.0" },
   # ]
-}
-
-variable "vnet_rules" {
-  description = "List of VNet rules to apply to the PostgreSQL server."
-  type = list(object({
-    name      = string
-    subnet_id = string
-  }))
-  # default = []
-  # { name = "subnet1", subnet_id = "<subnet_id>" }
 }
 
 # --------------------------------

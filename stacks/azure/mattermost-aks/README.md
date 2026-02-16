@@ -119,41 +119,22 @@ resource "azurerm_role_assignment" "aks_kv" {
 ```
 
 
-# Debugging
+# DEBUG
 
-RBAC access issues to the cluster
+RBAC ISsues
 
-```
-environment="dev-chris"
-cluster_name="mattermost-${environment}-aks"
-resource_group="chrisfickess-tfstate-azk"
+```bash
+scope=$(az aks show   --resource-group chrisfickess-tfstate-azk   --name mattermost-dev-chris-aks   --query id -o tsv)
 
-# Nothing
-az aks show --name  $cluster_name --resource-group "${resource_group}" --query "apiServerAccessProfile.authorizedIpRanges"
-
-# get aks resource id
-aks_resource_id=$(az aks show --name  $cluster_name --resource-group "${resource_group}" --query "id" -o tsv)
-
-az role assignment list --assignee christopher.fickess@mattermost.com --scope $aks_resource_id
-
-# Check Azure PDE group permissions to cluster
-
-az ad user get-member-groups \
-  --id christopher.fickess@mattermost.com \
-  --security-enabled-only
-
-az role assignment list \
-  --scope 26c3b8b8-a3bd-4401-9067-77a5e2541a18 \
-  --query "[].{principal:principalName,role:roleDefinitionName}"
-```
+az role assignment create \
+    --assignee christopher.fickess@mattermost.com \
+    --role "Azure Kubernetes Service RBAC Cluster Admin" \
+    --scope $scope
 
 
 az role assignment create \
   --assignee christopher.fickess@mattermost.com \
   --role "Azure Kubernetes Service Cluster Admin Role" \
-  --scope /subscriptions/95a937e7-e4a7-4f4b-9cb5-ce5affa2b458/resourceGroups/chrisfickess-tfstate-azk/providers/Microsoft.ContainerService/managedClusters/mattermost-dev-chris-aks
+  --scope $scope
 
-az role assignment create \
-  --assignee christopher.fickess@mattermost.com \
-  --role "Azure Kubernetes Service RBAC Cluster Admin" \
-  --scope /subscriptions/95a937e7-e4a7-4f4b-9cb5-ce5affa2b458/resourceGroups/chrisfickess-tfstate-azk/providers/Microsoft.ContainerService/managedClusters/mattermost-dev-chris-aks
+```

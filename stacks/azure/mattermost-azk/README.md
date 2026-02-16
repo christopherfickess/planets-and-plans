@@ -55,11 +55,12 @@ This process had several steps that were not fully automated yet.
 
     ```bash
     rg_name="chrisfickess-tfstate-azk"
+    location="eastus"
     
     # Create Resource Group
     az group create \
         --name ${rg_name} \
-        --location eastus   
+        --location ${location}   
     ```
 
 3. Create the Storage Account:
@@ -72,7 +73,7 @@ This process had several steps that were not fully automated yet.
     az storage account create \
         --name ${storage_account_name} \
         --resource-group ${rg_name} \
-        --location eastus \
+        --location ${location} \
         --sku Standard_LRS \
         --kind StorageV2
     ```

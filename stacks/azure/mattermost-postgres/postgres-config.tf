@@ -2,6 +2,8 @@
 # INTERNAL USER AND SCHEMA CONFIGURATION
 ############################################################
 
+# Only works in VNET
+
 # Internal user
 resource "postgresql_role" "mm_cloud" {
   depends_on = [

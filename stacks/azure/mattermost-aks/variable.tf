@@ -27,7 +27,7 @@ variable "environment_special" {
 variable "location" {
   description = "Azure region for resource deployment."
   type        = string
-  # default     = "East US"
+  # default     = "East US 2"
 }
 
 variable "resource_group_name" {
@@ -129,7 +129,7 @@ variable "system_node_pool" {
   })
   default = {
     name                        = "system"
-    vm_size                     = "standard_d8s_v6"
+    vm_size                     = "Standard_D2s_v4"
     node_count                  = 2
     auto_scaling_enabled        = true
     min_count                   = 2

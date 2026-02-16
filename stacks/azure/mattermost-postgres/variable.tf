@@ -131,6 +131,12 @@ variable "db_internal_schema_name" {
 # -------------------------------
 # DNS Variables
 # -------------------------------
+variable "azure_pde_admin_group_display_name" {
+  description = "Display name for the Azure PDE admin group."
+  type        = string
+  default     = "Azure PDE"
+}
+
 variable "private_dns_zone_name" {
   description = "The name of the private DNS zone."
   type        = string
@@ -159,21 +165,10 @@ variable "geo_redundant_backup_enabled" {
   default     = false
 }
 
-variable "delegated_subnet_id" {
-  description = "ID of the subnet delegated to Microsoft.DBforPostgreSQL/flexibleServers."
-  type        = string
-  default     = "value"
-}
-
-variable "private_dns_zone_id" {
-  description = "ID of the private DNS zone used for internal name resolution."
-  type        = string
-}
-
 variable "db_collation" {
   description = "Database collation for sorting and comparison rules."
   type        = string
-  default     = "English_United States.1252"
+  default     = "en_US.utf8"
 }
 
 variable "db_charset" {

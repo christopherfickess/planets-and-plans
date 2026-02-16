@@ -1,11 +1,13 @@
 
 
 module "mattermost_postgres" {
-  depends_on = [azurerm_key_vault_secret.postgres_admin_password, azurerm_key_vault_secret.postgres_admin_user]
+  depends_on = [
+    azurerm_key_vault_secret.postgres_admin_password,
+    azurerm_key_vault_secret.postgres_admin_user
+  ]
 
   source         = "../../../modules/azure/common/postgres"
-  module_version = "11.0.0"
-  server_version = "11"
+  server_version = var.server_version
 
   unique_name_prefix     = var.unique_name_prefix
   resource_group_name    = var.resource_group_name
@@ -25,13 +27,6 @@ module "mattermost_postgres" {
     # }
   ]
 
-  vnet_rules = [
-    {
-      name      = "allow-db-subnet"
-      subnet_id = data.azurerm_subnet.db.id
-    }
-  ]
-
   environment   = var.environment
   email_contact = var.email_contact
 
@@ -42,15 +37,10 @@ module "mattermost_postgres" {
   backup_retention_days         = var.backup_retention_days
   geo_redundant_backup_enabled  = var.geo_redundant_backup_enabled
   delegated_subnet_id           = data.azurerm_subnet.db.id
-  private_dns_zone_id           = module.mattermost_vnet.postgres_private_dns_zone_id
+  private_dns_zone_id           = data.azurerm_private_dns_zone.postgres.id
   public_network_access_enabled = var.public_network_access_enabled
   db_collation                  = var.db_collation
   db_charset                    = var.db_charset
 
-  tags = merge(
-    local.tags,
-    {
-      Project = "Mattermost Deployment"
-    }
-  )
+  tags = merge(local.tags, { Project = "Mattermost Deployment" })
 }

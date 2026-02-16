@@ -16,10 +16,11 @@ az ad sp create-for-rbac \
 
 ```bash
 rg_name="chrisfickess-tfstate-azk"
+location="eastus"
 
 az group create \
     --name ${rg_name} \
-    --location eastus
+    --location ${location}
 ```
 
 ## Create Storage Blocks For Terraform State
@@ -30,7 +31,7 @@ storage_account_name="chrisfickesstfstateazk"
 az storage account create \
     --name ${storage_account_name} \
     --resource-group ${rg_name} \
-    --location eastus \
+    --location ${location} \
     --sku Standard_LRS \
     --kind StorageV2
 ```

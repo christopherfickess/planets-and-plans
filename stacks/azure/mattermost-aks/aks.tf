@@ -26,7 +26,7 @@ module "mattermost_aks" {
 
   email_contact       = var.email_contact
   environment         = var.environment
-  location            = data.azurerm_resource_group.mattermost_location.location
+  location            = var.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   unique_name_prefix  = local.base_identifier
 
