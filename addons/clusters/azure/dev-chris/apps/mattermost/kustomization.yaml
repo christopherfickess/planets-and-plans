@@ -9,11 +9,13 @@ resources:
 
 patches:
   - path: patches.yaml
-  # - target:
-  #     kind: ExternalSecret
-  #     name: mattermost-license
-  #     namespace: mattermost
-  #   path: externalsecret-license.yaml
+  - target:
+      kind: ExternalSecret
+      name: mattermost-license
+      namespace: mattermost
+    patch: |-
+      - op: remove
+        path: /spec
   - target:
       kind: ExternalSecret
       name: database
