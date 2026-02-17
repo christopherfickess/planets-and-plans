@@ -13,5 +13,5 @@ spec:
       create: true
       name: "external-secrets"
       annotations:
-        azure.workload.identity/client-id: "/subscriptions/95a937e7-e4a7-4f4b-9cb5-ce5affa2b458/resourceGroups/chrisfickess-tfstate-azk/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mattermost-dev-chris-external-secrets-identity"
+        azure.workload.identity/client-id: "/subscriptions/95a937e7-e4a7-4f4b-9cb5-ce5affa2b458/resourcegroups/chrisfickess-tfstate-azk/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mattermost-dev-chris-external-secrets-identity"
   interval: 5m0s
