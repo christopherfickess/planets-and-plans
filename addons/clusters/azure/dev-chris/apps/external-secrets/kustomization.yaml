@@ -8,7 +8,7 @@ kind: Kustomization
 #   - stack
 
 resources:
-  - ../../../../base-apps/external-secrets
+  - ../../../../../base-apps/external-secrets
   - clustersecretstore.yaml
 
 patches:

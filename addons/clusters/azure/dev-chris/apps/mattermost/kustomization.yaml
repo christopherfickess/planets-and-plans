@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: mattermost
 
 resources:
-  - ../../../../base-apps/mattermost
+  - ../../../../../base-apps/mattermost
 
 patches:
   - path: patches.yaml
