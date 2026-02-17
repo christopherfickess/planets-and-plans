@@ -9,13 +9,22 @@ spec:
       server: mattermostdevchrisnfs.privatelink.file.core.windows.net
       path: /mattermostdevchrisshare
   ingress:
-    enabled: false
-    host: byoc-staging.dev.cloud.mattermost.com
+    enabled: true
+    # httproute_enabled: false
+    host: dev-chris.dev.cloud.mattermost.com
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: mattermost
-spec:
-  hostnames:
-    - byoc-staging.dev.cloud.mattermost.com
+$patch: delete
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: license
+  namespace: mattermost
+data:
+  accesskey: ""
+  secretkey: ""
+---
