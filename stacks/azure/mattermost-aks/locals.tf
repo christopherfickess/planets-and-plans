@@ -19,7 +19,7 @@ locals {
 
   # service account for workload identity
   # service_account_names = [] # Defaults to none
-  service_account_names = "${local.base_identifier}-external-secrets-identity"
+  service_account_names = ["${local.base_identifier}-external-secrets-identity"]
 
   tags = {
     Date           = time_static.deployment_date.rfc3339,

@@ -6,12 +6,11 @@ metadata:
   name: external-secrets
   namespace: external-secrets
 spec:
-  # Use this to override the IRSA per cluster/account
   values:
     serviceAccount:
-      automount: true
       create: true
-      name: "external-secrets"
+      name: external-secrets
+      automount: true
       annotations:
-        azure.workload.identity/client-id: "/subscriptions/95a937e7-e4a7-4f4b-9cb5-ce5affa2b458/resourcegroups/chrisfickess-tfstate-azk/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mattermost-dev-chris-external-secrets-identity"
+        azure.workload.identity/client-id: "8d7667d6-5229-413f-b2f8-1a4ff53fe4eb"
   interval: 5m0s

@@ -193,13 +193,13 @@ variable "node_pools" {
 variable "workload_identity_enabled" {
   description = "Enable Azure AD Workload Identity for AKS."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "oidc_issuer_enabled" {
   description = "Enable OIDC issuer for the AKS cluster."
   type        = bool
-  default     = false
+  default     = true
 }
 
 # -------------------------------
