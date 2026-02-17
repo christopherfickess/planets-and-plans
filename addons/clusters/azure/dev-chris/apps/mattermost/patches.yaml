@@ -22,7 +22,7 @@ $patch: delete
 apiVersion: v1
 kind: Secret
 metadata:
-  name: license
+  name: mattermost-license
   namespace: mattermost
 data:
   accesskey: ""
