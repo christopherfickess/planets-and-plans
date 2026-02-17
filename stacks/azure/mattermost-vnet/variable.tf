@@ -103,6 +103,13 @@ variable "private_dns_zone_name" {
   type        = string
   default     = "privatelink.postgres.database.azure.com"
 }
+
+variable "deploy_gateway" {
+  description = "Whether to deploy a NAT Gateway for outbound connectivity (required for private AKS clusters)."
+  type        = bool
+  default     = false
+}
+
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

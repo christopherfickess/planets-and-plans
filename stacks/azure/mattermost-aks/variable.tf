@@ -233,5 +233,45 @@ variable "storage_account_replication_type" {
 }
 
 # -------------------------------
+# Gateway Variables
+# -------------------------------
+variable "enable_application_gateway_ingress" {
+  description = "Enable Application Gateway Ingress Controller for AKS."
+  type        = bool
+  default     = true
+}
+
+variable "application_gateway_subnet_cidrs" {
+  description = "Address prefixes for the Application Gateway subnet."
+  type        = list(string)
+  default     = ["172.16.13.128/28"]
+}
+
+variable "application_gateway_subnet_name" {
+  description = "Name of the subnet for Application Gateway."
+  type        = string
+  default     = "appgw-subnet"
+}
+
+
+# -------------------------------
+# DNS / Private Endpoint Variables
+# -------------------------------
+variable "mattermost_domain" {
+  description = "Custom domain for Mattermost deployment."
+  type        = string
+  default     = "dev-chris.dev.cloud.mattermost.com"
+}
+
+variable "private_dns_zone_vnet_link_name" {
+  description = "Name for the private DNS zone VNet link."
+  type        = string
+  default     = "nfs-dns-vnet-link"
+}
+
+
+
+
+# -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

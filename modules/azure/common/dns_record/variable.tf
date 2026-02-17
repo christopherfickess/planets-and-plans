@@ -1,10 +1,4 @@
 
-variable "bad_naming_convention" {
-  description = "Will be removed"
-  type        = string
-  default     = "chrisfickess-azk-dev"
-}
-
 # -------------------------------
 # General / Environment Variables
 # -------------------------------
@@ -18,20 +12,26 @@ variable "environment" {
   type        = string
 }
 
-variable "environment_special" {
-  description = "Special environment identifier for unique naming."
-  type        = string
-}
-
 variable "location" {
   description = "Azure region for resource deployment."
   type        = string
   # default     = "East US"
 }
 
+variable "module_version" {
+  description = "Version of the module."
+  type        = string
+  default     = "11.0.0"
+}
+
 variable "resource_group_name" {
   description = "Name of the resource group for Terraform state."
   type        = string
+}
+
+variable "tags" {
+  description = "Tags to apply to resources."
+  type        = map(string)
 }
 
 variable "unique_name_prefix" {
@@ -40,16 +40,20 @@ variable "unique_name_prefix" {
 }
 
 # -------------------------------
-# VNet / Networking Variables
+# DNS Record Variables
 # -------------------------------
-
-variable "aks_subnet_name" {
-  description = "The name of the AKS subnet."
-  type        = string
-  default     = "aks-subnet"
+variable "private_dns_zone_vnet_link_name" {
+    description = "Name for the private DNS zone virtual network link."
+    type        = string
 }
 
+variable "mattermost_domain" {
+    description = "Custom domain for Mattermost deployment."
+  type        = string
+  default     = "<customer>.<env>.cloud.mattermost.com"
+}
 
-# -------------------------------
-# DNS / Private Endpoint Variables
-# -------------------------------
+variable "vnet_name" {
+  description = "Name of VNET"
+  type = string
+}

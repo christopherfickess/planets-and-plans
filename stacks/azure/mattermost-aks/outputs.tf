@@ -34,6 +34,10 @@ output "aks_user_group_object_id" {
   description = "Object ID of the Azure AD group with user access to AKS"
 }
 
+# output "mattermost_fqdn" {
+#   value       = module.dns_record.mattermost_fqdn
+#   description = "Fully qualified domain name for Mattermost deployment"
+# }
 
 output "connect_cluster" {
   value       = <<-EOT

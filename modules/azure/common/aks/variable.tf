@@ -270,6 +270,37 @@ variable "service_accounts" {
   # }
 }
 
+variable "enable_application_gateway_ingress" {
+  description = "Enable Application Gateway Ingress Controller for AKS."
+  type        = bool
+  default     = false
+}
+
+variable "application_gateway_name" {
+  description = "Name of the Application Gateway to deploy or use."
+  type        = string
+  default     = "appgw-ingress"
+}
+
+variable "application_gateway_subnet_name" {
+  description = "Name of the subnet for Application Gateway (brownfield)."
+  type        = string
+  default     = ""
+}
+
+variable "application_gateway_subnet_cidrs" {
+  description = "CIDR prefixes for AG subnet if creating new (greenfield)."
+  type        = list(string)
+  default     = []
+}
+
+
+variable "create_role_assignments_for_application_gateway" {
+  description = "Whether to create role assignments for Application Gateway."
+  type        = bool
+  default     = true
+}
+
 # -------------------------------
 # End of Variables
 # -------------------------------

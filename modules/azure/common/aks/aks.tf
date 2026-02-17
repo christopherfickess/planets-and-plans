@@ -1,6 +1,5 @@
 # modules/azure/common/aks/aks.tf
 
-
 module "aks" {
   source  = "Azure/aks/azurerm"
   version = "11.0.0" # pick the version you want
@@ -118,6 +117,18 @@ module "aks" {
   # For private clusters, use System-managed private DNS zone
   # This allows resources in the same VNet (like jumpbox) to resolve the AKS API server
   # private_dns_zone_id = var.private_cluster_enabled ? "System" : null
+
+
+  # Gateway settings if needed
+
+  # Conditionally enable App Gateway integration
+  green_field_application_gateway_for_ingress = var.enable_application_gateway_ingress && length(var.application_gateway_subnet_cidrs) > 0 ? {
+    name        = var.application_gateway_name
+    subnet_cidr = var.application_gateway_subnet_cidrs[0]
+    subnet_name = var.application_gateway_subnet_name
+  } : null
+
+  create_role_assignments_for_application_gateway = var.enable_application_gateway_ingress ? var.create_role_assignments_for_application_gateway : false
 
   # ------------------------------------------------------------------
   # TAGS

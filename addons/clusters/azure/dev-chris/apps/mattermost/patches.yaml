@@ -5,8 +5,9 @@ metadata:
   name: mattermost
 spec:
   fileStore:
-    external:
-      bucket: byoc-staging-internal-staging-app-data
+    nfs:
+      server: mattermostdevchrisnfs.privatelink.file.core.windows.net
+      path: /mattermostdevchrisshare
   ingress:
     enabled: false
     host: byoc-staging.dev.cloud.mattermost.com
