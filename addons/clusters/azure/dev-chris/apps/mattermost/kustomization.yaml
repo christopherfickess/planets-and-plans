@@ -4,25 +4,21 @@ kind: Kustomization
 namespace: mattermost
 
 resources:
-  - ../../../../../base-apps/mattermost  # must contain its own kustomization.yaml or YAML files
+  - ../../../../../base-apps/mattermost
   - license.yaml
 
-# Patches
 patches:
-  # Patch base HTTPRoute to delete it completely
-  - target:
-      group: gateway.networking.k8s.io
-      version: v1
-      kind: HTTPRoute
-      name: mattermost
-      namespace: mattermost
-    patch: |-
-      $patch: delete
-
+  - path: patches.yaml
+  # - target:
+  #     kind: ExternalSecret
+  #     name: mattermost-license
+  #     namespace: mattermost
+  #   patch: |-
+  #     - op: remove
+  #       path: /spec
   - target:
       kind: ExternalSecret
       name: database
       namespace: mattermost
     path: externalsecret-database.yaml
-  # Optional: patch the Mattermost CR for NFS configuration
-  - path: patches.yaml
+  # Remove the default Ingress since we'll be using a Different method for exposing the application in this environment
