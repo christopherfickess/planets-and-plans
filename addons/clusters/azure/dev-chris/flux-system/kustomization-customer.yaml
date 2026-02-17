@@ -21,7 +21,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./addons/base-apps/external-secrets
+  path: ./addons/apps/external-secrets
   prune: true
   healthChecks:
     - apiVersion: apps/v1

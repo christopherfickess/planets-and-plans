@@ -11,7 +11,7 @@ resources:
   - apps/external-secrets
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
-  # - apps/mattermost-operator
+  - apps/mattermost-operator
   # - apps/mattermost
   # - apps/mattermost-ext
   # - apps/prometheus
