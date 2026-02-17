@@ -55,3 +55,12 @@ output "aks_user_group_object_id" {
   value       = data.azuread_group.aks_users.object_id
   description = "Object ID of the Azure AD group with user access to AKS"
 }
+
+# Service Account Outputs
+output "identity_client_ids" {
+  value = { for k, v in azurerm_user_assigned_identity.service_account : k => v.client_id }
+}
+
+output "identity_principal_ids" {
+  value = { for k, v in azurerm_user_assigned_identity.service_account : k => v.principal_id }
+}

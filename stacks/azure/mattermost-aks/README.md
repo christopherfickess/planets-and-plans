@@ -62,7 +62,9 @@ pushd stacks/azure/mattermost-aks/
     terraform output connect_cluster
 
     # To destroy the stack:
-    terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
+    
+    terraform plan --destroy -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan-destroy.tfplan"
+    terraform apply plan-destroy.tfplan
     terraform force-unlock <LOCK_ID>
 popd
 ```

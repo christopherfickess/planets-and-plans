@@ -61,5 +61,9 @@ module "mattermost_aks" {
   storage_account_tier             = var.storage_account_tier
   storage_account_replication_type = var.storage_account_replication_type
 
+
+  ## Service_accounts
+  service_accounts = local.service_account_names
+
   tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

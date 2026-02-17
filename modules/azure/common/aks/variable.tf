@@ -252,6 +252,11 @@ variable "storage_account_replication_type" {
   # Options: LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.
 }
 
+variable "service_accounts" {
+  description = "Names for the user assigned identities to be used as service accounts for workload identity."
+  type        = list(string)
+}
+
 # -------------------------------
 # End of Variables
 # -------------------------------

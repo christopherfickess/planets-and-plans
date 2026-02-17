@@ -182,4 +182,4 @@ resource "azurerm_key_vault_secret" "postgres_internal_user" {
 #   --vault-name mattermost-dev-chris-pgs \
 #   --query "[].{name:name,id:id}" \
 #   -o table
-# az keyvault secret show --vault-name postgres-internal-password --name postgres-admin-password --query value -o tsv
+# az keyvault secret show --vault-name mattermost-dev-chris-pgs --name postgres-admin-password --query value -o tsv

@@ -57,3 +57,10 @@ data "azurerm_key_vault_secret" "postgres_internal_password" {
   name         = var.keyvault_name_internal_password
   key_vault_id = azurerm_key_vault.mattermost_key_vault.id
 }
+
+# Service account for External Secrets (if using workload identity)
+data "azurerm_user_assigned_identity" "external_secrets" {
+  name                = local.external_secrets_identity_name
+  resource_group_name = var.resource_group_name
+}
+

@@ -5,6 +5,8 @@ locals {
 
   keyvault_name = "${local.base_identifier}-pgs"
 
+  external_secrets_identity_name = "${local.base_identifier}-external-secrets-identity"
+
   # Postgres Variables
   server_name = "${local.base_identifier}-postgres-flex"
   vnet_name   = "${local.base_identifier}-vnet"

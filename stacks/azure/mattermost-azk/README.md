@@ -32,8 +32,9 @@ terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
 
 terraform apply plan.tfplan
 
-terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
 
+terraform plan --destroy -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan-destroy.tfplan"
+terraform apply plan-destroy.tfplan
 terraform force-unlock <LOCK_ID>
 ```
 
