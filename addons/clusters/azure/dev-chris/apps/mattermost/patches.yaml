@@ -18,13 +18,3 @@ kind: HTTPRoute
 metadata:
   name: mattermost
 $patch: delete
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mattermost-license
-  namespace: mattermost
-data:
-  accesskey: ""
-  secretkey: ""
----
