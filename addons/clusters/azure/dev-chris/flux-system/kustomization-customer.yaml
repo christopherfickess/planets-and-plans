@@ -21,7 +21,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./addons/apps/external-secrets
+  path: ./addons/base-apps/external-secrets
   prune: true
   healthChecks:
     - apiVersion: apps/v1
@@ -34,6 +34,6 @@ spec:
       namespace: external-secrets
   sourceRef:
     kind: GitRepository
-    name: planets-and-plans
+    name: mattermost-byoc-infra
 ---
 
