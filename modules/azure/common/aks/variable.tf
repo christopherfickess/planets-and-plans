@@ -253,8 +253,21 @@ variable "storage_account_replication_type" {
 }
 
 variable "service_accounts" {
-  description = "Names for the user assigned identities to be used as service accounts for workload identity."
-  type        = list(string)
+  description = "Map of service accounts to create and manage with UAMI + federated identity"
+  type = map(object({
+    namespace : string
+    uami_name : string
+  }))
+  # default = {
+  #     external-secrets = { 
+  #       namespace = "external-secrets", 
+  #       uami_name = "external-secrets-identity" 
+  #   }
+  #     db-secrets       = { 
+  #       namespace = "secrets", 
+  #       uami_name = "db-secrets-identity" 
+  #   }
+  # }
 }
 
 # -------------------------------
