@@ -5,9 +5,11 @@ metadata:
   name: mattermost
 spec:
   fileStore:
-    nfs:
-      server: mattermostdevchrisnfs.privatelink.file.core.windows.net
-      path: /mattermostdevchrisshare
+    external:
+      bucket: mattermostdevchrisshare
+      secret:
+        name: filestore
+      url: mattermostdevchrisnfs.privatelink.file.core.windows.net
   ingress:
     enabled: true
     # httproute_enabled: false
