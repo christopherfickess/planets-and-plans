@@ -1,0 +1,45 @@
+# addons/clusters/byoc-staging-internal/apps/external-secrets/helmrelease-patches.yaml
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: envoy-gateway
+  namespace: envoy-gateway
+spec:
+  values:
+    ingressClassName: envoy-gateway
+    gatewayClassName: envoy-gateway
+    listeners:
+      - name: https
+        protocol: HTTPS
+        port: 443
+        tls:
+          mode: Terminate
+          certificateRefs:
+            - name: mattermost-tls
+      - name: http
+        protocol: HTTP
+        port: 80
+        allowedRoutes:
+          namespaces:
+            from: All
+    httpRoutes:
+      - name: mattermost
+        namespace: mattermost
+        rules:
+          - backendRefs:
+              - kind: Service
+                name: mattermost
+                port: 8065
+    service:
+      type: LoadBalancer
+      annotations: {}
+      # AWS Load Balancer annotations (uncomment and set values for AWS):
+      #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      #   service.beta.kubernetes.io/aws-load-balancer-subnets: "<subnet-ids>"
+      #   service.beta.kubernetes.io/aws-load-balancer-security-groups: "<security-group-id>"
+      #   service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "<acm-certificate-arn>"
+      # Azure Load Balancer annotations (uncomment and set values for Azure):
+      #   service.beta.kubernetes.io/azure-load-balancer-resource-group: "<resource-group>"  # when PIP is in different RG
+      #   service.beta.kubernetes.io/azure-pip-name: "<public-ip-name>"                      # for static IP
+  interval: 5m0s
