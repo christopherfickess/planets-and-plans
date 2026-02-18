@@ -4,7 +4,7 @@ kind: Mattermost
 metadata:
   name: mattermost
 spec:
-  replicas: 2
+  # replicas: 2
   # fileStore:
   #   external:
   #     externalVolume:
