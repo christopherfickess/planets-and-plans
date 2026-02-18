@@ -3,7 +3,7 @@ locals {
   date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
   base_identifier = "mattermost-${var.environment}"
 
-  keyvault_name = "${local.base_identifier}-pgs"
+  keyvault_name = "${local.base_identifier}-kv"
 
   # Postgres Variables
   server_name = "${local.base_identifier}-postgres-flex"

@@ -253,25 +253,6 @@ variable "application_gateway_subnet_name" {
   default     = "appgw-subnet"
 }
 
-
-# -------------------------------
-# DNS / Private Endpoint Variables
-# -------------------------------
-variable "mattermost_domain" {
-  description = "Custom domain for Mattermost deployment."
-  type        = string
-  default     = "dev-chris.dev.cloud.mattermost.com"
-}
-
-variable "private_dns_zone_vnet_link_name" {
-  description = "Name for the private DNS zone VNet link."
-  type        = string
-  default     = "nfs-dns-vnet-link"
-}
-
-
-
-
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

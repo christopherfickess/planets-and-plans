@@ -42,27 +42,13 @@ variable "unique_name_prefix" {
 # -------------------------------
 # DNS Record Variables
 # -------------------------------
-variable "private_dns_zone_vnet_link_name" {
-  description = "Name for the private DNS zone virtual network link."
-  type        = string
-  default     = "dns-link"
-}
-
-variable "dns_zone_name" {
-  description = "Name of the DNS zone."
-  type        = string
-  # default     = "<customer>.<env>.cloud.mattermost.com"
-  # default     = "privatelink.postgres.database.azure.com"
-  # default     = "privatelink.postgres.database.azure.com"
-}
-
-variable "vnet_name" {
-  description = "Name of VNET"
+variable "azure_primary_group_display_name" {
+  description = "Display name of the Azure AD group to grant access to the Key Vault."
   type        = string
 }
 
-variable "registration_enabled" {
-  description = "Whether to register the DNS zone with the private DNS zone."
-  type        = bool
-  default     = false
+variable "keyvault_name" {
+  description = "Name of the Azure Key Vault."
+  type        = string
+  default    = "kv" 
 }

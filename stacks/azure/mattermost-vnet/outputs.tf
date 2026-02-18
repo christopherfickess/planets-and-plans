@@ -14,17 +14,21 @@ output "vnet_variables" {
   }
 }
 
-output "gateway_variables" {
+output "dns_record_variables" {
   value = {
-    id                        = module.gateway.application_gateway.id
-    name                      = module.gateway.application_gateway.name
-    location                  = module.gateway.application_gateway.location
-    frontend_ip_configuration = module.gateway.application_gateway.frontend_ip_configuration
-    frontend_port             = module.gateway.application_gateway.frontend_port
-    backend_address_pool      = module.gateway.application_gateway.backend_address_pool
-    backend_http_settings     = module.gateway.application_gateway.backend_http_settings
-    http_listener             = module.gateway.application_gateway.http_listener
-    request_routing_rule      = module.gateway.application_gateway.request_routing_rule
-    subnet_address_prefixes   = module.gateway.application_gateway.subnet_address_prefixes
+    zone_name     = module.dns_record.zone_name
+    zone_id       = module.dns_record.zone_id
+    dns_link_name = module.dns_record.dns_link_name
+    dns_link_id   = module.dns_record.dns_link_id
   }
+}
+
+output "view_dns_record" {
+  value = <<-EOT
+  az network private-dns zone list --resource-group ${var.resource_group_name}
+  az network private-dns zone show --name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  az network private-dns record-set a list --zone-name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  az network private-dns zone-virtual-network-link list --resource-group ${var.resource_group_name}
+  az network private-dns zone-virtual-network-link show --name ${module.dns_record.dns_link_name} --zone-name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  EOT
 }
