@@ -12,6 +12,14 @@ az keyvault secret show --vault-name mattermost-dev-chris-pgs --name postgresint
 
 License Null to start
 
+**Replicas:** Set to 1 until HA license is available (avoids "not licensed to run in High Availability mode").
+
+**File storage:** `MM_FILESETTINGS_DRIVERNAME=local` forces local/NFS storage instead of S3 (fixes "unable to check if the S3 bucket exists" and profile image uploads).
+
+**Other log noise (optional):**
+- SMTP: `Mail server connection test failed` — disable or configure SMTP in System Console if not needed.
+- Calls plugin: `failed to get public IP` — configure Calls plugin or disable if not needed.
+
 make the external secret optional to prevent errors until we have the license in place. We can add it later when we have the license ready.
 
 ```yaml

@@ -4,7 +4,7 @@ kind: Mattermost
 metadata:
   name: mattermost
 spec:
-  replicas: 2
+  replicas: 1  # Use 1 until HA license is available
   fileStore:
     externalVolume:
       volumeClaimName: mattermost-nfs-pvc
@@ -18,6 +18,8 @@ spec:
     # httproute_enabled: false
     host: dev-chris.dev.cloud.mattermost.com
   mattermostEnv:
+  - name: MM_FILESETTINGS_DRIVERNAME
+    value: "local"
   - name: MM_FILESETTINGS_AMAZONS3SSE
     value: "false"
   - name: MM_FILESETTINGS_AMAZONS3SSL
