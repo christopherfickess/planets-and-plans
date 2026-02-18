@@ -100,16 +100,34 @@ echo ""
 echo "Inside pod you can run:"
 echo psql "sslmode=require host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD port=$PGPORT"
 
-kubectl cp db-init-final.sql $APP_NAME/postgres-client:/tmp/db-init.sql
+echo "Do you need to update the database schema? (y/n)"
+read -p "Update database schema? (y/n): " UPDATE_SCHEMA
+if [ "$UPDATE_SCHEMA" = "y" ]; then
+    echo "Updating database schema..."
+    kubectl cp db-init-final.sql $APP_NAME/postgres-client:/tmp/db-init.sql
+    kubectl exec -it postgres-client -n $APP_NAME -- bash -c \
+    "psql \"host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD sslmode=require port=$PGPORT\" -f /tmp/db-init.sql"
 
-kubectl exec -it postgres-client -n $APP_NAME -- bash -c \
-"psql \"host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD sslmode=require port=$PGPORT\" -f /tmp/db-init.sql"
+        
+    kubectl create secret generic postgres-db-credentials \
+        -n "$APP_NAME" \
+        --from-literal=DB_USER="$NEW_DB_USER" \
+        --from-literal=DB_PASSWORD="$NEW_DB_PASSWORD" \
+        --from-literal=DB_HOST="$PGHOST" \
+        --from-literal=DB_NAME="$PGDATABASE" \
+        --from-literal=DB_PORT="$PGPORT" \
+        --dry-run=client -o yaml | kubectl apply -f -
+else 
+    echo "No database schema update needed."
+    echo "Connecting to database..."
+    kubectl exec -it postgres-client -n $APP_NAME -- bash -c \
+    "psql \"host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD sslmode=require port=$PGPORT\""
+    echo "Done."
+    echo "Connect with:"
+    echo kubectl exec -it postgres-client -n "$APP_NAME" -- bash
+    echo ""
+    echo "Inside pod you can run:"
+    echo psql "sslmode=require host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD port=$PGPORT"
+    echo "Done."
+fi
 
-kubectl create secret generic postgres-db-credentials \
-    -n "$APP_NAME" \
-    --from-literal=DB_USER="$NEW_DB_USER" \
-    --from-literal=DB_PASSWORD="$NEW_DB_PASSWORD" \
-    --from-literal=DB_HOST="$PGHOST" \
-    --from-literal=DB_NAME="$PGDATABASE" \
-    --from-literal=DB_PORT="$PGPORT" \
-    --dry-run=client -o yaml | kubectl apply -f -

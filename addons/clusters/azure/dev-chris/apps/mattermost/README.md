@@ -12,6 +12,15 @@ az keyvault secret show --vault-name mattermost-dev-chris-pgs --name postgresint
 
 License Null to start
 
+**Replicas:** Set to 1 until HA license is available (avoids "not licensed to run in High Availability mode").
+
+**File storage:** `MM_FILESETTINGS_DRIVERNAME=local` forces local/NFS storage instead of S3 (fixes "unable to check if the S3 bucket exists" and profile image uploads).
+
+**Other log noise (addressed in patches):**
+- HA: `MM_CLUSTERSETTINGS_ENABLE=false` — disables cluster mode (no HA license).
+- SMTP: `MM_EMAILSETTINGS_SMTPSERVER=""` — disables SMTP connection test.
+- Plugins: `MM_PLUGINSETTINGS_PLUGINSTATES` — disables mattermost-ai (needs search/ffmpeg) and com.mattermost.calls (needs public IP). Remove or adjust if you need these plugins.
+
 make the external secret optional to prevent errors until we have the license in place. We can add it later when we have the license ready.
 
 ```yaml
@@ -39,3 +48,24 @@ spec:
 # NFS 
 
 [docs/dns.md](./docs/dns.md)
+
+**NFS path:** If the PVC stays `Pending`, verify the Azure Files share name from Terraform:
+```bash
+cd stacks/azure/mattermost-nfs && terraform output -json nfs | jq -r '.nfs_share_name'
+```
+Update `pvc.yaml` path to `/<storage-account>/<share-name>` (e.g. `/mattermostdevchrisnfs/<actual-share-name>`).
+
+---
+
+# LoadBalancer & Website Hosting
+
+1. **Get the external IP** (may take 2–5 minutes after apply):
+   ```bash
+   kubectl get svc mattermost-lb -n mattermost -w
+   ```
+
+2. **Create DNS A record** for `dev-chris.dev.cloud.mattermost.com` → LoadBalancer external IP.
+
+3. **Optional – static public IP:** Create an Azure public IP, then uncomment and set the annotations in `service.yaml`:
+   - `service.beta.kubernetes.io/azure-load-balancer-resource-group`
+   - `service.beta.kubernetes.io/azure-pip-name`

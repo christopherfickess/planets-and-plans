@@ -3,6 +3,10 @@ kind: Service
 metadata:
   name: mattermost-lb
   namespace: mattermost
+  annotations:
+    # Optional: use if you have a static public IP pre-allocated
+    # service.beta.kubernetes.io/azure-load-balancer-resource-group: "<resource-group-with-pip>"
+    # service.beta.kubernetes.io/azure-pip-name: "<public-ip-name>"
 spec:
   type: LoadBalancer
   selector:
@@ -12,5 +16,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 443
+      port: 80
       targetPort: 8065
