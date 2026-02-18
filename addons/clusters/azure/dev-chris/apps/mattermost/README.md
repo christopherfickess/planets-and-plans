@@ -39,3 +39,24 @@ spec:
 # NFS 
 
 [docs/dns.md](./docs/dns.md)
+
+**NFS path:** If the PVC stays `Pending`, verify the Azure Files share name from Terraform:
+```bash
+cd stacks/azure/mattermost-nfs && terraform output -json nfs | jq -r '.nfs_share_name'
+```
+Update `pvc.yaml` path to `/<storage-account>/<share-name>` (e.g. `/mattermostdevchrisnfs/<actual-share-name>`).
+
+---
+
+# LoadBalancer & Website Hosting
+
+1. **Get the external IP** (may take 2–5 minutes after apply):
+   ```bash
+   kubectl get svc mattermost-lb -n mattermost -w
+   ```
+
+2. **Create DNS A record** for `dev-chris.dev.cloud.mattermost.com` → LoadBalancer external IP.
+
+3. **Optional – static public IP:** Create an Azure public IP, then uncomment and set the annotations in `service.yaml`:
+   - `service.beta.kubernetes.io/azure-load-balancer-resource-group`
+   - `service.beta.kubernetes.io/azure-pip-name`

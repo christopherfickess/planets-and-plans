@@ -7,9 +7,19 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  # Azure Files NFS requires path: /<storage-account-name>/<file-share-name>
+  # Verify share name from: terraform output -json nfs | jq -r '.nfs_share_name'
   nfs:
     server: mattermostdevchrisnfs.privatelink.file.core.windows.net
-    path: /mattermostdevchrisshare
+    path: /mattermostdevchrisnfs/mattermostdevchrisshare
+  mountOptions:
+    - vers=4
+    - minorversion=1
+    - sec=sys
+    - nconnect=4
+    - noresvport
+    - actimeo=30
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -22,5 +32,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: mattermost-nfs
+  volumeName: mattermost-nfs-volume
 
