@@ -46,3 +46,5 @@ terraform.rc
 
 *.key
 *.pem
+
+db-init-final.sql
