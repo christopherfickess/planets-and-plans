@@ -7,6 +7,7 @@ locals {
   vnet_name = "${local.base_identifier}-vnet"
 
 
+  # Dns and Private Endpoint names
   private_dns_zone_vnet_link_name = "${local.base_identifier}-dns-link"
   private_dns_a_record_name       = lower("${local.base_identifier_lower_case_only}nfs")
   private_endpoint_name           = "${local.base_identifier}-nfs-pe"
@@ -14,8 +15,10 @@ locals {
 
   base_identifier_lower_case_only = "mattermost${var.environment_special}"
 
+  # storage_account name
   storage_account_name = "${local.base_identifier_lower_case_only}store"
 
+  # Nat Gateway and Public IP names
   nat_public_ip_name = "${local.base_identifier}-nat-pip"
   nat_gateway_name   = "${local.base_identifier}-nat"
 

@@ -177,6 +177,7 @@ resource "azurerm_key_vault_secret" "postgres_internal_user" {
   tags = merge(local.tags, { Project = "Mattermost Postgres Internal User" })
 }
 
+
 # List secrets in the key vault (for verification, not typically used in production code)
 # az keyvault secret list \
 #   --vault-name mattermost-dev-chris-pgs \

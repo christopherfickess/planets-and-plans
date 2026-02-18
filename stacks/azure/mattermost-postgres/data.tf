@@ -60,7 +60,7 @@ data "azurerm_key_vault_secret" "postgres_internal_password" {
 
 # Service account for External Secrets (if using workload identity)
 data "azurerm_user_assigned_identity" "external_secrets" {
-  name                = local.external_secrets_identity_name
+  name                = local.external_secrets_uami_name
   resource_group_name = var.resource_group_name
 }
 

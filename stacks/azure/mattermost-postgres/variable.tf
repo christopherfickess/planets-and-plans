@@ -128,6 +128,16 @@ variable "db_internal_schema_name" {
 }
 
 
+
+# -------------------------------
+# Service Account Variables
+# -------------------------------
+variable "external_secrets_uami_name" {
+  description = "User-assigned managed identity name for external secrets."
+  type        = string
+  default     = "external-secrets"
+}
+
 # -------------------------------
 # DNS Variables
 # -------------------------------

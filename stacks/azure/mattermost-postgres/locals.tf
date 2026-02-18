@@ -5,14 +5,15 @@ locals {
 
   keyvault_name = "${local.base_identifier}-pgs"
 
-  external_secrets_identity_name = "${local.base_identifier}-external-secrets-identity"
-
   # Postgres Variables
   server_name = "${local.base_identifier}-postgres-flex"
   vnet_name   = "${local.base_identifier}-vnet"
 
   private_dns_zone_virtual_network_link_name = "${local.base_identifier}-postgres-link"
 
+
+  # Service Account names for workload identity
+  external_secrets_uami_name = "${local.base_identifier}-external-secrets-identity"
 
   # Create method for this password securely
   # administrator_password = "P@ssw0rd1234!"
