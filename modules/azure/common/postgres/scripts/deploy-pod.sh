@@ -117,5 +117,17 @@ if [ "$UPDATE_SCHEMA" = "y" ]; then
         --from-literal=DB_NAME="$PGDATABASE" \
         --from-literal=DB_PORT="$PGPORT" \
         --dry-run=client -o yaml | kubectl apply -f -
+else 
+    echo "No database schema update needed."
+    echo "Connecting to database..."
+    kubectl exec -it postgres-client -n $APP_NAME -- bash -c \
+    "psql \"host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD sslmode=require port=$PGPORT\""
+    echo "Done."
+    echo "Connect with:"
+    echo kubectl exec -it postgres-client -n "$APP_NAME" -- bash
+    echo ""
+    echo "Inside pod you can run:"
+    echo psql "sslmode=require host=$PGHOST user=$PGUSER dbname=$PGDATABASE password=$PGPASSWORD port=$PGPORT"
+    echo "Done."
 fi
 

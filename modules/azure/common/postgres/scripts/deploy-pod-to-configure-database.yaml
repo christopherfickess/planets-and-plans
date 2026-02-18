@@ -31,3 +31,5 @@ spec:
         limits:
           memory: "1Gi"
           cpu: "500m"
+# appname
+# envsubst < deploy-pod-to-configure-database.yaml | kubectl apply -f -
