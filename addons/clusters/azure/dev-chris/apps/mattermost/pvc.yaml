@@ -27,6 +27,7 @@ metadata:
   name: mattermost-nfs-pvc
   namespace: mattermost
 spec:
+  storageClassName: ""  # Required: use pre-provisioned PV, not default StorageClass
   accessModes:
     - ReadWriteMany
   resources:
