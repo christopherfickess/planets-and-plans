@@ -15,4 +15,9 @@ patches:
       name: database
       namespace: mattermost
     path: externalsecret-database.yaml
+  - target:
+      kind: ExternalSecret
+      name: mattermost-license
+      namespace: mattermost
+    path: externalsecret-license.yaml
   # Remove the default Ingress since we'll be using a Different method for exposing the application in this environment
