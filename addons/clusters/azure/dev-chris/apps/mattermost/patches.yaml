@@ -18,6 +18,11 @@ spec:
     enabled: true
     # httproute_enabled: false
     host: dev-chris.dev.cloud.mattermost.com
+  mattermostEnv:
+  - name: MM_FILESETTINGS_AMAZONS3SSE
+    value: "false"
+  - name: MM_FILESETTINGS_AMAZONS3SSL
+    value: "false"
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
