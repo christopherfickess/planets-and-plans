@@ -26,6 +26,13 @@ spec:
     value: "false"
   - name: MM_LICENSE
     value: ""
+  # Reduce log noise in dev
+  - name: MM_CLUSTERSETTINGS_ENABLE
+    value: "false"
+  - name: MM_EMAILSETTINGS_SMTPSERVER
+    value: ""
+  - name: MM_PLUGINSETTINGS_PLUGINSTATES
+    value: '{"com.mattermost.calls":{"Enable":false},"mattermost-ai":{"Enable":false}}'
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

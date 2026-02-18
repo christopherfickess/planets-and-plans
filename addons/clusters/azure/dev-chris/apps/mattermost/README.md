@@ -16,9 +16,10 @@ License Null to start
 
 **File storage:** `MM_FILESETTINGS_DRIVERNAME=local` forces local/NFS storage instead of S3 (fixes "unable to check if the S3 bucket exists" and profile image uploads).
 
-**Other log noise (optional):**
-- SMTP: `Mail server connection test failed` — disable or configure SMTP in System Console if not needed.
-- Calls plugin: `failed to get public IP` — configure Calls plugin or disable if not needed.
+**Other log noise (addressed in patches):**
+- HA: `MM_CLUSTERSETTINGS_ENABLE=false` — disables cluster mode (no HA license).
+- SMTP: `MM_EMAILSETTINGS_SMTPSERVER=""` — disables SMTP connection test.
+- Plugins: `MM_PLUGINSETTINGS_PLUGINSTATES` — disables mattermost-ai (needs search/ffmpeg) and com.mattermost.calls (needs public IP). Remove or adjust if you need these plugins.
 
 make the external secret optional to prevent errors until we have the license in place. We can add it later when we have the license ready.
 
