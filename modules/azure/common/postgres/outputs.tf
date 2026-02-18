@@ -28,3 +28,18 @@ output "server_name" {
   value       = azurerm_postgresql_flexible_server.mattermost_postgressql.name
   description = "The name of the PostgreSQL server."
 }
+
+output "host" {
+  value       = azurerm_postgresql_flexible_server.mattermost_postgressql.fqdn
+  description = "The hostname of the PostgreSQL server."
+}
+
+output "port" {
+  value       = 5432
+  description = "The port of the PostgreSQL server."
+}
+
+output "dbname" {
+  value       = var.database_names[0]
+  description = "The name of the primary PostgreSQL database."
+}

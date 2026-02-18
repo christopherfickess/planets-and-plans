@@ -177,6 +177,21 @@ resource "azurerm_key_vault_secret" "postgres_internal_user" {
   tags = merge(local.tags, { Project = "Mattermost Postgres Internal User" })
 }
 
+resource "azurerm_key_vault_secret" "database_connection_string" {
+  depends_on = [azurerm_key_vault_access_policy.terraform_sp]
+
+  name         = var.db_connection_string_name
+  # value        = var.db_internal_username
+  value = "postgresql://${var.db_internal_username}:${random_password.postgres_internal_password.result}@${module.mattermost_postgres.host}:${module.mattermost_postgres.port}/${module.mattermost_postgres.dbname}?sslmode=require"
+  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+
+  tags = merge(local.tags, { Project = "Mattermost Postgres Internal User" })
+}
+
 
 # List secrets in the key vault (for verification, not typically used in production code)
 # az keyvault secret list \

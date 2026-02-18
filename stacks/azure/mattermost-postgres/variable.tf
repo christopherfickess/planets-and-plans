@@ -103,6 +103,12 @@ variable "db_admin_username" {
 }
 
 # Internal DB user and password variables
+variable "db_connection_string_name" {
+  description = "Key vault name for PostgreSQL connection string."
+  type        = string
+  default     = "postgres-connection-string"
+}
+
 variable "keyvault_name_internal_user" {
   description = "Internal username for the PostgreSQL server."
   type        = string
