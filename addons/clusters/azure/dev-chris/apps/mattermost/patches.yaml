@@ -4,9 +4,15 @@ kind: Mattermost
 metadata:
   name: mattermost
 spec:
+  # fileStore:
+  #   external:
+  #     volumeClaimName: mattermost-nfs-pvc
   fileStore:
     external:
-      volumeClaimName: mattermost-nfs-pvc
+      bucket: mattermostdevchrisshare
+      url: https://mattermostdevchris.file.core.windows.net
+      secret:
+        name: filestore
   ingress:
     enabled: true
     # httproute_enabled: false
