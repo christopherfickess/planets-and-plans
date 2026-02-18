@@ -7,7 +7,9 @@ spec:
   type: LoadBalancer
   selector:
     app: mattermost
+  clusterIP: None
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 443
       targetPort: 8065
