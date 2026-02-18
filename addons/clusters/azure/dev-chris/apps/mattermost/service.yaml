@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mattermost
+  namespace: mattermost
+spec:
+  type: LoadBalancer
+  selector:
+    app: mattermost
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 8065

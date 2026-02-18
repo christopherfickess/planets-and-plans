@@ -6,6 +6,7 @@ namespace: mattermost
 resources:
   - ../../../../../base-apps/mattermost
   # - license.yaml
+  - service.yaml
   - pvc.yaml
 
 patches:
