@@ -19,7 +19,7 @@ resources:
   # - apps/rtcd
   # - apps/teleport
   # - apps/thanos
-  - apps/velero
+  # - apps/velero
   # - apps/wrapper-platform
 
 generatorOptions:
