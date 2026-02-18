@@ -6,10 +6,7 @@ metadata:
 spec:
   fileStore:
     external:
-      bucket: mattermostdevchrisshare
-      secret:
-        name: filestore
-      url: mattermostdevchrisnfs.privatelink.file.core.windows.net
+      volumeClaimName: mattermost-nfs-pvc
   ingress:
     enabled: true
     # httproute_enabled: false
