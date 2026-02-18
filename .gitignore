@@ -48,3 +48,6 @@ terraform.rc
 *.pem
 
 *.sql
+
+# Local addons env (may contain resource names, avoid committing)
+addons/docs/env.local.sh

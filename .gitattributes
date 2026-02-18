@@ -1,0 +1,2 @@
+# Ensure shell scripts use LF line endings (fixes "No such file or directory" on WSL/Windows)
+*.sh text eol=lf
