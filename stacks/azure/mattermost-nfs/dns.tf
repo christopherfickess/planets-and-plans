@@ -1,33 +1,31 @@
 
 
 
-# Private DNS zone
-resource "azurerm_private_dns_zone" "nfs_dns" {
-  name                = var.private_dns_zone_name
+module "dns_record" {
+  depends_on = [module.nfs]
+
+  source = "../../../modules/azure/common/dns_record"
+
+  email_contact       = var.email_contact
+  environment         = var.environment
+  location            = var.location
   resource_group_name = var.resource_group_name
-}
-
-# Link DNS zone to VNet
-resource "azurerm_private_dns_zone_virtual_network_link" "nfs_dns_link" {
-  depends_on = [azurerm_private_endpoint.nfs_pe]
-
-  name                  = local.private_dns_zone_vnet_link_name
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.nfs_dns.name
-  virtual_network_id    = data.azurerm_virtual_network.aks_vnet.id
-  registration_enabled  = false
+  tags                = local.tags
+  unique_name_prefix  = var.unique_name_prefix
+  dns_zone_name       = var.private_dns_zone_name
+  vnet_name           = local.vnet_name
 }
 
 # Create DNS A record pointing to the private endpoint IP
 resource "azurerm_private_dns_a_record" "nfs_a_record" {
   depends_on = [
-    azurerm_private_endpoint.nfs_pe,
-    azurerm_private_endpoint.nfs_pe
+    module.nfs,
+    module.dns_record
   ]
 
   name                = local.private_dns_a_record_name
-  zone_name           = azurerm_private_dns_zone.nfs_dns.name
+  zone_name           = module.dns_record.zone_name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [azurerm_private_endpoint.nfs_pe.private_service_connection[0].private_ip_address]
+  records             = [module.nfs.nfs_pe_private_ip_address]
 }

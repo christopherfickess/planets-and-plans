@@ -49,13 +49,18 @@ variable "aks_subnet_name" {
   default     = "aks-subnet"
 }
 
-
-# -------------------------------
-# DNS / Private Endpoint Variables
-# -------------------------------
-
 variable "private_dns_zone_name" {
   description = "Name of the private DNS zone."
   type        = string
   default     = "privatelink.file.core.windows.net"
 }
+
+variable "azure_primary_group_display_name" {
+  description = "Display name of the Azure AD group to grant access to the NFS."
+  type        = string
+  default     = "Azure PDE"
+}
+
+# -------------------------------
+# DNS / Private Endpoint Variables
+# -------------------------------

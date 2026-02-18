@@ -103,6 +103,12 @@ variable "db_admin_username" {
 }
 
 # Internal DB user and password variables
+variable "db_connection_string_name" {
+  description = "Key vault name for PostgreSQL connection string."
+  type        = string
+  default     = "postgres-connection-string"
+}
+
 variable "keyvault_name_internal_user" {
   description = "Internal username for the PostgreSQL server."
   type        = string
@@ -127,6 +133,16 @@ variable "db_internal_schema_name" {
   default     = "mattermost_internal"
 }
 
+
+
+# -------------------------------
+# Service Account Variables
+# -------------------------------
+variable "external_secrets_uami_name" {
+  description = "User-assigned managed identity name for external secrets."
+  type        = string
+  default     = "external-secrets"
+}
 
 # -------------------------------
 # DNS Variables

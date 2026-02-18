@@ -193,13 +193,13 @@ variable "node_pools" {
 variable "workload_identity_enabled" {
   description = "Enable Azure AD Workload Identity for AKS."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "oidc_issuer_enabled" {
   description = "Enable OIDC issuer for the AKS cluster."
   type        = bool
-  default     = false
+  default     = true
 }
 
 # -------------------------------
@@ -250,6 +250,55 @@ variable "storage_account_replication_type" {
   description = "Replication type for the Azure Storage Account used for Azure Files."
   type        = string
   # Options: LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.
+}
+
+variable "service_accounts" {
+  description = "Map of service accounts to create and manage with UAMI + federated identity"
+  type = map(object({
+    namespace : string
+    uami_name : string
+  }))
+  # default = {
+  #     external-secrets = { 
+  #       namespace = "external-secrets", 
+  #       uami_name = "external-secrets-identity" 
+  #   }
+  #     db-secrets       = { 
+  #       namespace = "secrets", 
+  #       uami_name = "db-secrets-identity" 
+  #   }
+  # }
+}
+
+variable "enable_application_gateway_ingress" {
+  description = "Enable Application Gateway Ingress Controller for AKS."
+  type        = bool
+  default     = false
+}
+
+variable "application_gateway_name" {
+  description = "Name of the Application Gateway to deploy or use."
+  type        = string
+  default     = "appgw-ingress"
+}
+
+variable "application_gateway_subnet_name" {
+  description = "Name of the subnet for Application Gateway (brownfield)."
+  type        = string
+  default     = ""
+}
+
+variable "application_gateway_subnet_cidrs" {
+  description = "CIDR prefixes for AG subnet if creating new (greenfield)."
+  type        = list(string)
+  default     = []
+}
+
+
+variable "create_role_assignments_for_application_gateway" {
+  description = "Whether to create role assignments for Application Gateway."
+  type        = bool
+  default     = true
 }
 
 # -------------------------------

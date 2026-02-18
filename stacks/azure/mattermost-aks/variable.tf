@@ -233,5 +233,26 @@ variable "storage_account_replication_type" {
 }
 
 # -------------------------------
+# Gateway Variables
+# -------------------------------
+variable "enable_application_gateway_ingress" {
+  description = "Enable Application Gateway Ingress Controller for AKS."
+  type        = bool
+  default     = true
+}
+
+variable "application_gateway_subnet_cidrs" {
+  description = "Address prefixes for the Application Gateway subnet."
+  type        = list(string)
+  default     = ["172.16.13.128/28"]
+}
+
+variable "application_gateway_subnet_name" {
+  description = "Name of the subnet for Application Gateway."
+  type        = string
+  default     = "appgw-subnet"
+}
+
+# -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

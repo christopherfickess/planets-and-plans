@@ -14,6 +14,7 @@ output "aks_variables" {
     key_vault_secrets_provider_enabled   = module.mattermost_aks.key_vault_secrets_provider_enabled
     location                             = module.mattermost_aks.location
     network_profile                      = module.mattermost_aks.network_profile
+    oidc_issuer_url                      = module.mattermost_aks.oidc_issuer_url
     username                             = module.mattermost_aks.username
   }
   sensitive = true
@@ -33,6 +34,10 @@ output "aks_user_group_object_id" {
   description = "Object ID of the Azure AD group with user access to AKS"
 }
 
+# output "mattermost_fqdn" {
+#   value       = module.dns_record.mattermost_fqdn
+#   description = "Fully qualified domain name for Mattermost deployment"
+# }
 
 output "connect_cluster" {
   value       = <<-EOT

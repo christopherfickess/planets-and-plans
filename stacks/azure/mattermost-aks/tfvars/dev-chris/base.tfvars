@@ -52,3 +52,5 @@ oidc_issuer_enabled       = true
 # Other Variables
 bad_naming_convention = "chrisfickess-azk-dev" # Will be removed
 firewall_rules        = []
+
+enable_application_gateway_ingress = true

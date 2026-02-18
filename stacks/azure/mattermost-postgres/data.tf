@@ -49,11 +49,18 @@ data "azurerm_private_dns_zone" "postgres" {
 data "azurerm_key_vault_secret" "postgres_internal_user" {
   depends_on   = [azurerm_key_vault_secret.postgres_internal_user]
   name         = var.keyvault_name_internal_user
-  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+  key_vault_id = data.azurerm_key_vault.mattermost_key_vault.id
 }
 
 data "azurerm_key_vault_secret" "postgres_internal_password" {
   depends_on   = [azurerm_key_vault_secret.postgres_internal_password]
   name         = var.keyvault_name_internal_password
-  key_vault_id = azurerm_key_vault.mattermost_key_vault.id
+  key_vault_id = data.azurerm_key_vault.mattermost_key_vault.id
 }
+
+# Service account for External Secrets (if using workload identity)
+data "azurerm_user_assigned_identity" "external_secrets" {
+  name                = local.external_secrets_uami_name
+  resource_group_name = var.resource_group_name
+}
+

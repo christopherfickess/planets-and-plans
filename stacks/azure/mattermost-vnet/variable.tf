@@ -103,6 +103,38 @@ variable "private_dns_zone_name" {
   type        = string
   default     = "privatelink.postgres.database.azure.com"
 }
+
+variable "deploy_gateway" {
+  description = "Whether to deploy a NAT Gateway for outbound connectivity (required for private AKS clusters)."
+  type        = bool
+  default     = false
+}
+
+# -------------------------------
+# DNS / Private Endpoint Variables
+# -------------------------------
+variable "mattermost_domain" {
+  description = "Custom domain for Mattermost deployment."
+  type        = string
+  default     = "dev-chris.dev.cloud.mattermost.com"
+}
+
+variable "private_dns_zone_vnet_link_name" {
+  description = "Name for the private DNS zone VNet link."
+  type        = string
+  default     = "nfs-dns-vnet-link"
+}
+
+
+# -------------------------------
+# Key Vault Variables
+# -------------------------------
+variable "azure_primary_group_display_name" {
+  description = "Display name of the Azure AD group to grant access to the Key Vault."
+  type        = string
+  default     = "Azure PDE"
+}
+
 # -------------------------------
 # End of Azure Mattermost AZK Variables
 # -------------------------------

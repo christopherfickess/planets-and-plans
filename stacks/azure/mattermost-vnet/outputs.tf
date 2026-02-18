@@ -13,3 +13,22 @@ output "vnet_variables" {
     nat_public_ip_id = module.mattermost_vnet.nat_public_ip_id
   }
 }
+
+output "dns_record_variables" {
+  value = {
+    zone_name     = module.dns_record.zone_name
+    zone_id       = module.dns_record.zone_id
+    dns_link_name = module.dns_record.dns_link_name
+    dns_link_id   = module.dns_record.dns_link_id
+  }
+}
+
+output "view_dns_record" {
+  value = <<-EOT
+  az network private-dns zone list --resource-group ${var.resource_group_name}
+  az network private-dns zone show --name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  az network private-dns record-set a list --zone-name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  az network private-dns zone-virtual-network-link list --resource-group ${var.resource_group_name}
+  az network private-dns zone-virtual-network-link show --name ${module.dns_record.dns_link_name} --zone-name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
+  EOT
+}

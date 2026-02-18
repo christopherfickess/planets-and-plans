@@ -1,21 +1,8 @@
 # stacks/azure/mattermost-azk/aks.tf
 
-data "azuread_group" "aks_pde_admins" {
-  display_name = var.azure_pde_admin_group_display_name
-}
-
-resource "azurerm_role_assignment" "aks_pde_admins" {
-  scope                = module.mattermost_aks.aks_id
-  role_definition_name = "Azure Kubernetes Service RBAC Admin" # Built-in role
-  principal_id         = data.azuread_group.aks_pde_admins.object_id
-}
-
-resource "azurerm_role_assignment" "aks_admin" {
-  depends_on = [module.mattermost_aks]
-
-  scope                = module.mattermost_aks.aks_id
-  role_definition_name = "Azure Kubernetes Service Cluster Admin Role"
-  principal_id         = data.azuread_group.pde_group.object_id
+locals {
+  application_gateway_name        = "${local.base_identifier}-appgw"
+  application_gateway_subnet_name = "${local.base_identifier}-appgw-subnet"
 }
 
 module "mattermost_aks" {
@@ -60,6 +47,15 @@ module "mattermost_aks" {
   storage_share_quota_gb           = var.storage_share_quota_gb
   storage_account_tier             = var.storage_account_tier
   storage_account_replication_type = var.storage_account_replication_type
+
+
+  ## Service_accounts
+  service_accounts = local.service_account_names
+
+  enable_application_gateway_ingress = var.enable_application_gateway_ingress
+  application_gateway_subnet_cidrs   = var.application_gateway_subnet_cidrs
+  application_gateway_subnet_name    = var.application_gateway_subnet_name
+  application_gateway_name           = local.application_gateway_name
 
   tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

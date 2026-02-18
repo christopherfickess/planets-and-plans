@@ -6,12 +6,12 @@ metadata:
   name: external-secrets
   namespace: external-secrets
 spec:
-  # Use this to override the IRSA per cluster/account
   values:
     serviceAccount:
-      automount: true
       create: true
-      name: "external-secrets"
+      name: external-secrets
+      automount: true
       annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/mattermost-external-secrets"
+        azure.workload.identity/client-id: "99a1a097-ff23-4363-a136-1a3cc3fddc49"
+        eks.amazonaws.com/role-arn: null
   interval: 5m0s

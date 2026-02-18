@@ -54,7 +54,7 @@ How to deploy the Terraform stacks for the AKS components.
 ```bash
 pushd stacks/azure/mattermost-aks/
     TF_VARS="dev-chris"
-    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform init -upgrade -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
   
@@ -62,7 +62,9 @@ pushd stacks/azure/mattermost-aks/
     terraform output connect_cluster
 
     # To destroy the stack:
-    terraform destroy -var-file="tfvars/${TF_VARS}/base.tfvars"
+    
+    terraform plan --destroy -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan-destroy.tfplan"
+    terraform apply plan-destroy.tfplan
     terraform force-unlock <LOCK_ID>
 popd
 ```
