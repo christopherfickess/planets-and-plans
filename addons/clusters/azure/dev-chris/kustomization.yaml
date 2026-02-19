@@ -11,7 +11,7 @@ resources:
   - apps/external-secrets
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
-  - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost
+  # - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost
   - apps/mattermost-operator
   - apps/mattermost
   # - apps/mattermost-ext
