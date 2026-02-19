@@ -7,6 +7,8 @@ metadata:
     # Optional: use if you have a static public IP pre-allocated
     service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
     service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-alb-pip"
+    # Use dedicated Mattermost PIP (mattermost_lb_pip_name from Terraform) - has FQDN for CNAME
+    #service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-mattermost-pip"
 spec:
   type: LoadBalancer
   selector:

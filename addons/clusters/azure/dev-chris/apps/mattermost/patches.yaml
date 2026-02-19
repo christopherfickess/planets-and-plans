@@ -16,13 +16,11 @@ spec:
   ingress:
     enabled: true
     # httproute_enabled: false
-    # host: dev-chris.dev.cloud.mattermost.com ## this is the old domain with IP address
-    # Use ALB FQDN from Terraform (mattermost-dev-chris-alb.eastus2.cloudapp.azure.com)
-    # Or CNAME your domain to LB_FQDN and use that here
-    host: mattermost-dev-chris-alb.eastus2.cloudapp.azure.com
+    # Custom domain - CNAME in Cloudflare: dev-chris -> mattermost_lb_fqdn (Terraform)
+    host: dev-chris.dev.cloud.mattermost.com
   mattermostEnv:
     - name: MM_SITEURL
-      value: "https://mattermost-dev-chris-alb.eastus2.cloudapp.azure.com"
+      value: "https://dev-chris.dev.cloud.mattermost.com"
     - name: MM_FILESETTINGS_DRIVERNAME
       value: "local"
     - name: MM_FILESETTINGS_AMAZONS3SSE

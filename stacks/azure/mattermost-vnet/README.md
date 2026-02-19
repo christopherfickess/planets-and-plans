@@ -122,3 +122,30 @@ spec:
 ```
 
 Replace `chrisfickess-tfstate-azk` and `mattermost-dev-chris-nlb-pip` with values from `terraform output load_balancer_resource_group` and `terraform output nlb_pip_name` (or the az CLI commands above).
+
+### Mattermost LoadBalancer - CNAME (like AWS ELB)
+
+A dedicated PIP is created for the Mattermost Kubernetes LoadBalancer service with a stable FQDN for CNAME (no IP in DNS):
+
+```bash
+terraform output mattermost_lb_pip_name   # e.g. mattermost-dev-chris-mattermost-pip
+terraform output mattermost_lb_fqdn      # e.g. mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
+```
+
+Use `mattermost_lb_pip_name` in the service annotation. Point your domain (e.g. dev-chris.dev.cloud.mattermost.com) to `mattermost_lb_fqdn` via CNAME.
+
+### Cloudflare CNAME (optional - like AWS Route53)
+
+To have Terraform create the CNAME record in Cloudflare:
+
+1. Get your zone ID from Cloudflare (Dashboard → dev.cloud.mattermost.com → Overview → Zone ID)
+2. Create a Cloudflare API token with Zone:DNS:Edit
+3. Add to your tfvars or pass at apply:
+
+```hcl
+cloudflare_zone_id     = "<your-zone-id>"
+cloudflare_api_token   = "<token>"   # or set env CLOUDFLARE_API_TOKEN / TF_VAR_cloudflare_api_token
+cloudflare_record_name = "dev-chris" # record name in zone (dev-chris.dev.cloud.mattermost.com)
+```
+
+Terraform will create: `dev-chris` (CNAME) → `mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com`

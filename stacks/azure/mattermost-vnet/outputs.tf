@@ -60,3 +60,16 @@ output "alb_id" {
   value       = var.deploy_load_balancer && var.lb_type == "alb" ? module.load_balancer[0].alb_id : null
   description = "Application Gateway ID for AGIC brownfield integration (ALB only)."
 }
+
+# -----------------------------------------------------------------------------
+# Mattermost K8s LoadBalancer - Dedicated PIP with FQDN for CNAME (like AWS ELB)
+# -----------------------------------------------------------------------------
+output "mattermost_lb_pip_name" {
+  value       = var.deploy_load_balancer ? azurerm_public_ip.mattermost_lb[0].name : null
+  description = "Public IP name for service.beta.kubernetes.io/azure-pip-name on Mattermost LoadBalancer service."
+}
+
+output "mattermost_lb_fqdn" {
+  value       = var.deploy_load_balancer ? azurerm_public_ip.mattermost_lb[0].fqdn : null
+  description = "Stable FQDN for CNAME. Point dev-chris.dev.cloud.mattermost.com to this in Cloudflare."
+}
