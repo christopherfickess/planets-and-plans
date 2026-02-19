@@ -9,6 +9,7 @@ kind: Kustomization
 
 resources:
   - ../../../../../base-apps/external-secrets
+  - identity-secret.yaml
   - clustersecretstore.yaml
 
 patches:

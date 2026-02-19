@@ -38,9 +38,11 @@ if [ -z "$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID" ]; then
   exit 1
 fi
 
-# Target: addons/clusters/azure/<cluster>/apps/external-secrets/patches.yaml
+# Target: addons/clusters/azure/<cluster>/apps/external-secrets/
 CLUSTER_PATH="${1:-addons/clusters/azure/dev-chris}"
-PATCHES_FILE="$REPO_ROOT/$CLUSTER_PATH/apps/external-secrets/patches.yaml"
+EXTERNAL_SECRETS_DIR="$REPO_ROOT/$CLUSTER_PATH/apps/external-secrets"
+PATCHES_FILE="$EXTERNAL_SECRETS_DIR/patches.yaml"
+IDENTITY_SECRET_FILE="$EXTERNAL_SECRETS_DIR/identity-secret.yaml"
 
 if [ ! -f "$PATCHES_FILE" ]; then
   echo "ERROR: Patches file not found: $PATCHES_FILE" >&2
@@ -49,11 +51,33 @@ if [ ! -f "$PATCHES_FILE" ]; then
   exit 1
 fi
 
-# Replace the client-id value (handles different quoting)
+# Tenant ID (for identity-secret and patches)
+TENANT_ID="${AZURE_TENANT_ID:-}"
+if [ -z "$TENANT_ID" ]; then
+  TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null || true)
+fi
+if [ -z "$TENANT_ID" ]; then
+  echo "WARNING: AZURE_TENANT_ID not set, skipping identity-secret update" >&2
+fi
+
+# 1. Update patches.yaml (service account annotation - backup if Helm patch wins)
 if sed -i.bak "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" "$PATCHES_FILE" 2>/dev/null; then
   rm -f "${PATCHES_FILE}.bak"
   echo "Updated $PATCHES_FILE with client-id: $EXTERNAL_SECRETS_IDENTITY_CLIENT_ID"
 else
   echo "ERROR: Failed to patch $PATCHES_FILE" >&2
   exit 1
+fi
+
+# 2. Update identity-secret.yaml (authSecretRef - primary, bypasses base Helm chart)
+if [ -f "$IDENTITY_SECRET_FILE" ] && [ -n "$TENANT_ID" ]; then
+  if sed -i.bak \
+    -e "s|clientId:.*|clientId: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" \
+    -e "s|tenantId:.*|tenantId: \"$TENANT_ID\"|" \
+    "$IDENTITY_SECRET_FILE" 2>/dev/null; then
+    rm -f "${IDENTITY_SECRET_FILE}.bak"
+    echo "Updated $IDENTITY_SECRET_FILE with client-id and tenant-id"
+  else
+    echo "WARNING: Failed to patch $IDENTITY_SECRET_FILE" >&2
+  fi
 fi
