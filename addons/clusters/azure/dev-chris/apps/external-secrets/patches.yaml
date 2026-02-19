@@ -12,6 +12,6 @@ spec:
       name: external-secrets
       automount: true
       annotations:
-        azure.workload.identity/client-id: "99a1a097-ff23-4363-a136-1a3cc3fddc49"
+        azure.workload.identity/client-id: "2d358d95-2457-49dd-a7c8-9479cac7b2b0"
         eks.amazonaws.com/role-arn: null
   interval: 5m0s
