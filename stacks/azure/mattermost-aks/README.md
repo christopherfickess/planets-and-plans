@@ -106,6 +106,34 @@ For detailed instructions, see [PRIVATE_CLUSTER_SETUP.md](./PRIVATE_CLUSTER_SETU
 
 ---
 
+## Load Balancer (Deployed in mattermost-vnet)
+
+The load balancer (NLB or ALB) is deployed in the **mattermost-vnet** stack, not with AKS. To use it with Kubernetes:
+
+### NLB – Kubernetes service annotation
+
+```yaml
+annotations:
+  service.beta.kubernetes.io/azure-load-balancer-resource-group: "<resource_group>"   # from terraform output load_balancer_resource_group
+  service.beta.kubernetes.io/azure-pip-name: "<nlb_pip_name>"                          # from terraform output nlb_pip_name
+```
+
+### Get values
+
+```bash
+# From mattermost-vnet stack
+cd ../mattermost-vnet
+terraform output nlb_pip_name
+terraform output load_balancer_resource_group
+
+# Or via Azure CLI
+az network public-ip list --resource-group <RG> --query "[?contains(name, 'nlb')].name" -o tsv
+```
+
+See [../mattermost-vnet/README.md](../mattermost-vnet/README.md) for full az CLI examples.
+
+---
+
 # Notes 
 
 Need to figure out how to allow RBAC access to the Key Vault for the AKS cluster. This is required for the cluster to retrieve the Postgres password stored in Key Vault.

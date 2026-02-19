@@ -16,9 +16,10 @@ patches:
       name: database
       namespace: mattermost
     path: externalsecret-database.yaml
+  # Remove license ES - mattermost-license-store not in Key Vault yet (base defines it)
   - target:
       kind: ExternalSecret
       name: mattermost-license
       namespace: mattermost
-    path: externalsecret-license.yaml
+    path: externalsecret-license-delete.yaml
   # Remove the default Ingress since we'll be using a Different method for exposing the application in this environment

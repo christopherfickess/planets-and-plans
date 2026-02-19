@@ -24,6 +24,13 @@ resource "azurerm_role_assignment" "kv_secrets_officer" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+resource "azurerm_role_assignment" "kv_azure_pde_secrets_user" {
+  depends_on           = [azurerm_key_vault.jumpbox]
+  scope                = azurerm_key_vault.jumpbox.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = data.azuread_group.azure_pde.object_id
+}
+
 resource "azurerm_key_vault_secret" "jumpbox_private_key" {
   depends_on   = [azurerm_role_assignment.kv_secrets_officer]
   name         = local.keyvault_private_key_secret_name

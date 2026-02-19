@@ -95,6 +95,33 @@ variable "jumpbox_subnet_addresses" {
   default     = ["172.16.13.96/28"]
 }
 
+variable "appgw_subnet_name" {
+  description = "The name of the Application Gateway subnet (dedicated, no other resources)."
+  type        = string
+  default     = "appgw-subnet"
+}
+
+variable "appgw_subnet_addresses" {
+  description = "The address prefixes for the Application Gateway subnet (min /26)."
+  type        = list(string)
+  default     = ["172.16.13.128/28"]
+}
+
+# -------------------------------
+# Load Balancer Variables
+# -------------------------------
+variable "deploy_load_balancer" {
+  description = "Whether to deploy the load balancer (NLB or ALB) in the VNet stack."
+  type        = bool
+  default     = true
+}
+
+variable "lb_type" {
+  description = "Load balancer type: 'nlb' (Standard LB, L4) or 'alb' (Application Gateway, L7)."
+  type        = string
+  default     = "alb"
+}
+
 # -------------------------------
 # DNS Variables
 # -------------------------------
@@ -114,9 +141,30 @@ variable "deploy_gateway" {
 # DNS / Private Endpoint Variables
 # -------------------------------
 variable "mattermost_domain" {
-  description = "Custom domain for Mattermost deployment."
+  description = "Custom domain for Mattermost deployment (full hostname)."
   type        = string
   default     = "dev-chris.dev.cloud.mattermost.com"
+}
+
+# -------------------------------
+# Mattermost Public DNS (Azure)
+# -------------------------------
+variable "deploy_mattermost_public_dns" {
+  description = "Create Azure public DNS zone + CNAME for Mattermost. Zone must be delegated from parent (cloud.mattermost.com)."
+  type        = bool
+  default     = false
+}
+
+variable "mattermost_dns_zone_name" {
+  description = "DNS zone name for Mattermost (e.g. testing.cloud.mattermost.com). Used when deploy_mattermost_public_dns = true."
+  type        = string
+  default     = "testing.cloud.mattermost.com"
+}
+
+variable "mattermost_dns_record_name" {
+  description = "CNAME record name in the zone (e.g. mattermost for mattermost.testing.cloud.mattermost.com)."
+  type        = string
+  default     = "mattermost"
 }
 
 variable "private_dns_zone_vnet_link_name" {

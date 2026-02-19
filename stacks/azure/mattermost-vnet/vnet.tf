@@ -6,7 +6,6 @@ module "mattermost_vnet" {
 
   unique_name_prefix = local.base_identifier
 
-  vnet_name           = local.vnet_name
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = var.location
 
@@ -59,15 +58,15 @@ module "mattermost_vnet" {
       address_prefixes    = var.jumpbox_subnet_addresses
       nat_gateway_enabled = true
       nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
-      nsg = {
-        inbound_rules = [
-          {
-            name        = "AllowBastion"
-            priority    = 100
-            source_cidr = var.bastion_subnet_addresses
-          }
-        ]
-      }
+      # NSG is managed by mattermost-bastion stack (azurerm_subnet_network_security_group_association)
+      # Do not add nsg here - the Azure module expects network_security_group = { id = "..." }
+      # and the bastion stack owns the jumpbox NSG to avoid cross-stack subnet churn
+    }
+    "appgw-subnet" = {
+      name                = var.appgw_subnet_name
+      address_prefixes    = var.appgw_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = ""
     }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {

@@ -1,9 +1,5 @@
 # stacks/azure/mattermost-azk/aks.tf
-
-locals {
-  application_gateway_name        = "${local.base_identifier}-appgw"
-  application_gateway_subnet_name = "${local.base_identifier}-appgw-subnet"
-}
+# Load balancer (ALB/NLB) is deployed in mattermost-vnet stack for decoupled lifecycle.
 
 module "mattermost_aks" {
   source = "../../../modules/azure/common/aks"
@@ -52,10 +48,12 @@ module "mattermost_aks" {
   ## Service_accounts
   service_accounts = local.service_account_names
 
-  enable_application_gateway_ingress = var.enable_application_gateway_ingress
-  application_gateway_subnet_cidrs   = var.application_gateway_subnet_cidrs
-  application_gateway_subnet_name    = var.application_gateway_subnet_name
-  application_gateway_name           = local.application_gateway_name
+  # Load balancer deployed in mattermost-vnet stack; use AGIC brownfield or NLB annotations
+  enable_application_gateway_ingress = false
+
+  # Grant AKS kubelet identity Network Contributor on RG containing PIP (azure-pip-name)
+  grant_load_balancer_network_access = true
+  load_balancer_resource_group      = data.azurerm_resource_group.mattermost_location.name
 
   tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

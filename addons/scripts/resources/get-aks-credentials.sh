@@ -5,13 +5,13 @@
 # Merges AKS credentials into ~/.kube/config so you can run kubectl
 #
 # Prerequisites: RESOURCE_GROUP_NAME, AKS_CLUSTER_NAME
-# Run: source addons/docs/env.local.sh && ./addons/scripts/get-aks-credentials.sh
+# Run: source addons/docs/env.local.sh && ./addons/scripts/resources/get-aks-credentials.sh
 # =============================================================================
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCS_DIR="$(dirname "$SCRIPT_DIR")/docs"
+DOCS_DIR="$(dirname "$SCRIPT_DIR")/../docs"
 
 if [ -f "$DOCS_DIR/env.local.sh" ]; then
   source "$DOCS_DIR/env.local.sh"

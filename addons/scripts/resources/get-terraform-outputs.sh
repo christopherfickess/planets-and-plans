@@ -5,7 +5,7 @@
 # The most reliable source: Terraform outputs from your deployed stacks.
 # Run from repo root. Requires Terraform initialized in each stack.
 #
-# Run: ./addons/scripts/get-terraform-outputs.sh [stack-name]
+# Run: ./addons/scripts/resources/get-terraform-outputs.sh [stack-name]
 #   stack-name: mattermost-nfs | mattermost-postgres | mattermost-aks | mattermost-vnet
 #   If omitted, runs for mattermost-nfs and mattermost-postgres (most used by addons)
 # =============================================================================
@@ -13,7 +13,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 STACKS_DIR="$REPO_ROOT/stacks/azure"
 
 STACK="${1:-}"
@@ -36,5 +36,5 @@ if [ -n "$STACK" ]; then
 else
   run_output "$STACKS_DIR/mattermost-nfs"
   run_output "$STACKS_DIR/mattermost-postgres"
-  echo "To get AKS or VNet outputs: ./addons/scripts/get-terraform-outputs.sh mattermost-aks"
+  echo "To get AKS or VNet outputs: ./addons/scripts/resources/get-terraform-outputs.sh mattermost-aks"
 fi

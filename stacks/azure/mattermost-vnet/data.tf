@@ -32,7 +32,7 @@ output "aks_subnet_id" {
 data "azurerm_virtual_network" "vnet" {
   depends_on = [module.mattermost_vnet]
 
-  name                = local.vnet_name
+  name                = module.mattermost_vnet.vnet_name
   resource_group_name = var.resource_group_name
 }
 

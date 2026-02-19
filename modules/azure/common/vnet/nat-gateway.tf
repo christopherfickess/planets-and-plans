@@ -30,15 +30,5 @@ resource "azurerm_nat_gateway_public_ip_association" "nat_gateway_association" {
   public_ip_address_id = azurerm_public_ip.nat_public_ip.id
 }
 
-
-resource "azurerm_subnet_nat_gateway_association" "subnet_nat" {
-  depends_on = [
-    azurerm_nat_gateway_public_ip_association.nat_gateway_association,
-    module.avm-res-network-virtualnetwork
-  ]
-
-  for_each = data.azurerm_subnet.subnets
-
-  subnet_id      = each.value.id
-  nat_gateway_id = azurerm_nat_gateway.nat_gateway.id
-}
+# NAT gateway is attached to subnets via the Azure AVM module's nat_gateway input
+# (see local.subnet_configs_for_azure in vnet.tf). No separate association needed.

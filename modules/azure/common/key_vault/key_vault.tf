@@ -7,7 +7,7 @@ resource "azurerm_key_vault" "mattermost_key_vault" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 90
-  purge_protection_enabled   = false
+  purge_protection_enabled   = var.purge_protection_enabled
   enable_rbac_authorization  = false
 
   tags = merge(var.tags, { Name = "${var.unique_name_prefix}-${var.keyvault_name}" })

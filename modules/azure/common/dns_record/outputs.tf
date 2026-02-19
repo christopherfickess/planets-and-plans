@@ -28,3 +28,9 @@ output "dns_link_resource_group_name" {
   value       = azurerm_private_dns_zone_virtual_network_link.dns_link.resource_group_name
   description = "The resource group of the DNS link."
 }
+
+# Public Mattermost DNS (when create_public_mattermost_cname = true)
+output "mattermost_public_zone_nameservers" {
+  value       = var.create_public_mattermost_cname ? azurerm_dns_zone.mattermost_public[0].name_servers : null
+  description = "Nameservers for the public zone. Add as NS records at parent zone to delegate."
+}

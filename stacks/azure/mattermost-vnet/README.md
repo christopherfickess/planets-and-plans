@@ -54,7 +54,7 @@ How to deploy the Terraform stacks for the VNet components.
 ```bash
 pushd stacks/azure/mattermost-vnet/
     TF_VARS="dev-chris"
-    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform init --upgrade -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
     
@@ -62,3 +62,98 @@ pushd stacks/azure/mattermost-vnet/
     terraform apply plan-destroy.tfplan
 popd
 ```
+
+---
+
+## 3️⃣ Load Balancer Outputs (NLB/ALB)
+
+The VNet stack deploys the load balancer (ALB by default) outside the AKS cluster for decoupled lifecycle. Use these outputs for Kubernetes annotations or AGIC brownfield integration.
+
+### Get values via Terraform output
+
+```bash
+cd stacks/azure/mattermost-vnet/
+terraform output nlb_pip_name
+terraform output load_balancer_resource_group
+terraform output load_balancer_fqdn
+```
+
+### Get `azure-pip-name` via Azure CLI (NLB)
+
+When using NLB (`lb_type = "nlb"`), get the Public IP name for the `service.beta.kubernetes.io/azure-pip-name` annotation:
+
+```bash
+# List Public IPs in the resource group (filter by load balancer)
+az network public-ip list \
+  --resource-group <RESOURCE_GROUP_NAME> \
+  --query "[?contains(name, 'nlb') || contains(name, 'alb')].{name:name, ip:ipAddress, fqdn:fqdn}" \
+  -o table
+
+# Get the specific PIP name for NLB (use the name from above, e.g. mattermost-dev-chris-nlb-pip)
+az network public-ip list \
+  --resource-group <RESOURCE_GROUP_NAME> \
+  --query "[?contains(name, 'nlb')].name" \
+  -o tsv
+```
+
+**Example** (replace `chrisfickess-tfstate-azk` with your resource group):
+
+```bash
+RG="chrisfickess-tfstate-azk"
+az network public-ip list --resource-group $RG --query "[?contains(name, 'nlb')].name" -o tsv
+# Output: mattermost-dev-chris-nlb-pip
+```
+
+### Kubernetes LoadBalancer service annotation (NLB)
+
+Use the PIP name with your LoadBalancer or Ingress service:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mattermost-ingress
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
+    service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-nlb-pip"
+spec:
+  type: LoadBalancer
+  # ...
+```
+
+Replace `chrisfickess-tfstate-azk` and `mattermost-dev-chris-nlb-pip` with values from `terraform output load_balancer_resource_group` and `terraform output nlb_pip_name` (or the az CLI commands above).
+
+### Mattermost LoadBalancer - CNAME (like AWS ELB)
+
+A dedicated PIP is created for the Mattermost Kubernetes LoadBalancer service with a stable FQDN for CNAME (no IP in DNS):
+
+```bash
+terraform output mattermost_lb_pip_name   # e.g. mattermost-dev-chris-mattermost-pip
+terraform output mattermost_lb_fqdn      # e.g. mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
+```
+
+Use `mattermost_lb_pip_name` in the service annotation. Terraform can create the CNAME record for you — choose one:
+
+### Option A: Azure DNS (Terraform creates zone + CNAME)
+
+Set `deploy_mattermost_public_dns = true`. The dns_record module creates public zone `dev.cloud.mattermost.com` and CNAME `dev-chris` → LB FQDN. Delegate the subdomain to Azure by adding NS records at the parent zone (`cloud.mattermost.com`):
+
+```hcl
+deploy_mattermost_public_dns = true
+mattermost_dns_zone_name     = "dev.cloud.mattermost.com"
+mattermost_dns_record_name   = "dev-chris"
+```
+
+After apply:
+```bash
+terraform output mattermost_public_dns_nameservers
+# Add these as NS records for dev.cloud.mattermost.com at cloud.mattermost.com
+```
+
+### Option B: Manual CNAME (Cloudflare, Azure, or other)
+
+Create the CNAME record manually in your DNS provider:
+
+| Zone | Type | Name | Target |
+|------|------|------|--------|
+| dev.cloud.mattermost.com | CNAME | dev-chris | `terraform output mattermost_lb_fqdn` |

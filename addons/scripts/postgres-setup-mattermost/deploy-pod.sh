@@ -8,8 +8,8 @@ echo ""
 read -p "Namespace (default: chrisfickess): " NAMESPACE
 export APP_NAME="${NAMESPACE:-chrisfickess}"
 
-read -p "Azure Key Vault name for database credentials (default: mattermost-dev-chris-pgs): " VAULT_NAME
-VAULT_NAME=${VAULT_NAME:-"mattermost-dev-chris-pgs"}
+read -p "Azure Key Vault name for database credentials (default: mattermost-dev-chris-kv): " VAULT_NAME
+VAULT_NAME=${VAULT_NAME:-"mattermost-dev-chris-kv"}
 
 if [ $(az keyvault secret show --vault-name "$VAULT_NAME" --name postgresadmin --query value -o tsv) ]; then
     echo "Retrieved database admin username from Key Vault."

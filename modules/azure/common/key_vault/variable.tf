@@ -52,3 +52,9 @@ variable "keyvault_name" {
   type        = string
   default    = "kv" 
 }
+
+variable "purge_protection_enabled" {
+  description = "Enable purge protection. Once enabled, cannot be disabled. Set to true to match existing Key Vaults that have it enabled."
+  type        = bool
+  default     = true
+}

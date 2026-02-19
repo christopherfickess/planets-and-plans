@@ -56,6 +56,20 @@ export VNET_NAME=""                    # e.g. mattermost-dev-chris-vnet
 export PRIVATE_DNS_ZONE_NAME=""        # e.g. privatelink.file.core.windows.net
 
 # -----------------------------------------------------------------------------
+# Load Balancer - For envoy-gateway service annotations (envoy-gateway/patches.yaml)
+# azure-load-balancer-resource-group: use RESOURCE_GROUP_NAME
+# azure-pip-name: use LB_PIP_NAME. LB_FQDN = CNAME target (DNS instead of IP)
+# -----------------------------------------------------------------------------
+export LB_PIP_NAME=""                  # e.g. mattermost-dev-chris-nlb-pip
+export LB_FQDN=""                      # e.g. mattermost-dev-chris-nlb.eastus2.cloudapp.azure.com
+
+# -----------------------------------------------------------------------------
 # Tenant (for ClusterSecretStore - External Secrets)
 # -----------------------------------------------------------------------------
 export AZURE_TENANT_ID=""              # From: az account show --query tenantId -o tsv
+
+# -----------------------------------------------------------------------------
+# External Secrets - Workload identity (azure.workload.identity/client-id)
+# Used in addons/clusters/azure/<cluster>/apps/external-secrets/patches.yaml
+# -----------------------------------------------------------------------------
+export EXTERNAL_SECRETS_IDENTITY_CLIENT_ID=""   # From: get-resource-names.sh

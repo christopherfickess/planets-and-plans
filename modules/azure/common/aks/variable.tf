@@ -302,5 +302,20 @@ variable "create_role_assignments_for_application_gateway" {
 }
 
 # -------------------------------
+# LoadBalancer (azure-pip-name)
+# -------------------------------
+variable "grant_load_balancer_network_access" {
+  description = "Grant AKS cluster identity Network Contributor on load_balancer_resource_group. Required when using azure-pip-name annotation (PIP in that RG)."
+  type        = bool
+  default     = true
+}
+
+variable "load_balancer_resource_group" {
+  description = "Resource group containing the public IP (from mattermost-vnet). AKS cluster identity needs Network Contributor here for azure-pip-name."
+  type        = string
+  default     = ""
+}
+
+# -------------------------------
 # End of Variables
 # -------------------------------
