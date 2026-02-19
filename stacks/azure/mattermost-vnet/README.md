@@ -62,3 +62,63 @@ pushd stacks/azure/mattermost-vnet/
     terraform apply plan-destroy.tfplan
 popd
 ```
+
+---
+
+## 3️⃣ Load Balancer Outputs (NLB/ALB)
+
+The VNet stack deploys the load balancer (ALB by default) outside the AKS cluster for decoupled lifecycle. Use these outputs for Kubernetes annotations or AGIC brownfield integration.
+
+### Get values via Terraform output
+
+```bash
+cd stacks/azure/mattermost-vnet/
+terraform output nlb_pip_name
+terraform output load_balancer_resource_group
+terraform output load_balancer_fqdn
+```
+
+### Get `azure-pip-name` via Azure CLI (NLB)
+
+When using NLB (`lb_type = "nlb"`), get the Public IP name for the `service.beta.kubernetes.io/azure-pip-name` annotation:
+
+```bash
+# List Public IPs in the resource group (filter by load balancer)
+az network public-ip list \
+  --resource-group <RESOURCE_GROUP_NAME> \
+  --query "[?contains(name, 'nlb') || contains(name, 'alb')].{name:name, ip:ipAddress, fqdn:fqdn}" \
+  -o table
+
+# Get the specific PIP name for NLB (use the name from above, e.g. mattermost-dev-chris-nlb-pip)
+az network public-ip list \
+  --resource-group <RESOURCE_GROUP_NAME> \
+  --query "[?contains(name, 'nlb')].name" \
+  -o tsv
+```
+
+**Example** (replace `chrisfickess-tfstate-azk` with your resource group):
+
+```bash
+RG="chrisfickess-tfstate-azk"
+az network public-ip list --resource-group $RG --query "[?contains(name, 'nlb')].name" -o tsv
+# Output: mattermost-dev-chris-nlb-pip
+```
+
+### Kubernetes LoadBalancer service annotation (NLB)
+
+Use the PIP name with your LoadBalancer or Ingress service:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mattermost-ingress
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
+    service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-nlb-pip"
+spec:
+  type: LoadBalancer
+  # ...
+```
+
+Replace `chrisfickess-tfstate-azk` and `mattermost-dev-chris-nlb-pip` with values from `terraform output load_balancer_resource_group` and `terraform output nlb_pip_name` (or the az CLI commands above).

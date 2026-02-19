@@ -95,6 +95,33 @@ variable "jumpbox_subnet_addresses" {
   default     = ["172.16.13.96/28"]
 }
 
+variable "appgw_subnet_name" {
+  description = "The name of the Application Gateway subnet (dedicated, no other resources)."
+  type        = string
+  default     = "appgw-subnet"
+}
+
+variable "appgw_subnet_addresses" {
+  description = "The address prefixes for the Application Gateway subnet (min /26)."
+  type        = list(string)
+  default     = ["172.16.13.128/28"]
+}
+
+# -------------------------------
+# Load Balancer Variables
+# -------------------------------
+variable "deploy_load_balancer" {
+  description = "Whether to deploy the load balancer (NLB or ALB) in the VNet stack."
+  type        = bool
+  default     = true
+}
+
+variable "lb_type" {
+  description = "Load balancer type: 'nlb' (Standard LB, L4) or 'alb' (Application Gateway, L7)."
+  type        = string
+  default     = "alb"
+}
+
 # -------------------------------
 # DNS Variables
 # -------------------------------

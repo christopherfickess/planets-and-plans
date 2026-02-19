@@ -2,23 +2,6 @@ data "azurerm_resource_group" "mattermost_location" {
   name = var.resource_group_name
 }
 
-# data "azurerm_subnet" "aks" {
-#   name                 = "aks-subnet"
-#   virtual_network_name = var.vnet_name
-#   resource_group_name  = var.resource_group_name
-# }
-
-# data "azurerm_subnet" "pods" {
-#   name                 = "pods-subnet"
-#   virtual_network_name = var.vnet_name
-#   resource_group_name  = var.resource_group_name
-# }
-
-# data "azurerm_virtual_network" "vnet" {
-#   name                = var.vnet_name
-#   resource_group_name = var.resource_group_name
-# }
-
 data "azurerm_subnet" "subnets" {
   depends_on = [module.avm-res-network-virtualnetwork]
 
@@ -29,5 +12,5 @@ data "azurerm_subnet" "subnets" {
 
   name                 = each.value.name
   resource_group_name  = var.resource_group_name
-  virtual_network_name = var.vnet_name
+  virtual_network_name = "${var.unique_name_prefix}-${var.vnet_name}"
 }

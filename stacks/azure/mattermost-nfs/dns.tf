@@ -1,5 +1,9 @@
 
 
+data "azurerm_virtual_network" "vnet" {
+  name                = local.vnet_name
+  resource_group_name = var.resource_group_name
+}
 
 module "dns_record" {
   depends_on = [module.nfs]
@@ -13,7 +17,7 @@ module "dns_record" {
   tags                = local.tags
   unique_name_prefix  = var.unique_name_prefix
   dns_zone_name       = var.private_dns_zone_name
-  vnet_name           = local.vnet_name
+  vnet_name           = data.azurerm_virtual_network.vnet.name
 }
 
 # Create DNS A record pointing to the private endpoint IP

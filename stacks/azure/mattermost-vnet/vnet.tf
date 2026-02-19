@@ -6,7 +6,6 @@ module "mattermost_vnet" {
 
   unique_name_prefix = local.base_identifier
 
-  vnet_name           = local.vnet_name
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = var.location
 
@@ -68,6 +67,12 @@ module "mattermost_vnet" {
           }
         ]
       }
+    }
+    "appgw-subnet" = {
+      name                = var.appgw_subnet_name
+      address_prefixes    = var.appgw_subnet_addresses
+      nat_gateway_enabled = false
+      nat_gateway_id      = ""
     }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {

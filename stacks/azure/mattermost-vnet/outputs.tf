@@ -32,3 +32,31 @@ output "view_dns_record" {
   az network private-dns zone-virtual-network-link show --name ${module.dns_record.dns_link_name} --zone-name ${var.mattermost_domain} --resource-group ${var.resource_group_name}
   EOT
 }
+
+# -----------------------------------------------------------------------------
+# Load Balancer Outputs - For Kubernetes annotations and AGIC
+# -----------------------------------------------------------------------------
+output "load_balancer_type" {
+  value       = var.deploy_load_balancer ? var.lb_type : null
+  description = "The load balancer type (nlb or alb)."
+}
+
+output "load_balancer_fqdn" {
+  value       = var.deploy_load_balancer ? module.load_balancer[0].fqdn : null
+  description = "Stable FQDN for CNAME. Create CNAME from your domain to this hostname."
+}
+
+output "load_balancer_resource_group" {
+  value       = var.deploy_load_balancer ? module.load_balancer[0].resource_group_name : null
+  description = "Resource group for azure-load-balancer-resource-group annotation."
+}
+
+output "nlb_pip_name" {
+  value       = var.deploy_load_balancer && var.lb_type == "nlb" ? module.load_balancer[0].nlb_pip_name : null
+  description = "Public IP name for service.beta.kubernetes.io/azure-pip-name annotation (NLB only)."
+}
+
+output "alb_id" {
+  value       = var.deploy_load_balancer && var.lb_type == "alb" ? module.load_balancer[0].alb_id : null
+  description = "Application Gateway ID for AGIC brownfield integration (ALB only)."
+}

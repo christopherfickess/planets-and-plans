@@ -1,6 +1,8 @@
 
 
 module "dns_record" {
+  depends_on = [module.mattermost_vnet]
+
   source = "../../../modules/azure/common/dns_record"
 
   email_contact       = var.email_contact
@@ -11,7 +13,7 @@ module "dns_record" {
   unique_name_prefix  = var.unique_name_prefix
   dns_zone_name       = var.mattermost_domain
 
-  vnet_name = local.vnet_name
+  vnet_name = module.mattermost_vnet.vnet_name
 
   # private_dns_zone_vnet_link_name = var.private_dns_zone_vnet_link_name
 }

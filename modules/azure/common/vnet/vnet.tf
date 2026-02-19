@@ -7,7 +7,7 @@ module "avm-res-network-virtualnetwork" {
 
   address_space = var.address_space
   location      = var.location
-  name          = var.vnet_name
+  name          = "${var.unique_name_prefix}-${var.vnet_name}"
   parent_id     = data.azurerm_resource_group.mattermost_location.id
 
   # Nat Gateway and Subnet Configuration

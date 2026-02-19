@@ -53,4 +53,4 @@ oidc_issuer_enabled       = true
 bad_naming_convention = "chrisfickess-azk-dev" # Will be removed
 firewall_rules        = []
 
-enable_application_gateway_ingress = true
+# Load balancer is deployed in mattermost-vnet stack (not with AKS)

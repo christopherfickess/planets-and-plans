@@ -59,6 +59,6 @@ output "alb_id" {
 }
 
 output "alb_backend_address_pool_name" {
-  value       = lower(var.lb_type) == "alb" ? azurerm_application_gateway.alb[0].backend_address_pool[0].name : null
+  value       = lower(var.lb_type) == "alb" ? one([for p in azurerm_application_gateway.alb[0].backend_address_pool : p.name]) : null
   description = "Backend address pool name for AKS AGIC integration."
 }
