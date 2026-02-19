@@ -9,7 +9,6 @@ kind: Kustomization
 
 resources:
   - ../../../../../base-apps/external-secrets
-  - serviceaccount-azure.yaml
   - clustersecretstore.yaml
 
 patches:

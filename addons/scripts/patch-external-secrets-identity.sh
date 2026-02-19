@@ -49,25 +49,11 @@ if [ ! -f "$PATCHES_FILE" ]; then
   exit 1
 fi
 
-# Tenant ID (for identity-secret and patches)
-TENANT_ID="${AZURE_TENANT_ID:-}"
-if [ -z "$TENANT_ID" ]; then
-  TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null || true)
-fi
-if [ -z "$TENANT_ID" ]; then
-  echo "WARNING: AZURE_TENANT_ID not set, skipping identity-secret update" >&2
-fi
-
-# Update serviceaccount-azure.yaml (our SA - base cannot overwrite)
-SA_FILE="$EXTERNAL_SECRETS_DIR/serviceaccount-azure.yaml"
-if [ -f "$SA_FILE" ]; then
-  if sed -i.bak \
-    -e "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" \
-    -e "s|azure.workload.identity/tenant-id:.*|azure.workload.identity/tenant-id: \"${TENANT_ID:-}\"|" \
-    "$SA_FILE" 2>/dev/null; then
-    rm -f "${SA_FILE}.bak"
-    echo "Updated $SA_FILE with client-id"
-  else
-    echo "WARNING: Failed to patch $SA_FILE" >&2
-  fi
+# Update patches.yaml (HelmRelease serviceAccount annotations)
+if sed -i.bak "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" "$PATCHES_FILE" 2>/dev/null; then
+  rm -f "${PATCHES_FILE}.bak"
+  echo "Updated $PATCHES_FILE with client-id: $EXTERNAL_SECRETS_IDENTITY_CLIENT_ID"
+else
+  echo "ERROR: Failed to patch $PATCHES_FILE" >&2
+  exit 1
 fi
