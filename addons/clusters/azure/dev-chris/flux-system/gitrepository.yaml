@@ -26,7 +26,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: feature/mattermost-debugging
+    branch: feature/azure-redeploy
   secretRef:
     name: planets-and-plans
   url: ssh://git@ssh.github.com:443/christopherfickess/planets-and-plans.git

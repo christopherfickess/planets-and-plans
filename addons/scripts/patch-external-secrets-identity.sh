@@ -49,11 +49,13 @@ if [ ! -f "$PATCHES_FILE" ]; then
   exit 1
 fi
 
-# Update patches.yaml (HelmRelease serviceAccount annotations)
-if sed -i.bak "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" "$PATCHES_FILE" 2>/dev/null; then
-  rm -f "${PATCHES_FILE}.bak"
-  echo "Updated $PATCHES_FILE with client-id: $EXTERNAL_SECRETS_IDENTITY_CLIENT_ID"
-else
-  echo "ERROR: Failed to patch $PATCHES_FILE" >&2
-  exit 1
+# Update external-secrets-operator patches.yaml (HelmRelease serviceAccount annotations)
+OPERATOR_PATCHES="$EXTERNAL_SECRETS_DIR/../external-secrets-operator/patches.yaml"
+if [ -f "$OPERATOR_PATCHES" ]; then
+  if sed -i.bak "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" "$OPERATOR_PATCHES" 2>/dev/null; then
+    rm -f "${OPERATOR_PATCHES}.bak"
+    echo "Updated $OPERATOR_PATCHES with client-id: $EXTERNAL_SECRETS_IDENTITY_CLIENT_ID"
+  else
+    echo "WARNING: Failed to patch $OPERATOR_PATCHES" >&2
+  fi
 fi

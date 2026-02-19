@@ -41,6 +41,26 @@ az identity show --name mattermost-dev-chris-external-secrets-identity --resourc
 
 The external-secrets Flux Kustomization (from mattermost-byoc-infra) applies the base Helm chart with a different client ID (`99a1a097...`), which overwrites our patches and causes `AADSTS700016: Application not found`. With it removed, **planets-and-plans** is the only source for external-secrets (base + patches), so our workload identity client ID stays applied.
 
+## Prerequisites: Azure Workload Identity Webhook
+
+The webhook injects `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_FEDERATED_TOKEN_FILE` into pods. **Install it if missing:**
+
+```bash
+# Check if installed
+kubectl get pods -n azure-workload-identity-system 2>/dev/null || echo "Not installed"
+
+# Install (one-time)
+AZURE_TENANT_ID=$(az account show --query tenantId -o tsv)
+helm repo add azure-workload-identity https://azure.github.io/azure-workload-identity/charts
+helm repo update
+helm install workload-identity-webhook azure-workload-identity/workload-identity-webhook \
+  --namespace azure-workload-identity-system \
+  --create-namespace \
+  --set azureTenantID="${AZURE_TENANT_ID}"
+```
+
+**Test pod must have** `azure.workload.identity/use: "true"` label and use the `external-secrets` service account.
+
 ## Problem
 External Secrets could not authenticate to Azure Key Vault. Errors showed `AADSTS700016: Application not found`.
 

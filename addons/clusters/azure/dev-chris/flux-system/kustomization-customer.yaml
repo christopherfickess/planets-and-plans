@@ -1,18 +1,18 @@
 # addons/clusters/azure/dev-chris/flux-system/kustomization-customer.yaml
 
-# 1. external-secrets deploys operator first (CRDs) - required before ClusterSecretStore
-# 2. planets-and-plans depends on it, applies ClusterSecretStore + patches; runs every 2m to re-apply patches
+# Operator from planets-and-plans (our patches) - no byoc-infra overwrite. Terraform federated cred for external-secrets.
+# planets-and-plans depends on it for CRD timing.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: planets-and-plans
   namespace: flux-system
 spec:
-  interval: 2m0s
+  interval: 5m0s
   path: ./addons/clusters/azure/dev-chris
   prune: true
   dependsOn:
-    - name: external-secrets
+    - name: external-secrets-operator
       namespace: flux-system
   sourceRef:
     kind: GitRepository
@@ -21,11 +21,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: external-secrets
+  name: external-secrets-operator
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./addons/apps/external-secrets
+  path: ./addons/clusters/azure/dev-chris/apps/external-secrets-operator
   prune: true
   healthChecks:
     - apiVersion: apps/v1
@@ -38,6 +38,6 @@ spec:
       namespace: external-secrets
   sourceRef:
     kind: GitRepository
-    name: mattermost-byoc-infra
+    name: planets-and-plans
 ---
 

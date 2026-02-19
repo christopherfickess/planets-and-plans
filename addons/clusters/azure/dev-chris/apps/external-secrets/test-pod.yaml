@@ -3,6 +3,8 @@ kind: Pod
 metadata:
   name: test-es
   namespace: external-secrets
+  labels:
+    azure.workload.identity/use: "true"
 spec:
   serviceAccountName: external-secrets
   containers:
