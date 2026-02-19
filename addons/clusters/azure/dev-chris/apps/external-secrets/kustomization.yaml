@@ -9,7 +9,7 @@ kind: Kustomization
 
 resources:
   - ../../../../../base-apps/external-secrets
-  - identity-secret.yaml
+  - serviceaccount-azure.yaml
   - clustersecretstore.yaml
 
 patches:

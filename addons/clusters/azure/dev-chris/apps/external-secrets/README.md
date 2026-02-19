@@ -37,9 +37,9 @@ az identity show --name mattermost-dev-chris-external-secrets-identity --resourc
 
 ---
 
-## Why authSecretRef?
+## Why a separate ServiceAccount?
 
-The base (mattermost-byoc-infra) Helm chart uses a different client ID (`99a1a097...`), which causes `AADSTS700016: Application not found`. Even with patches, the base can overwrite during Flux reconciliation. **authSecretRef** in the ClusterSecretStore passes your UAMI client ID directly, bypassing the service account annotation entirely.
+The base (mattermost-byoc-infra) Helm chart uses a different client ID (`99a1a097...`), which causes `AADSTS700016: Application not found`. The base overwrites the default `external-secrets` service account during Flux reconciliation. We use **serviceAccount.create: false** and a separate **external-secrets-azure** ServiceAccount that we control—the base cannot overwrite it.
 
 ## Problem
 External Secrets could not authenticate to Azure Key Vault. Errors showed `AADSTS700016: Application not found`.

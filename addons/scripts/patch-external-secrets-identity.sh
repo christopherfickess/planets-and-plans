@@ -42,8 +42,6 @@ fi
 CLUSTER_PATH="${1:-addons/clusters/azure/dev-chris}"
 EXTERNAL_SECRETS_DIR="$REPO_ROOT/$CLUSTER_PATH/apps/external-secrets"
 PATCHES_FILE="$EXTERNAL_SECRETS_DIR/patches.yaml"
-IDENTITY_SECRET_FILE="$EXTERNAL_SECRETS_DIR/identity-secret.yaml"
-
 if [ ! -f "$PATCHES_FILE" ]; then
   echo "ERROR: Patches file not found: $PATCHES_FILE" >&2
   echo "       Usage: $0 [cluster-path]" >&2
@@ -60,24 +58,16 @@ if [ -z "$TENANT_ID" ]; then
   echo "WARNING: AZURE_TENANT_ID not set, skipping identity-secret update" >&2
 fi
 
-# 1. Update patches.yaml (service account annotation - backup if Helm patch wins)
-if sed -i.bak "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" "$PATCHES_FILE" 2>/dev/null; then
-  rm -f "${PATCHES_FILE}.bak"
-  echo "Updated $PATCHES_FILE with client-id: $EXTERNAL_SECRETS_IDENTITY_CLIENT_ID"
-else
-  echo "ERROR: Failed to patch $PATCHES_FILE" >&2
-  exit 1
-fi
-
-# 2. Update identity-secret.yaml (authSecretRef - primary, bypasses base Helm chart)
-if [ -f "$IDENTITY_SECRET_FILE" ] && [ -n "$TENANT_ID" ]; then
+# Update serviceaccount-azure.yaml (our SA - base cannot overwrite)
+SA_FILE="$EXTERNAL_SECRETS_DIR/serviceaccount-azure.yaml"
+if [ -f "$SA_FILE" ]; then
   if sed -i.bak \
-    -e "s|clientId:.*|clientId: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" \
-    -e "s|tenantId:.*|tenantId: \"$TENANT_ID\"|" \
-    "$IDENTITY_SECRET_FILE" 2>/dev/null; then
-    rm -f "${IDENTITY_SECRET_FILE}.bak"
-    echo "Updated $IDENTITY_SECRET_FILE with client-id and tenant-id"
+    -e "s|azure.workload.identity/client-id:.*|azure.workload.identity/client-id: \"$EXTERNAL_SECRETS_IDENTITY_CLIENT_ID\"|" \
+    -e "s|azure.workload.identity/tenant-id:.*|azure.workload.identity/tenant-id: \"${TENANT_ID:-}\"|" \
+    "$SA_FILE" 2>/dev/null; then
+    rm -f "${SA_FILE}.bak"
+    echo "Updated $SA_FILE with client-id"
   else
-    echo "WARNING: Failed to patch $IDENTITY_SECRET_FILE" >&2
+    echo "WARNING: Failed to patch $SA_FILE" >&2
   fi
 fi
