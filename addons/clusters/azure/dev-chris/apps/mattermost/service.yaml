@@ -5,8 +5,8 @@ metadata:
   namespace: mattermost
   annotations:
     # Optional: use if you have a static public IP pre-allocated
-    # service.beta.kubernetes.io/azure-load-balancer-resource-group: "<resource-group-with-pip>"
-    # service.beta.kubernetes.io/azure-pip-name: "<public-ip-name>"
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
+    service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-alb-pip"
 spec:
   type: LoadBalancer
   selector:

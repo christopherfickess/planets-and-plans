@@ -76,5 +76,14 @@ variable "jumpbox_admin_username" {
 
 
 # -------------------------------
+# Azure AD Group Variables
+# -------------------------------
+variable "azure_primary_group_display_name" {
+  description = "Display name of the Azure AD group to grant access to resources (e.g. Azure PDE)."
+  type        = string
+  default     = "Azure PDE"
+}
+
+# -------------------------------
 # End of Variables
 # -------------------------------

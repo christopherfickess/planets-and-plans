@@ -23,7 +23,10 @@ Or run the master script with bash explicitly: `bash addons/scripts/get-all-addo
 
 | Script | Purpose |
 |--------|---------|
-| **get-resource-names.sh** | Discover resource names when you only know the resource group or partial names (e.g. "mattermost") |
+| **get-resource-names.sh** | Discover resource names (incl. external-secrets workload identity client ID) |
+| **patch-external-secrets-identity.sh** | Update external-secrets patches.yaml with client ID from env.local.sh |
+| **patch-mattermost-lb.sh** | Update mattermost service.yaml with LB annotations (current LB setup) |
+| **patch-envoy-gateway-lb.sh** | Update envoy-gateway patches.yaml with LB annotations (when using Envoy Gateway) |
 | **get-keyvault-secrets.sh** | List and verify Key Vault secrets used by External Secrets and Mattermost |
 | **get-nfs-storage-values.sh** | Get NFS storage account, share name, and mount path for `pvc.yaml` |
 | **get-aks-credentials.sh** | Merge AKS kubeconfig so you can run `kubectl` |

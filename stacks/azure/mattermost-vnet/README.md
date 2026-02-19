@@ -54,7 +54,7 @@ How to deploy the Terraform stacks for the VNet components.
 ```bash
 pushd stacks/azure/mattermost-vnet/
     TF_VARS="dev-chris"
-    terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
+    terraform init --upgrade -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"
     terraform apply plan.tfplan
     

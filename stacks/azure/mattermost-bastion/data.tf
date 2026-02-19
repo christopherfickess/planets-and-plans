@@ -35,3 +35,7 @@ data "azurerm_subnet" "jumpbox" {
   resource_group_name  = data.azurerm_resource_group.mattermost_location.name
   virtual_network_name = data.azurerm_virtual_network.vnet.name
 }
+
+data "azuread_group" "azure_pde" {
+  display_name = var.azure_primary_group_display_name
+}

@@ -10,7 +10,19 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Always resolve from script location - never use SCRIPT_DIR/DOCS_DIR from environment
+_script="${BASH_SOURCE[0]}"
+if [[ "$_script" != */* ]]; then
+  echo "ERROR: Run with a path, e.g.: ./addons/scripts/get-all-addon-values.sh" >&2
+  exit 1
+fi
+if command -v readlink >/dev/null 2>&1 && readlink -f "$_script" >/dev/null 2>&1; then
+  _script_abs="$(readlink -f "$_script")"
+else
+  [[ "$_script" != /* ]] && _script="$(pwd)/$_script"
+  _script_abs="$(cd "$(dirname "$_script")" && pwd)/$(basename "$_script")"
+fi
+SCRIPT_DIR="$(dirname "$_script_abs")"
 DOCS_DIR="$(dirname "$SCRIPT_DIR")/docs"
 
 echo "=============================================="
@@ -18,9 +30,9 @@ echo "  Addons Azure Values - Full Discovery"
 echo "=============================================="
 echo ""
 
-# 1. Discover resource names
+# 1. Discover resource names (run with clean path vars - child must resolve its own paths)
 echo ">>> Step 1: Discovering resource names..."
-bash "$SCRIPT_DIR/get-resource-names.sh"
+env -u SCRIPT_DIR -u DOCS_DIR -u ENV_LOCAL -u REPO_ROOT bash "$SCRIPT_DIR/get-resource-names.sh"
 echo ""
 
 # 2. Load env for subsequent steps

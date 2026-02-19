@@ -15,7 +15,6 @@ module "load_balancer" {
   unique_name_prefix  = local.base_identifier
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = var.location
-  vnet_name           = module.mattermost_vnet.vnet_name
   subnet_name         = var.lb_type == "alb" ? var.appgw_subnet_name : var.aks_subnet_name
   dns_label           = ""
   tags                = local.tags

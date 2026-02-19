@@ -12,7 +12,7 @@ resources:
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
   - apps/mattermost-operator
-  - apps/mattermost
+  # - apps/mattermost
   # - apps/mattermost-ext
   # - apps/prometheus
   # - apps/metrics-server
