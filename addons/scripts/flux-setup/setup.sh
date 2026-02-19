@@ -42,4 +42,4 @@ flux create secret git $BYOC_REPO \
 
 
 BYOC_REPO="dev-chris"
-kubectl apply -f clusters/$BYOC_REPO$/flux-system/.
+kubectl apply -f clusters/azure/$BYOC_REPO/flux-system/.

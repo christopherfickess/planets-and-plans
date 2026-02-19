@@ -1,0 +1,8 @@
+# Mattermost CRD - install before apps/mattermost
+# The base-apps/mattermost-operator from mattermost-byoc-infra may not include the CRD.
+# This ensures installation.mattermost.com/v1beta1 (Mattermost kind) exists before Mattermost resources.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - https://raw.githubusercontent.com/mattermost/mattermost-operator/master/config/crd/bases/installation.mattermost.com_mattermosts.yaml
