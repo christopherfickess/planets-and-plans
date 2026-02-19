@@ -65,11 +65,16 @@ output "alb_id" {
 # Mattermost K8s LoadBalancer - Dedicated PIP with FQDN for CNAME (like AWS ELB)
 # -----------------------------------------------------------------------------
 output "mattermost_lb_pip_name" {
-  value       = var.deploy_load_balancer ? azurerm_public_ip.mattermost_lb[0].name : null
+  value       = var.deploy_load_balancer ? module.load_balancer[0].mattermost_lb_pip_name : null
   description = "Public IP name for service.beta.kubernetes.io/azure-pip-name on Mattermost LoadBalancer service."
 }
 
 output "mattermost_lb_fqdn" {
-  value       = var.deploy_load_balancer ? azurerm_public_ip.mattermost_lb[0].fqdn : null
-  description = "Stable FQDN for CNAME. Point dev-chris.dev.cloud.mattermost.com to this in Cloudflare."
+  value       = var.deploy_load_balancer ? module.load_balancer[0].mattermost_lb_fqdn : null
+  description = "Stable FQDN for CNAME. Create CNAME manually: dev-chris.dev.cloud.mattermost.com -> this."
+}
+
+output "mattermost_public_dns_nameservers" {
+  value       = var.deploy_mattermost_public_dns && var.deploy_load_balancer ? module.dns_record.mattermost_public_zone_nameservers : null
+  description = "Azure DNS nameservers. Add as NS records at parent zone (cloud.mattermost.com) to delegate dev.cloud.mattermost.com."
 }

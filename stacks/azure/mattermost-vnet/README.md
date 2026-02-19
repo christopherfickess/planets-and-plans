@@ -132,20 +132,28 @@ terraform output mattermost_lb_pip_name   # e.g. mattermost-dev-chris-mattermost
 terraform output mattermost_lb_fqdn      # e.g. mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
 ```
 
-Use `mattermost_lb_pip_name` in the service annotation. Point your domain (e.g. dev-chris.dev.cloud.mattermost.com) to `mattermost_lb_fqdn` via CNAME.
+Use `mattermost_lb_pip_name` in the service annotation. Terraform can create the CNAME record for you — choose one:
 
-### Cloudflare CNAME (optional - like AWS Route53)
+### Option A: Azure DNS (Terraform creates zone + CNAME)
 
-To have Terraform create the CNAME record in Cloudflare:
-
-1. Get your zone ID from Cloudflare (Dashboard → dev.cloud.mattermost.com → Overview → Zone ID)
-2. Create a Cloudflare API token with Zone:DNS:Edit
-3. Add to your tfvars or pass at apply:
+Set `deploy_mattermost_public_dns = true`. The dns_record module creates public zone `dev.cloud.mattermost.com` and CNAME `dev-chris` → LB FQDN. Delegate the subdomain to Azure by adding NS records at the parent zone (`cloud.mattermost.com`):
 
 ```hcl
-cloudflare_zone_id     = "<your-zone-id>"
-cloudflare_api_token   = "<token>"   # or set env CLOUDFLARE_API_TOKEN / TF_VAR_cloudflare_api_token
-cloudflare_record_name = "dev-chris" # record name in zone (dev-chris.dev.cloud.mattermost.com)
+deploy_mattermost_public_dns = true
+mattermost_dns_zone_name     = "dev.cloud.mattermost.com"
+mattermost_dns_record_name   = "dev-chris"
 ```
 
-Terraform will create: `dev-chris` (CNAME) → `mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com`
+After apply:
+```bash
+terraform output mattermost_public_dns_nameservers
+# Add these as NS records for dev.cloud.mattermost.com at cloud.mattermost.com
+```
+
+### Option B: Manual CNAME (Cloudflare, Azure, or other)
+
+Create the CNAME record manually in your DNS provider:
+
+| Zone | Type | Name | Target |
+|------|------|------|--------|
+| dev.cloud.mattermost.com | CNAME | dev-chris | `terraform output mattermost_lb_fqdn` |

@@ -141,9 +141,30 @@ variable "deploy_gateway" {
 # DNS / Private Endpoint Variables
 # -------------------------------
 variable "mattermost_domain" {
-  description = "Custom domain for Mattermost deployment."
+  description = "Custom domain for Mattermost deployment (full hostname)."
   type        = string
   default     = "dev-chris.dev.cloud.mattermost.com"
+}
+
+# -------------------------------
+# Mattermost Public DNS (Azure)
+# -------------------------------
+variable "deploy_mattermost_public_dns" {
+  description = "Create Azure public DNS zone + CNAME for Mattermost. Zone must be delegated from parent (cloud.mattermost.com)."
+  type        = bool
+  default     = false
+}
+
+variable "mattermost_dns_zone_name" {
+  description = "DNS zone name for Mattermost (e.g. testing.cloud.mattermost.com). Used when deploy_mattermost_public_dns = true."
+  type        = string
+  default     = "testing.cloud.mattermost.com"
+}
+
+variable "mattermost_dns_record_name" {
+  description = "CNAME record name in the zone (e.g. mattermost for mattermost.testing.cloud.mattermost.com)."
+  type        = string
+  default     = "mattermost"
 }
 
 variable "private_dns_zone_vnet_link_name" {
