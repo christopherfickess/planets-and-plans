@@ -11,9 +11,8 @@ resources:
   - apps/external-secrets
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
-  # mattermost-crd applied by separate Flux Kustomization (mattermost-crd) - must run first
   - apps/mattermost-operator
-  # - apps/mattermost
+  - apps/mattermost
   # - apps/mattermost-ext
   # - apps/prometheus
   # - apps/metrics-server

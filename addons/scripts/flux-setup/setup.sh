@@ -41,5 +41,9 @@ flux create secret git $BYOC_REPO \
   --namespace=flux-system
 
 
+# Install mattermost crd 
+kubectl apply -f https://raw.githubusercontent.com/mattermost/mattermost-helm/refs/heads/master/charts/mattermost-operator/crds/crd-mattermosts.yaml
+
+
 BYOC_REPO="dev-chris"
 kubectl apply -f clusters/azure/$BYOC_REPO/flux-system/.
