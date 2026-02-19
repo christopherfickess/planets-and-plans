@@ -1,5 +1,19 @@
 # addons/clusters/azure/dev-chris/flux-system/kustomization-customer.yaml
 
+# Apply Mattermost CRD first - must be established before Mattermost resources
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mattermost-crd
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./addons/clusters/azure/dev-chris/apps/mattermost-crd
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: planets-and-plans
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -9,6 +23,9 @@ spec:
   interval: 5m0s
   path: ./addons/clusters/azure/dev-chris
   prune: true
+  dependsOn:
+    - name: mattermost-crd
+      namespace: flux-system
   sourceRef:
     kind: GitRepository
     name: planets-and-plans

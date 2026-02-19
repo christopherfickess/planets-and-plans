@@ -11,7 +11,7 @@ resources:
   - apps/external-secrets
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
-  - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost
+  # mattermost-crd applied by separate Flux Kustomization (mattermost-crd) - must run first
   - apps/mattermost-operator
   # - apps/mattermost
   # - apps/mattermost-ext
