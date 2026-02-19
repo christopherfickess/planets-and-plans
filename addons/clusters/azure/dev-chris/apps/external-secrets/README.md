@@ -18,7 +18,7 @@ The name follows the pattern: **`<base_identifier>-external-secrets-identity`**
 ./addons/scripts/get-resource-names.sh
 # Writes EXTERNAL_SECRETS_IDENTITY_CLIENT_ID to addons/docs/env.local.sh
 # Then run:
-./addons/scripts/patch-external-secrets-identity.sh
+./addons/scripts/patches/patch-external-secrets-identity.sh
 ```
 
 **Option 2 – List identities in your resource group:**

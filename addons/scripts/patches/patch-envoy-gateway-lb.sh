@@ -6,8 +6,8 @@
 # annotations to envoy-gateway. Uses LB_PIP_NAME and RESOURCE_GROUP_NAME for
 # azure-pip-name and azure-load-balancer-resource-group. LB_FQDN is for CNAME.
 #
-# Run: source addons/docs/env.local.sh && ./addons/scripts/patch-envoy-gateway-lb.sh
-# Or:  ./addons/scripts/patch-envoy-gateway-lb.sh addons/clusters/azure/dev-chris
+# Run: source addons/docs/env.local.sh && ./addons/scripts/patches/patch-envoy-gateway-lb.sh
+# Or:  ./addons/scripts/patches/patch-envoy-gateway-lb.sh addons/clusters/azure/dev-chris
 # =============================================================================
 
 set -e
@@ -23,7 +23,7 @@ else
   _script_abs="$(cd "$(dirname "$_script_path")" && pwd)/$(basename "$_script_path")"
 fi
 SCRIPT_DIR="$(dirname "$_script_abs")"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Load env
 ENV_LOCAL="$REPO_ROOT/addons/docs/env.local.sh"

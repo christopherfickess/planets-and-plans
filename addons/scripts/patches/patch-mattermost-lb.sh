@@ -6,14 +6,13 @@
 # annotations on the Mattermost LoadBalancer service. Uses LB_PIP_NAME and
 # RESOURCE_GROUP_NAME. LB_FQDN is for CNAME (DNS instead of IP).
 #
-# Run: ./addons/scripts/patch-mattermost-lb.sh   (sources env.local.sh automatically)
-# Or:  ./addons/scripts/patch-mattermost-lb.sh addons/clusters/azure/dev-chris
+# Run: ./addons/scripts/patches/patch-mattermost-lb.sh   (sources env.local.sh automatically)
+# Or:  ./addons/scripts/patches/patch-mattermost-lb.sh addons/clusters/azure/dev-chris
 # Do NOT source this script - run it as ./patch-mattermost-lb.sh
 # =============================================================================
 
 set -e
 
-# Isolate from environment (sourcing can inherit polluted REPO_ROOT/ENV_LOCAL)
 unset REPO_ROOT SCRIPT_DIR ENV_LOCAL CLUSTER_PATH SERVICE_FILE
 
 _script_path="${BASH_SOURCE[0]}"
@@ -25,7 +24,7 @@ else
   _script_abs="$(cd "$(dirname "$_script_path")" && pwd)/$(basename "$_script_path")"
 fi
 SCRIPT_DIR="$(dirname "$_script_abs")"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Load env
 ENV_LOCAL="$REPO_ROOT/addons/docs/env.local.sh"

@@ -5,7 +5,7 @@
 # Runs discovery and outputs a summary of everything needed to configure addons.
 # For new devs: run this first, then fill env.local.sh from the output.
 #
-# Run: ./addons/scripts/get-all-addon-values.sh
+# Run: ./addons/scripts/resources/get-all-addon-values.sh
 # =============================================================================
 
 set -e
@@ -13,7 +13,7 @@ set -e
 # Always resolve from script location - never use SCRIPT_DIR/DOCS_DIR from environment
 _script="${BASH_SOURCE[0]}"
 if [[ "$_script" != */* ]]; then
-  echo "ERROR: Run with a path, e.g.: ./addons/scripts/get-all-addon-values.sh" >&2
+  echo "ERROR: Run with a path, e.g.: ./addons/scripts/resources/get-all-addon-values.sh" >&2
   exit 1
 fi
 if command -v readlink >/dev/null 2>&1 && readlink -f "$_script" >/dev/null 2>&1; then
@@ -23,7 +23,7 @@ else
   _script_abs="$(cd "$(dirname "$_script")" && pwd)/$(basename "$_script")"
 fi
 SCRIPT_DIR="$(dirname "$_script_abs")"
-DOCS_DIR="$(dirname "$SCRIPT_DIR")/docs"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 echo "=============================================="
 echo "  Addons Azure Values - Full Discovery"
@@ -32,12 +32,12 @@ echo ""
 
 # 1. Discover resource names (run with clean path vars - child must resolve its own paths)
 echo ">>> Step 1: Discovering resource names..."
-env -u SCRIPT_DIR -u DOCS_DIR -u ENV_LOCAL -u REPO_ROOT bash "$SCRIPT_DIR/get-resource-names.sh"
+env -u SCRIPT_DIR -u DOCS_DIR -u ENV_LOCAL -u REPO_ROOT bash "$REPO_ROOT/addons/scripts/get-resource-names.sh"
 echo ""
 
 # 2. Load env for subsequent steps
-if [ -f "$DOCS_DIR/env.local.sh" ]; then
-  source "$DOCS_DIR/env.local.sh"
+if [ -f "$REPO_ROOT/addons/docs/env.local.sh" ]; then
+  source "$REPO_ROOT/addons/docs/env.local.sh"
   echo ">>> Loaded env.local.sh"
 else
   echo ">>> No env.local.sh found. Create from template: cp addons/docs/env.sh addons/docs/env.local.sh"

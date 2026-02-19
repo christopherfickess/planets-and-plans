@@ -62,3 +62,16 @@ output "alb_backend_address_pool_name" {
   value       = lower(var.lb_type) == "alb" ? one([for p in azurerm_application_gateway.alb[0].backend_address_pool : p.name]) : null
   description = "Backend address pool name for AKS AGIC integration."
 }
+
+# -----------------------------------------------------------------------------
+# Mattermost K8s LoadBalancer - Dedicated PIP with FQDN for CNAME (like AWS ELB)
+# -----------------------------------------------------------------------------
+output "mattermost_lb_pip_name" {
+  value       = azurerm_public_ip.mattermost_lb.name
+  description = "Public IP name for service.beta.kubernetes.io/azure-pip-name on Mattermost LoadBalancer service."
+}
+
+output "mattermost_lb_fqdn" {
+  value       = azurerm_public_ip.mattermost_lb.fqdn
+  description = "Stable FQDN for CNAME. Point dev-chris.dev.cloud.mattermost.com to this in Cloudflare."
+}

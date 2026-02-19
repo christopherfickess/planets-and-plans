@@ -8,13 +8,13 @@
 # These go into the PersistentVolume nfs.server and nfs.path
 #
 # Prerequisites: RESOURCE_GROUP_NAME, or NFS_STORAGE_ACCOUNT
-# Run: source addons/docs/env.local.sh && ./addons/scripts/get-nfs-storage-values.sh
+# Run: source addons/docs/env.local.sh && ./addons/scripts/resources/get-nfs-storage-values.sh
 # =============================================================================
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCS_DIR="$(dirname "$SCRIPT_DIR")/docs"
+DOCS_DIR="$(dirname "$SCRIPT_DIR")/../docs"
 
 if [ -f "$DOCS_DIR/env.local.sh" ]; then
   source "$DOCS_DIR/env.local.sh"

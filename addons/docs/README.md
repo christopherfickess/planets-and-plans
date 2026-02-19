@@ -82,10 +82,10 @@ az postgres flexible-server list --query "[?contains(name, 'mattermost')].{name:
 | Script | Purpose |
 |--------|---------|
 | `get-resource-names.sh` | Discover resource names when you only know the resource group or partial names |
-| `get-keyvault-secrets.sh` | Retrieve Key Vault secrets (DB credentials, license) for addons |
-| `get-nfs-storage-values.sh` | Get NFS storage account, share name, and mount path for PVC config |
-| `get-aks-credentials.sh` | Get AKS kubeconfig and cluster info |
-| `get-all-addon-values.sh` | Run all scripts and output a summary of values needed for addons |
+| `resources/get-keyvault-secrets.sh` | Retrieve Key Vault secrets (DB credentials, license) for addons |
+| `resources/get-nfs-storage-values.sh` | Get NFS storage account, share name, and mount path for PVC config |
+| `resources/get-aks-credentials.sh` | Get AKS kubeconfig and cluster info |
+| `resources/get-all-addon-values.sh` | Run all scripts and output a summary of values needed for addons |
 
 ---
 
@@ -151,7 +151,7 @@ az network private-endpoint show --name <NFS_PRIVATE_ENDPOINT_NAME> --resource-g
 | `external-secrets/clustersecretstore.yaml` | `vaultUrl` | `https://<KEYVAULT_NAME>.vault.azure.net/` |
 | `mattermost/externalsecret-database.yaml` | Key Vault secrets | `postgres-connection-string`, `postgres-internal-password`, `postgresinternaluser` |
 | `mattermost/externalsecret-license.yaml` | Key Vault secret | `mattermost-license-store` |
-| `mattermost/pvc.yaml` | NFS server, path | Storage account + share from `get-nfs-storage-values.sh` |
+| `mattermost/pvc.yaml` | NFS server, path | Storage account + share from `resources/get-nfs-storage-values.sh` |
 | `mattermost/secret.yaml` | Storage account, key | For Azure Blob filestore (if used instead of NFS) |
 
 ---

@@ -5,8 +5,8 @@
 # Run get-resource-names.sh first, then this script to update the external-secrets
 # patches.yaml with the discovered azure.workload.identity/client-id.
 #
-# Run: source addons/docs/env.local.sh && ./addons/scripts/patch-external-secrets-identity.sh
-# Or:  ./addons/scripts/patch-external-secrets-identity.sh addons/clusters/azure/dev-chris
+# Run: source addons/docs/env.local.sh && ./addons/scripts/patches/patch-external-secrets-identity.sh
+# Or:  ./addons/scripts/patches/patch-external-secrets-identity.sh addons/clusters/azure/dev-chris
 # =============================================================================
 
 set -e
@@ -22,7 +22,7 @@ else
   _script_abs="$(cd "$(dirname "$_script_path")" && pwd)/$(basename "$_script_path")"
 fi
 SCRIPT_DIR="$(dirname "$_script_abs")"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Load env
 ENV_LOCAL="$REPO_ROOT/addons/docs/env.local.sh"

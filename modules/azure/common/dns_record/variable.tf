@@ -66,3 +66,30 @@ variable "registration_enabled" {
   type        = bool
   default     = false
 }
+
+# -------------------------------
+# Optional: Public DNS for Mattermost CNAME
+# -------------------------------
+variable "create_public_mattermost_cname" {
+  description = "Create Azure public DNS zone + CNAME (dev-chris -> LB FQDN). Zone must be delegated from parent."
+  type        = bool
+  default     = false
+}
+
+variable "public_mattermost_zone_name" {
+  description = "Public DNS zone name (e.g. dev.cloud.mattermost.com). Used when create_public_mattermost_cname = true."
+  type        = string
+  default     = "dev.cloud.mattermost.com"
+}
+
+variable "public_mattermost_cname_name" {
+  description = "CNAME record name in the zone (e.g. dev-chris for dev-chris.dev.cloud.mattermost.com)."
+  type        = string
+  default     = "dev-chris"
+}
+
+variable "public_mattermost_cname_target" {
+  description = "CNAME target - the LB FQDN (e.g. mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com)."
+  type        = string
+  default     = ""
+}

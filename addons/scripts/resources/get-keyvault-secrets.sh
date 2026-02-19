@@ -5,7 +5,7 @@
 # Used for: External Secrets (ClusterSecretStore), Mattermost database, license
 #
 # Prerequisites: KEYVAULT_NAME and RESOURCE_GROUP_NAME set (source env.local.sh)
-# Run: source addons/docs/env.local.sh && ./addons/scripts/get-keyvault-secrets.sh
+# Run: source addons/docs/env.local.sh && ./addons/scripts/resources/get-keyvault-secrets.sh
 #
 # Output: Secret values (use carefully - do not log or commit)
 # =============================================================================
@@ -13,7 +13,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCS_DIR="$(dirname "$SCRIPT_DIR")/docs"
+DOCS_DIR="$(dirname "$SCRIPT_DIR")/../docs"
 
 if [ -f "$DOCS_DIR/env.local.sh" ]; then
   source "$DOCS_DIR/env.local.sh"

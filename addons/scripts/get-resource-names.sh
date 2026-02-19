@@ -92,9 +92,11 @@ POSTGRES_SERVER_NAME=$(az postgres flexible-server list --resource-group "$RESOU
 
 VNET_NAME=$(az network vnet list --resource-group "$RESOURCE_GROUP_NAME" --query "[].name" -o tsv 2>/dev/null | head -1)
 
-# Load Balancer - Public IP name and FQDN for envoy-gateway annotations (NLB/ALB in mattermost-vnet)
+# Load Balancer - Public IP name and FQDN for Mattermost/envoy-gateway annotations (mattermost-vnet)
+# Prefer Mattermost K8s LB PIP (mattermost-*-mattermost-pip), then nlb, then alb
 # Annotations: azure-load-balancer-resource-group, azure-pip-name. FQDN for CNAME (DNS instead of IP)
-LB_PIP_NAME=$(az network public-ip list --resource-group "$RESOURCE_GROUP_NAME" --query "[?contains(name, 'nlb') || contains(name, 'alb')].name" -o tsv 2>/dev/null | head -1 || true)
+LB_PIP_NAME=$(az network public-ip list --resource-group "$RESOURCE_GROUP_NAME" --query "[?contains(name, 'mattermost-pip')].name" -o tsv 2>/dev/null | head -1 || true)
+[ -z "$LB_PIP_NAME" ] && LB_PIP_NAME=$(az network public-ip list --resource-group "$RESOURCE_GROUP_NAME" --query "[?contains(name, 'nlb') || contains(name, 'alb')].name" -o tsv 2>/dev/null | head -1 || true)
 LB_FQDN=""
 if [ -n "$LB_PIP_NAME" ]; then
   LB_FQDN=$(az network public-ip show --name "$LB_PIP_NAME" --resource-group "$RESOURCE_GROUP_NAME" --query dnsSettings.fqdn -o tsv 2>/dev/null || true)

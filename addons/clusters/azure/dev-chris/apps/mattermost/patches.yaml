@@ -16,7 +16,7 @@ spec:
   ingress:
     enabled: true
     # httproute_enabled: false
-    # Custom domain - CNAME in Cloudflare: dev-chris -> mattermost_lb_fqdn (Terraform)
+    # CNAME setup: dev-chris.dev.cloud.mattermost.com -> mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
     host: dev-chris.dev.cloud.mattermost.com
   mattermostEnv:
     - name: MM_SITEURL
