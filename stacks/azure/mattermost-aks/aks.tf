@@ -51,5 +51,9 @@ module "mattermost_aks" {
   # Load balancer deployed in mattermost-vnet stack; use AGIC brownfield or NLB annotations
   enable_application_gateway_ingress = false
 
+  # Grant AKS kubelet identity Network Contributor on RG containing PIP (azure-pip-name)
+  grant_load_balancer_network_access = true
+  load_balancer_resource_group      = data.azurerm_resource_group.mattermost_location.name
+
   tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
 }

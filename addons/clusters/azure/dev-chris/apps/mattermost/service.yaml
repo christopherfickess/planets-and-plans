@@ -7,6 +7,8 @@ metadata:
     # Terraform mattermost-vnet: mattermost_lb_pip_name (has FQDN for CNAME)
     service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
     service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-chris-mattermost-pip"
+    # Azure PIP FQDN; view with: kubectl get svc mattermost-lb -n mattermost -o jsonpath='{.metadata.annotations.lb-fqdn}'
+    lb-fqdn: mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
 spec:
   type: LoadBalancer
   selector:

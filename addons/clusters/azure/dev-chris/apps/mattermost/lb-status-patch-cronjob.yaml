@@ -1,0 +1,68 @@
+# Optional: Patches mattermost-lb service status to add hostname so kubectl get svc shows
+# mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com instead of the IP.
+# kubectl prefers hostname over IP when both exist. Azure cloud provider only sets IP
+# and will overwrite this periodically; running every minute keeps hostname visible most of the time.
+# Apply with: kubectl apply -f lb-status-patch-cronjob.yaml
+# Or add to kustomization.yaml resources.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lb-status-patch
+  namespace: mattermost
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lb-status-patch
+  namespace: mattermost
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["services/status"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lb-status-patch
+  namespace: mattermost
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lb-status-patch
+subjects:
+  - kind: ServiceAccount
+    name: lb-status-patch
+    namespace: mattermost
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: lb-status-patch
+  namespace: mattermost
+spec:
+  schedule: "*/1 * * * *"  # every minute
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: lb-status-patch
+          restartPolicy: OnFailure
+          containers:
+            - name: patch
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  SVC="mattermost-lb"
+                  NS="mattermost"
+                  HOSTNAME="mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com"
+                  IP=$(kubectl get svc "$SVC" -n "$NS" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+                  [ -z "$IP" ] && exit 0
+                  kubectl patch svc "$SVC" -n "$NS" --type=merge -p "{\"status\":{\"loadBalancer\":{\"ingress\":[{\"ip\":\"$IP\",\"hostname\":\"$HOSTNAME\"}]}}}"

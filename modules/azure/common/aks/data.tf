@@ -1,4 +1,4 @@
-
+data "azurerm_client_config" "current" {}
 
 data "azuread_group" "aks_admins" {
   display_name = var.admin_group_display_name

@@ -102,7 +102,6 @@ If the zone `dev.cloud.mattermost.com` is in Azure DNS:
 ```bash
 # Zone must exist. Create CNAME record set.
 az network dns record-set cname set-record \
-  --resource-group <DNS_ZONE_RESOURCE_GROUP> \
   --zone-name dev.cloud.mattermost.com \
   --record-set-name dev-chris \
   --cname mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
@@ -149,3 +148,17 @@ terraform output mattermost_lb_pip_name # e.g. mattermost-dev-chris-mattermost-p
 kubectl get svc mattermost-lb -n mattermost -w
 # External IP may take 2–5 minutes after apply
 ```
+
+### Show hostname instead of IP in kubectl
+
+Azure only populates the IP in service status. Two options:
+
+1. **Annotation** (already set): The FQDN is in `lb-fqdn` annotation:
+   ```bash
+   kubectl get svc mattermost-lb -n mattermost -o jsonpath='{.metadata.annotations.lb-fqdn}'
+   ```
+
+2. **Status patch CronJob** (optional): Makes `kubectl get svc` show the hostname. Azure will overwrite periodically; the CronJob re-applies every minute:
+   ```bash
+   kubectl apply -f addons/clusters/azure/dev-chris/apps/mattermost/lb-status-patch-cronjob.yaml
+   ```
