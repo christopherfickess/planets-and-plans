@@ -8,7 +8,6 @@ resources:
   # - apps/alloy
   # - apps/cluster-autoscaler
   # - apps/aws-load-balancer-controller
-  - apps/external-secrets-operator
   - apps/external-secrets
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
