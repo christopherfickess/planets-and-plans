@@ -283,3 +283,15 @@ function __install_teleport__() {
 
     teleport version
 }
+
+
+function __k9s_install__() {
+    curl -LO https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.rpm
+    sudo dnf install ./k9s_Linux_amd64.rpm
+}
+
+function __zellij_install__() {
+    wget https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz
+    tar -xvf zellij-x86_64-unknown-linux-musl.tar.gz
+    sudo mv zellij /usr/local/bin/
+}

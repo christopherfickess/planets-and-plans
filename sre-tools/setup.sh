@@ -3,7 +3,7 @@
 
 # Initialize directory variables if not already set
 
-function sre_tools() {    
+function sre_tools() {
     [[ -z "${__aws_sre_tools_dir__}" ]] && __aws_sre_tools_dir__="${__sre_tools_dir__}/aws"
     [[ -z "${__aws_connect_file__}" ]] && __aws_connect_file__="${__aws_sre_tools_dir__}/defaults/aws_connect.sh"
     [[ -z "${__aws_help_file__}" ]] && __aws_help_file__="${__aws_sre_tools_dir__}/help.sh"
@@ -11,9 +11,10 @@ function sre_tools() {
     [[ -z "${__minikube_dir__}" ]] && __minikube_dir__="${__sre_tools_dir__}/minikube"
     [[ -z "${__go_dir__}" ]] && __go_dir__="${__sre_tools_dir__}/go"
     [[ -z "${__python_dir__}" ]] && __python_dir__="${__sre_tools_dir__}/python"
+    [[ -z "${__zellij_dir__}" ]] && __zellij_dir__="${__sre_tools_dir__}/zellij"
 
     # Handle command-line arguments first
-    
+
     __sre_tools_menu_logic__ "$@"
 
     unset __aws_sre_tools_dir__
@@ -23,7 +24,28 @@ function sre_tools() {
     unset __minikube_dir__
     unset __go_dir__
     unset __python_dir__
+    unset __zellij_dir__
 }
+
+
+function source_folder_scripts() {
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo -e "${YELLOW}Usage: source_folder_scripts <folder> [label]${NC}"
+        return 1
+    fi
+    
+    local folder="${1:?Usage: source_folder_scripts <folder> [label]}"
+    local label="${2:-functions Installed}"
+    local name
+    for f in "${folder}"/*.sh; do
+        [[ -f "$f" ]] || continue
+        [[ "$(basename "$f")" == "setup.sh" ]] && continue
+        . "$f"
+        name="$(basename "$f" .sh)"
+        echo -e "   ${GREEN}✓${NC} ${name} ${label}"
+    done
+}
+
 
 function __sre_tools_menu_logic__(){
     __list_sre_tools__ "$@"
@@ -39,7 +61,7 @@ function __sre_tools_menu_logic__(){
             __source_go_functions__
             ;;
         -h|--help)
-            help_sre_tools
+            myhelp_sre_tools
             ;;
         -l|--list)
             list_sre_tools
@@ -58,12 +80,15 @@ function __sre_tools_menu_logic__(){
             unset __choice__
             return 0
             ;;
+        -z|--zellij)
+            __source_zellij_functions__
+            ;;
         *)
             echo -e "${RED}Invalid choice.${NC}"
             unset __choice__
             return 1
             ;;
-        
+
     esac
     
     unset __choice__
@@ -91,9 +116,11 @@ function __list_sre_tools__(){
         __choice__="${1}"
     elif [[ "${1}" == "-v" || "${1}" == "--version" ]]; then
         __choice__="${1}"
+    elif [[ "${1}" == "-z" || "${1}" == "--zellij" ]]; then
+        __choice__="${1}"
     elif [[ ! -z "${1}" ]]; then
         # Interactive mode if no arguments provided
-        echo -e "${CYAN}Which Functionality do you want to setup?${NC}"    
+        echo -e "${CYAN}Which Functionality do you want to setup?${NC}"
         echo -e "   ${YELLOW}-a${NC}    | --all           ${CYAN}All${NC}"
         echo -e "   ${YELLOW}-aws${NC}  | --aws           ${CYAN}AWS Functions${NC}"
         echo -e "   ${YELLOW}-g${NC}    | --go            ${CYAN}Go Tools${NC}"
@@ -104,6 +131,7 @@ function __list_sre_tools__(){
         echo -e "   ${YELLOW}-p${NC}    | --python        ${CYAN}Python Tools${NC}"
         echo -e "   ${YELLOW}-u${NC}    | --update        ${CYAN}Update SRE Tools${NC}"
         echo -e "   ${YELLOW}-v${NC}    | --version       ${CYAN}Show SRE Tools Version${NC}"
+        echo -e "   ${YELLOW}-z${NC}    | --zellij        ${CYAN}Zellij Templates${NC}"
         echo -e ""
 
         read -p "   Enter your choice: " __choice__
@@ -147,28 +175,10 @@ function __source_aws_functions__() {
 }
 
 function __source_mattermost_functions__() {
-    local __mattermost_file__="${__mattermost_dir__}/mattermost.sh"
-    local __mattermostfed_file__="${__mattermost_dir__}/mattermostfed.sh"
-    local __mattermost_help_file__="${__mattermost_dir__}/help.sh"
-    
-    if [ -f "${__mattermost_file__}" ] && [[ "${MATTERMOST}" == "TRUE" ]]; then 
-        source "${__mattermost_file__}"
-        echo -e "   ${GREEN}✓${NC} Mattermost functions"
+    local __mattermost_setup__="${__mattermost_dir__}/setup.sh"
+    if [ -f "${__mattermost_setup__}" ]; then
+        source "${__mattermost_setup__}"
     fi
-    if [ -f "${__mattermostfed_file__}" ] && [ "${MATTERMOSTFED}" == "TRUE" ]; then 
-        source "${__mattermostfed_file__}"
-        echo -e "   ${GREEN}✓${NC} Mattermost Fed functions"
-    fi
-    if [ -f "${__mattermost_help_file__}" ]; then 
-        source "${__mattermost_help_file__}"
-        echo -e "   ${GREEN}✓${NC} Mattermost help"
-    fi
-    
-    echo -e "${MAGENTA}Mattermost functions loaded.${NC}"
-
-    unset __mattermost_file__
-    unset __mattermostfed_file__
-    unset __mattermost_help_file__
 }
 
 function __source_minikube_functions__() {
@@ -227,13 +237,33 @@ function __source_python_functions__(){
     unset __python_functions_file__
 }
 
+function __source_zellij_functions__() {
+    local __zellij_setup_file__="${__sre_tools_dir__}/zellij/setup.sh"
+    local __zellij_help_file__="${__sre_tools_dir__}/zellij/defaults/help.sh"
+
+    if [ -f "${__zellij_setup_file__}" ]; then
+        source "${__zellij_setup_file__}"
+        echo -e "   ${GREEN}✓${NC} Zellij functions"
+    fi
+    if [ -f "${__zellij_help_file__}" ]; then
+        source "${__zellij_help_file__}"
+        echo -e "   ${GREEN}✓${NC} Zellij help"
+    fi
+
+    echo -e "${MAGENTA}Zellij functions loaded.${NC}"
+
+    unset __zellij_setup_file__
+    unset __zellij_help_file__
+}
+
 function __source_all_functions__() {
     __source_aws_functions__
     __source_minikube_functions__
     __source_mattermost_functions__
     __source_go_functions__
     __source_python_functions__
-    
+    __source_zellij_functions__
+
     echo -e "${GREEN}All SRE tools setup completed.${NC}"
 }
 

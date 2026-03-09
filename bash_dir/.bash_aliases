@@ -19,6 +19,7 @@ export MAGENTAR=$(tput setaf 5) #magenta used in a while loop after 'read';
 export CYANR=$(tput setaf 6) #cyan used in a while loop after 'read';
 export NCR=$(tput sgr0) #No color used in a while loop after 'read';
 
+# export zellij="$(bash <(curl -L https://zellij.dev/launch))"
 
 alias ls='ls --color=auto'
 alias la="ls -a -1 --color"

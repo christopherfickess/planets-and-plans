@@ -1,0 +1,58 @@
+// Template for watching resources in namespaces matching a pattern
+// Set NAMESPACE_PATTERN environment variable before launching
+// Example: NAMESPACE_PATTERN="mattermost" zellij --layout namespace-filtered-watch.kdl
+
+layout {
+    pane split_direction="vertical" {
+        // Left side - K9s instances with namespace filtering
+        pane size="50%" split_direction="horizontal" {
+            // K9s deployments - use :namespace to switch or Ctrl-n for namespace filter
+            pane size="50%" {
+                command "k9s"
+                args "-c" "deployments"
+            }
+            // K9s pods view
+            pane size="50%" {
+                command "k9s"
+                args "-c" "pods"
+            }
+        }
+
+        // Right side - kubectl watches with pattern matching
+        pane size="50%" split_direction="horizontal" {
+            // Pods filtered by namespace pattern
+            pane size="25%" {
+                command "bash"
+                args "-c" "kubectl get pods -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            }
+
+            // Deployments filtered
+            pane size="25%" {
+                command "bash"
+                args "-c" "kubectl get deployments -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            }
+
+            // Services filtered
+            pane size="25%" {
+                command "bash"
+                args "-c" "kubectl get services -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            }
+
+            // Events filtered by namespace pattern
+            pane size="25%" {
+                command "bash"
+                args "-c" "kubectl get events -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            }
+        }
+    }
+
+    tab_template name="tab" {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+}

@@ -1,0 +1,81 @@
+layout {
+    pane split_direction="vertical" {
+        // Left side - Resource monitoring (60% width)
+        pane size="60%" split_direction="horizontal" {
+            // Top - Pods in namespace (35% height)
+            pane size="35%" name="📦 Pods" {
+                command "bash"
+                args "-c" "watch -t -n 2 kubectl get pods -n ${ZELLIJ_NAMESPACE:-default}"
+            }
+
+            // Middle - Split for metrics (30% height)
+            pane size="30%" split_direction="vertical" {
+                // Pod resource requests/limits (60% width)
+                pane size="60%" name="📊 Pod Restarts/Age" {
+                    command "bash"
+                    args "-c" "watch -t -n 5 'kubectl get pods -n ${ZELLIJ_NAMESPACE:-default} -o custom-columns=NAME:.metadata.name,RESTARTS:.status.containerStatuses[*].restartCount,AGE:.metadata.creationTimestamp --sort-by=.status.containerStatuses[0].restartCount 2>/dev/null || kubectl get pods -n ${ZELLIJ_NAMESPACE:-default}'"
+                }
+                // Pod status summary (40% width)
+                pane size="40%" name="✅ Namespace" {
+                    command "bash"
+                    args "-c" "watch -t -n 3 'kubectl get ns -n ${ZELLIJ_NAMESPACE:-default} --no-headers -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp'"
+                }
+            }
+
+            // Bottom - Events (35% height)
+            pane size="35%" name="📋 Events" {
+                command "bash"
+                args "-c" "watch -t -n 3 'kubectl get events -n ${ZELLIJ_NAMESPACE:-default} --sort-by=.metadata.creationTimestamp | tail -20'"
+            }
+        }
+
+        // Right side - Workload status (40% width)
+        pane size="40%" split_direction="horizontal" {
+            // Deployments
+            pane size="16%" name="🚀 Deployments" {
+                command "bash"
+                args "-c" "watch -t -n 2 kubectl get deployments -n ${ZELLIJ_NAMESPACE:-default}"
+            }
+
+            // ReplicaSets (shows rollout status)
+            pane size="16%" name="♻️ ReplicaSets" {
+                command "bash"
+                args "-c" "watch -t -n 2 kubectl get rs -n ${ZELLIJ_NAMESPACE:-default}"
+            }
+
+            // Services
+            pane size="16%" name="🔌 Services" {
+                command "bash"
+                args "-c" "watch -t -n 5 kubectl get services -n ${ZELLIJ_NAMESPACE:-default}"
+            }
+
+            // StatefulSets & DaemonSets
+            pane size="16%" name="📊 StatefulSets/DaemonSets" {
+                command "bash"
+                args "-c" "NS=${ZELLIJ_NAMESPACE:-default}; watch -t -n 3 \"echo '=== StatefulSets ===' && kubectl get sts -n $NS 2>/dev/null && echo '' && echo '=== DaemonSets ===' && kubectl get ds -n $NS 2>/dev/null\""
+            }
+
+            // HPA (Horizontal Pod Autoscaler)
+            pane size="16%" name="📈 HPA" {
+                command "bash"
+                args "-c" "watch -t -n 5 kubectl get hpa -n ${ZELLIJ_NAMESPACE:-default}"
+            }
+
+            // Ingress & Network
+            pane size="20%" name="🌐 Ingress/Network" {
+                command "bash"
+                args "-c" "NS=${ZELLIJ_NAMESPACE:-default}; watch -t -n 5 \"echo '=== Ingress ===' && kubectl get ingress -n $NS && echo '' && echo '=== NetworkPolicies ===' && kubectl get networkpolicies -n $NS 2>/dev/null | head -10\""
+            }
+        }
+    }
+
+    tab_template name="second_tab" {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+}

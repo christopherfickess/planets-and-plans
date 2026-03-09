@@ -1,0 +1,76 @@
+// Popout panel layout for Flux resource monitoring
+// Main center pane with popout sidebars and info panels
+
+layout {
+    pane split_direction="horizontal" {
+        // Top strip - Flux system status (20% height)
+        pane size="20%" split_direction="vertical" {
+            // Flux namespace pods
+            pane size="60%" name="🔧 Flux Pods" {
+                command "k9s"
+                args "--headless" "-c" "pods" "-n" "flux-system"
+            }
+            // Flux events (errors/warnings)
+            pane size="40%" name="📋 Cluster Events" {
+                command "k9s"
+                args "--headless" "-c" "events" "-A"
+            }
+        }
+
+        // Main content area (60% height)
+        pane size="60%" split_direction="vertical" {
+            // Left popout - GitRepo monitoring (50% width)
+            pane size="50%" split_direction="horizontal" {
+                // GitRepositories
+                pane size="50%" name="📦 Git Sources" {
+                    command "k9s"
+                    args "--headless" "-c" "gitrepo" "-n" "flux-system"
+                }
+                // Ingress
+                pane size="50%" name="🌐 Ingress Routes" {
+                    command "k9s"
+                    args "--headless" "-c" "ingress" "-A"
+                }
+            }
+
+
+            // Right popout - Kustomizations & status (50% width)
+            pane size="50%" split_direction="horizontal" {
+                // Kustomizations
+                pane size="60%" name="⚙️ Kustomizations" {
+                    command "k9s"
+                    args "--headless" "-c" "kustomizations" "-n" "flux-system"
+                }
+                // Flux Controllers
+                pane size="40%" name="🎮 Flux Controllers" {
+                    command "k9s"
+                    args "--headless" "-c" "deployments" "-n" "flux-system"
+                }
+            }
+        }
+
+        // Bottom strip - Cluster status (20% height)
+        pane size="20%" split_direction="vertical" {
+            // All HelmReleases status overview
+            pane size="50%" name="📊 HelmReleases (All NS)" {
+                command "k9s"
+                args "--headless" "-c" "hr" "-A"
+            }
+            // Node status
+            pane size="50%" name="🖥️ Node Status" {
+                command "k9s"
+                args "--headless" "-c" "nodes"
+            }
+        }
+    }
+
+    tab_template name="second_tab" {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+}

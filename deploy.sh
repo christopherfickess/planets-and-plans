@@ -65,6 +65,7 @@ function __source_bashrc_functions__() {
     [[ -f /etc/bashrc ]] && source /etc/bashrc
     [[ -f "$__bash_config_dir__/.bash_aliases" ]] && source "$__bash_config_dir__/.bash_aliases"
     [[ -f "$__bash_config_dir__/.bash_functions" ]] && source "$__bash_config_dir__/.bash_functions"
+    [[ -f "$__bash_config_dir__/namespace-stuck.sh" ]] && source "$__bash_config_dir__/namespace-stuck.sh"
 
     unset -f __source_bashrc_functions__  # Clean up function after use
 }

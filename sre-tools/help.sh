@@ -1,5 +1,5 @@
 
-function help_sre_tools() {
+function myhelp_sre_tools() {
     echo -e "${CYAN}SRE Tools - Help${NC}"
     echo -e "------------------------------------------------------------------------------------------------------"
     echo -e "Usage: ${YELLOW}sre_tools [OPTION]${NC}"
@@ -12,10 +12,11 @@ function help_sre_tools() {
     echo -e "   ${YELLOW}-m${NC}, ${YELLOW}--minikube${NC}      Load Minikube functions"
     echo -e "   ${YELLOW}-M${NC}, ${YELLOW}--mattermost${NC}    Load Mattermost functions"
     echo -e "   ${YELLOW}-v${NC}, ${YELLOW}--version${NC}       Show version information"
+    echo -e "   ${YELLOW}-z${NC}, ${YELLOW}--zellij${NC}        Load Zellij functions"
     echo -e ""
     echo -e "Examples:"
     echo -e "   ${GREEN}sre_tools -m${NC}           # Load Minikube functions"
-    echo -e "   ${GREEN}sre_tools --mattermost${NC}  # Load Mattermost functions"
+    echo -e "   ${GREEN}sre_tools -M${NC}           # Load Mattermost functions"
     echo -e "   ${GREEN}sre_tools --all${NC}        # Load all tools"
 }
 
@@ -32,11 +33,4 @@ function list_sre_tools() {
     echo -e "Use ${GREEN}sre_tools -aws${NC} or ${GREEN}sre_tools --aws${NC} to load AWS functions"
     echo -e "Use ${GREEN}sre_tools -m${NC} or ${GREEN}sre_tools --minikube${NC} to load Minikube functions"
     echo -e "Use ${GREEN}sre_tools -M${NC} or ${GREEN}sre_tools --mattermost${NC} to load Mattermost functions"
-}
-
-
-function remove_sre_tools() {
-    echo -e "${YELLOW}Note: SRE tools are sourced functions, not installed packages.${NC}"
-    echo -e "To 'remove' them, simply don't source them in your shell session."
-    echo -e "They are loaded on-demand when you call ${GREEN}sre_tools${NC}."
 }

@@ -45,7 +45,7 @@ function myhelp(){
     fi
 
     echo -e ""
-    if [ "$MATTERMOST" = "TRUE" ]; then  __help_mattermost__; fi
+    if [ "$MATTERMOST" = "TRUE" ] && [ "$MM_ENABLED" = "TRUE" ]; then  myhelp_mattermost; fi
     echo -e ""
     
     echo -e ""
@@ -75,13 +75,6 @@ function __help_default_linux__() {
     echo -e "     ${YELLOW}which_cluster${NC}                   - Shows which Cluster the User is connected to"
 
 }
-
-function __help_mattermost__() {
-    echo -e "Mattermost Functions:"
-    echo -e "------------------------------------------------------------------------------------------------------"
-    echo -e "     ${YELLOW}mattermost_functions_help${NC}       - List Mattermost functions and their descriptions"
-    echo -e "     ${YELLOW}update_mattermost_ctl${NC}           - Update the Mattermost ctl Tool to the latest version"
-}   
 
 function __help_windows__() {
     echo -e "Windows WSL Functions:"
