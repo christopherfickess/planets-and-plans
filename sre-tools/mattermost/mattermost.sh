@@ -44,7 +44,7 @@ function update_mattermost_ctl() {
 
     echo -e "${MAGENTA}Backing up${NC} previous mmctl version to tmp folder..."
     mv ${HOME}/bin/mmctl ${HOME}/tmp/mmctl_${MMCTL_PREVIOUS_VERSION} || \
-        echo -e "${YELLOW}    No previous mmctl version found to back up.${NC}";
+        echo -e "${__COMMAND_COLOR__}    No previous mmctl version found to back up.${NC}";
 
     echo -e "${MAGENTA}Extracting and installing${NC} the new mmctl version..."
     tar -xvf ${HOME}/bin/linux_amd64.tar -C ${HOME}/bin/

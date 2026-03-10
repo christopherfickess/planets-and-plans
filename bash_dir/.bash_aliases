@@ -7,6 +7,7 @@ export YELLOW='\033[0;33m';
 export BLUE='\033[0;34m';
 export MAGENTA='\033[0;35m';
 export CYAN='\033[0;36m';
+export WHITE='\033[0;37m';
 export NC='\033[0m' 
 
 # No color 

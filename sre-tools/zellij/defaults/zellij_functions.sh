@@ -46,14 +46,14 @@ function __zell_menu__(){
     echo -e "${CYAN}Zell - Zellij Layout Launcher${NC}"
     echo -e "Usage: zell <flags>"
     echo -e "Available layouts:"
-    echo -e "   ${YELLOW}-9|--k9s${NC} - Watch K9s deployments with a custom Zellij layout"
-    echo -e "   ${YELLOW}-c|--create${NC} - Create a new Zellij template with a basic layout"
-    echo -e "   ${YELLOW}-f|--flux${NC} - Watch Flux deployments with a custom Zellij layout"
-    echo -e "   ${YELLOW}-h|--help${NC} - Show this help menu"
-    echo -e "   ${YELLOW}-l|--list${NC} - List available Zellij templates"
-    echo -e "   ${YELLOW}-k|--kubectl${NC} - Run kubectl checks in a Zellij layout"
-    echo -e "   ${YELLOW}-m|--mattermost${NC} - Custom Zellij layout for watching Mattermost deployments"
-    echo -e "   ${YELLOW}-n|--namespaces${NC} - Watch namespaces with pattern filtering in Zellij"
+    echo -e "   ${__COMMAND_COLOR__}-9|--k9s${NC} - Watch K9s deployments with a custom Zellij layout"
+    echo -e "   ${__COMMAND_COLOR__}-c|--create${NC} - Create a new Zellij template with a basic layout"
+    echo -e "   ${__COMMAND_COLOR__}-f|--flux${NC} - Watch Flux deployments with a custom Zellij layout"
+    echo -e "   ${__COMMAND_COLOR__}-h|--help${NC} - Show this help menu"
+    echo -e "   ${__COMMAND_COLOR__}-l|--list${NC} - List available Zellij templates"
+    echo -e "   ${__COMMAND_COLOR__}-k|--kubectl${NC} - Run kubectl checks in a Zellij layout"
+    echo -e "   ${__COMMAND_COLOR__}-m|--mattermost${NC} - Custom Zellij layout for watching Mattermost deployments"
+    echo -e "   ${__COMMAND_COLOR__}-n|--namespaces${NC} - Watch namespaces with pattern filtering in Zellij"
 }
 
 function __zellij_k9s_watch__() {

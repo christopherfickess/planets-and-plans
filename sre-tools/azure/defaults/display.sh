@@ -71,12 +71,3 @@ function azure.assign.role.sp(){
         --assignee "$__appID__" \
         --output table
 }
-
-function __myhelp_azure_display__(){
-    echo -e "     ${YELLOW}azure.display.subscription.details${NC}           - Show details of the current Azure subscription"
-    echo -e "     ${YELLOW}azure.display.subscription.id${NC}                - Show the current Azure subscription ID"
-    echo -e "     ${YELLOW}azure.display.sp.id.from.name <sp-name>${NC}      - Get the App ID of a service principal by name"
-    echo -e "     ${YELLOW}azure.display.sp.role.assignments <sp-name>${NC}  - Show role assignments for a service principal"
-    echo -e "     ${YELLOW}azure.display.sp.credentials <sp-name>${NC}       - Show credentials for a service principal"
-    echo -e "     ${YELLOW}azure.assign.role.sp${NC}                      - Assign Storage Blob Data Contributor and Contributor roles to the SP on the storage account and resource group"
-}

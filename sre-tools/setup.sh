@@ -30,7 +30,7 @@ function sre_tools() {
 
 function source_folder_scripts() {
     if [ -z "$1" ] || [ -z "$2" ]; then
-        echo -e "${YELLOW}Usage: source_folder_scripts <folder> [label]${NC}"
+        echo -e "${__COMMAND_COLOR__}Usage: source_folder_scripts <folder> [label]${NC}"
         return 1
     fi
     
@@ -121,17 +121,17 @@ function __list_sre_tools__(){
     elif [[ ! -z "${1}" ]]; then
         # Interactive mode if no arguments provided
         echo -e "${CYAN}Which Functionality do you want to setup?${NC}"
-        echo -e "   ${YELLOW}-a${NC}    | --all           ${CYAN}All${NC}"
-        echo -e "   ${YELLOW}-aws${NC}  | --aws           ${CYAN}AWS Functions${NC}"
-        echo -e "   ${YELLOW}-g${NC}    | --go            ${CYAN}Go Tools${NC}"
-        echo -e "   ${YELLOW}-l${NC}    | --list          ${CYAN}List Available Tools${NC}"
-        echo -e "   ${YELLOW}-h${NC}    | --help          ${CYAN}Show Help${NC}"
-        echo -e "   ${YELLOW}-M${NC}    | --mattermost    ${CYAN}Mattermost${NC}"
-        echo -e "   ${YELLOW}-m${NC}    | --minikube      ${CYAN}Minikube${NC}"
-        echo -e "   ${YELLOW}-p${NC}    | --python        ${CYAN}Python Tools${NC}"
-        echo -e "   ${YELLOW}-u${NC}    | --update        ${CYAN}Update SRE Tools${NC}"
-        echo -e "   ${YELLOW}-v${NC}    | --version       ${CYAN}Show SRE Tools Version${NC}"
-        echo -e "   ${YELLOW}-z${NC}    | --zellij        ${CYAN}Zellij Templates${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-a${NC}    | --all           ${CYAN}All${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-aws${NC}  | --aws           ${CYAN}AWS Functions${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-g${NC}    | --go            ${CYAN}Go Tools${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-l${NC}    | --list          ${CYAN}List Available Tools${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-h${NC}    | --help          ${CYAN}Show Help${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-M${NC}    | --mattermost    ${CYAN}Mattermost${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-m${NC}    | --minikube      ${CYAN}Minikube${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-p${NC}    | --python        ${CYAN}Python Tools${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-u${NC}    | --update        ${CYAN}Update SRE Tools${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-v${NC}    | --version       ${CYAN}Show SRE Tools Version${NC}"
+        echo -e "   ${__COMMAND_COLOR__}-z${NC}    | --zellij        ${CYAN}Zellij Templates${NC}"
         echo -e ""
 
         read -p "   Enter your choice: " __choice__
@@ -147,26 +147,29 @@ function __source_aws_functions__() {
     local __aws_sre_tools_setup_file__="${__sre_tools_dir__}/aws/tools/setup.sh"
     local __aws_connect_file__="${__sre_tools_dir__}/aws/defaults/aws_connect.sh"
     local __aws_users_file__="${__sre_tools_dir__}/aws/defaults/users/users.sh"
-    local __aws_help_file__="${__sre_tools_dir__}/help.sh"
-    
-    if [ -f "${__aws_sre_tools_setup_file__}" ]; then 
+    local __aws_help_file__="${__sre_tools_dir__}/aws/help.sh"
+
+    if [ -f "${__aws_sre_tools_setup_file__}" ]; then
         source "${__aws_sre_tools_setup_file__}" && __source_all_aws_functions
         echo -e "   ${GREEN}✓${NC} AWS functions"
     fi
-    if [ -f "${__aws_connect_file__}" ]; then 
+    if [ -f "${__aws_connect_file__}" ]; then
         source "${__aws_connect_file__}"
         echo -e "   ${GREEN}✓${NC} AWS connect functions"
     fi
-    if [ -f "${__aws_users_file__}" ]; then 
+    if [ -f "${__aws_users_file__}" ]; then
         source "${__aws_users_file__}"
         echo -e "   ${GREEN}✓${NC} AWS users functions"
     fi
-    if [ -f "${__aws_help_file__}" ]; then 
+    if [ -f "${__aws_help_file__}" ]; then
         source "${__aws_help_file__}"
         echo -e "   ${GREEN}✓${NC} AWS help"
     fi
-    
+
     echo -e "${MAGENTA}AWS functions loaded.${NC}"
+
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[aws]="true"
 
     unset __aws_sre_tools_setup_file__
     unset __aws_connect_file__
@@ -176,30 +179,48 @@ function __source_aws_functions__() {
 
 function __source_mattermost_functions__() {
     local __mattermost_setup__="${__mattermost_dir__}/setup.sh"
+    local __mattermost_help__="${__mattermost_dir__}/help.sh"
+
     if [ -f "${__mattermost_setup__}" ]; then
         source "${__mattermost_setup__}"
+        echo -e "   ${GREEN}✓${NC} Mattermost functions"
     fi
+    if [ -f "${__mattermost_help__}" ]; then
+        source "${__mattermost_help__}"
+        echo -e "   ${GREEN}✓${NC} Mattermost help"
+    fi
+
+    echo -e "${MAGENTA}Mattermost functions loaded.${NC}"
+
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[mattermost]="true"
+
+    unset __mattermost_setup__
+    unset __mattermost_help__
 }
 
 function __source_minikube_functions__() {
     local __minikube_functions_file__="${__minikube_dir__}/minikube_functions.sh"
     local __minikube_setup_file__="${__minikube_dir__}/setup_minikube.sh"
     local __minikube_help_file__="${__minikube_dir__}/help.sh"
-    
-    if [ -f "${__minikube_functions_file__}" ]; then 
+
+    if [ -f "${__minikube_functions_file__}" ]; then
         source "${__minikube_functions_file__}"
         echo -e "   ${GREEN}✓${NC} Minikube functions"
     fi
-    if [ -f "${__minikube_setup_file__}" ]; then 
+    if [ -f "${__minikube_setup_file__}" ]; then
         source "${__minikube_setup_file__}"
         echo -e "   ${GREEN}✓${NC} Minikube setup"
     fi
-    if [ -f "${__minikube_help_file__}" ]; then 
+    if [ -f "${__minikube_help_file__}" ]; then
         source "${__minikube_help_file__}"
         echo -e "   ${GREEN}✓${NC} Minikube help"
     fi
-    
+
     echo -e "${MAGENTA}Minikube functions loaded.${NC}"
+
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[minikube]="true"
 
     unset __minikube_functions_file__
     unset __minikube_setup_file__
@@ -209,32 +230,45 @@ function __source_minikube_functions__() {
 function __source_go_functions__() {
     local __go_setup_file__="${__go_dir__}/setup.sh"
     local __go_help_file__="${__go_dir__}/help.sh"
-    
-    if [ -f "${__go_setup_file__}" ]; then 
+
+    if [ -f "${__go_setup_file__}" ]; then
         source "${__go_setup_file__}"
         echo -e "   ${GREEN}✓${NC} Go tools setup"
     fi
-    if [ -f "${__go_help_file__}" ]; then 
+    if [ -f "${__go_help_file__}" ]; then
         source "${__go_help_file__}"
         echo -e "   ${GREEN}✓${NC} Go tools help"
     fi
     echo -e "${MAGENTA}Go tools functions loaded.${NC}"
 
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[go]="true"
+
     unset __go_setup_file__
     unset __go_help_file__
 }
 
-function __source_python_functions__(){ 
+function __source_python_functions__(){
     local __python_dir__="${__sre_tools_dir__}/python"
     local __python_functions_file__="${__python_dir__}/defaults/python-functions.sh"
-    
-    if [ -f "${__python_functions_file__}" ]; then 
+    local __python_help_file__="${__python_dir__}/help.sh"
+
+    if [ -f "${__python_functions_file__}" ]; then
         source "${__python_functions_file__}"
         echo -e "   ${GREEN}✓${NC} Python functions"
     fi
+    if [ -f "${__python_help_file__}" ]; then
+        source "${__python_help_file__}"
+        echo -e "   ${GREEN}✓${NC} Python help"
+    fi
     echo -e "${MAGENTA}Python functions loaded.${NC}"
+
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[python]="true"
+
     unset __python_dir__
     unset __python_functions_file__
+    unset __python_help_file__
 }
 
 function __source_zellij_functions__() {
@@ -251,6 +285,9 @@ function __source_zellij_functions__() {
     fi
 
     echo -e "${MAGENTA}Zellij functions loaded.${NC}"
+
+    # Register tool as loaded
+    __SRE_TOOLS_LOADED__[zellij]="true"
 
     unset __zellij_setup_file__
     unset __zellij_help_file__
@@ -275,7 +312,7 @@ function __source_all_functions__() {
 #         git pull
 #         popd > /dev/null
 #         echo -e "${GREEN}SRE tools updated successfully.${NC}"
-#         echo -e "${YELLOW}Note: You may need to reload your shell or run ${GREEN}bashrc${NC} to apply changes.${NC}"
+#         echo -e "${__COMMAND_COLOR__}Note: You may need to reload your shell or run ${GREEN}bashrc${NC} to apply changes.${NC}"
 #     else
 #         echo -e "${RED}Could not find git repository. Manual update required.${NC}"
 #     fi

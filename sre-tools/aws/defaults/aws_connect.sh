@@ -101,7 +101,7 @@ function __cluster_connect__(){
         return
     fi
     # local env_tag="${env_tag:-}"
-    echo -e "   ${GREEN}✓${NC} Connected to EKS cluster:    ${YELLOW}${__cluster_name__}${NC}"
+    echo -e "   ${GREEN}✓${NC} Connected to EKS cluster:    ${__INFO_COLOR__}${__cluster_name__}${NC}"
     echo
 }
 
@@ -112,7 +112,7 @@ function __bastion_connect_host__(){
         --query "Reservations[].Instances[].InstanceId" \
         --output text)
 
-    echo -e "Starting SSM Session to Bastion Host: ${CYAN}${__bastion_host_id}${NC}"
+    echo -e "Starting SSM Session to Bastion Host: ${__INFO_COLOR__}${__bastion_host_id}${NC}"
 
     aws ssm start-session --target "${__bastion_host_id}" \
         --document-name AWS-StartInteractiveCommand \
@@ -126,21 +126,21 @@ function __aws_connect_options__(){
         echo -e "${MAGENTA}Usage:${NC} aws_sts_assume_role [Role ARN] [Session Name]"
         echo -e "       OR"
         echo -e "        aws_sts_assume_role <flags>"
-        echo -e "           ${YELLOW}-d${NC}|--dev       - Assume Dev AWS role if set in env.sh"
-        echo -e "           ${YELLOW}-h${NC}|--help      - Show this help message"
-        echo -e "${YELLOW}This function assumes an AWS IAM role and sets the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN environment variables.${NC}"
+        echo -e "           ${__COMMAND_COLOR__}-d${NC}|--dev       - Assume Dev AWS role if set in env.sh"
+        echo -e "           ${__COMMAND_COLOR__}-h${NC}|--help      - Show this help message"
+        echo -e "${__INFO_COLOR__}This function assumes an AWS IAM role and sets the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN environment variables.${NC}"
 }
 
 function __aws_eks_cluster_options__(){
     echo -e "${MAGENTA}Usage:${NC} aws_eks_connect_cluster [Cluster Name]"
     echo -e "       OR"
     echo -e "       aws_eks_connect_cluster <flag>"
-    echo -e "           ${YELLOW}-i${NC}                - Connect to iron-badger AWS cluster if set in tsh_connections.sh"
-    echo -e "           ${YELLOW}-d|--dev${NC}          - Connect to Dev AWS cluster if set in tsh_connections.sh"
-    echo -e "           ${YELLOW}-p|--prod${NC}         - Connect to Prod AWS cluster if set in env.sh"
-    echo -e "           ${YELLOW}-h|--help${NC}         - Show this help message"
-    echo -e "           ${YELLOW}-s|--sandbox${NC}   - Connect to sandbox EKS cluster if set in env.sh"
-    echo -e "${YELLOW}This function connects to an EKS cluster by updating the kubeconfig file.${NC}"
+    echo -e "           ${__COMMAND_COLOR__}-i${NC}                - Connect to iron-badger AWS cluster if set in tsh_connections.sh"
+    echo -e "           ${__COMMAND_COLOR__}-d|--dev${NC}          - Connect to Dev AWS cluster if set in tsh_connections.sh"
+    echo -e "           ${__COMMAND_COLOR__}-p|--prod${NC}         - Connect to Prod AWS cluster if set in env.sh"
+    echo -e "           ${__COMMAND_COLOR__}-h|--help${NC}         - Show this help message"
+    echo -e "           ${__COMMAND_COLOR__}-s|--sandbox${NC}   - Connect to sandbox EKS cluster if set in env.sh"
+    echo -e "${__INFO_COLOR__}This function connects to an EKS cluster by updating the kubeconfig file.${NC}"
 }
 
 function __output_aws_connection_info__() {
