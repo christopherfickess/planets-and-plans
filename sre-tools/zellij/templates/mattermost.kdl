@@ -22,27 +22,33 @@ layout {
         // Right side - Individual namespace views with k9s
         pane size="50%" split_direction="horizontal" {
             // mattermost-internal (k9s interactive)
-            pane size="25%" name="📦 Git Sources (k9s)" {
+            pane size="20%" name="📦 Git Sources (k9s)" {
                 command "k9s"
                 args "--headless" "-c" "gitrepo" "-n" "flux-system"
             }
 
             // mattermost-internal (k9s interactive)
-            pane size="25%" name="⚙️ Kustomizations (k9s)" {
+            pane size="20%" name="⚙️ Kustomizations (k9s)" {
                 command "k9s"
                 args "--headless" "-c" "kustomizations" "-n" "flux-system"
             }
 
             // mattermost-partners (k9s interactive)
-            pane size="25%" name="🔌 All Mattermost Services" {                
+            pane size="20%" name="🔌 All Mattermost Services" {                
                 command "k9s"
                 args "--headless" "-A" "-c" "services /mattermost"
             }
 
             // mattermost-operator (k9s interactive)
-            pane size="25%" name="🌐 Ingress (k9s)" {
+            pane size="20%" name="🌐 Ingress" {
                 command "k9s"
-                args "--headless" "-c" "ingress" "-A"
+                args "--headless" "-A" "-c" "ingress /mattermost"
+            }
+
+            // mattermost-operator (k9s interactive)
+            pane size="20%" name="📻 HttpRoute" {
+                command "k9s"
+                args "--headless" "-A" "-c" "httproute /mattermost"
             }
         }
     }

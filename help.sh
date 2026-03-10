@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Main help function - shows all available functions
-function myhelp(){
-    
+function __color_help__() {
     export __HEADER_COLOR__="${WHITE}"
     export __CATEGORY_COLOR__="${CYAN}"
     export __COMMAND_COLOR__="${YELLOW}"
     export __DESCRIPTION_COLOR__="${WHITE}"
     export __DETAILS_COLOR__="${GREEN}"
     export __INFO_COLOR__="${MAGENTA}"
+}
+
+# Main help function - shows all available functions
+function myhelp(){
+    __color_help__
     local show_all=false
     local show_system=false
     local show_git=false

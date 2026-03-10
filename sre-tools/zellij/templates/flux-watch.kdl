@@ -1,65 +1,48 @@
-// Popout panel layout for Flux resource monitoring
-// Main center pane with popout sidebars and info panels
-
 layout {
-    pane split_direction="horizontal" {
-        // Top strip - Flux system status (20% height)
-        pane size="20%" split_direction="vertical" {
-            // Flux namespace pods
-            pane size="60%" name="🔧 Flux Pods" {
-                command "k9s"
-                args "--headless" "-c" "pods" "-n" "flux-system"
-            }
-            // Flux events (errors/warnings)
-            pane size="40%" name="📋 Cluster Events" {
-                command "k9s"
-                args "--headless" "-c" "events" "-A"
-            }
-        }
-
-        // Main content area (60% height)
-        pane size="60%" split_direction="vertical" {
-            // Left popout - GitRepo monitoring (50% width)
-            pane size="50%" split_direction="horizontal" {
-                // GitRepositories
-                pane size="50%" name="📦 Git Sources" {
-                    command "k9s"
-                    args "--headless" "-c" "gitrepo" "-n" "flux-system"
-                }
-                // Ingress
-                pane size="50%" name="🌐 Ingress Routes" {
-                    command "k9s"
-                    args "--headless" "-c" "ingress" "-A"
-                }
-            }
-
-
-            // Right popout - Kustomizations & status (50% width)
-            pane size="50%" split_direction="horizontal" {
-                // Kustomizations
-                pane size="60%" name="⚙️ Kustomizations" {
-                    command "k9s"
-                    args "--headless" "-c" "kustomizations" "-n" "flux-system"
-                }
-                // Flux Controllers
-                pane size="40%" name="🎮 Flux Controllers" {
-                    command "k9s"
-                    args "--headless" "-c" "deployments" "-n" "flux-system"
-                }
-            }
-        }
-
-        // Bottom strip - Cluster status (20% height)
-        pane size="20%" split_direction="vertical" {
-            // All HelmReleases status overview
-            pane size="50%" name="📊 HelmReleases (All NS)" {
+    pane split_direction="vertical" {
+        // Left side - K9s views with specific starting contexts
+        pane size="50%" split_direction="horizontal" {
+            // Top left - K9s starting at deployments view
+            pane size="33%" name="📊 HelmReleases (All NS)" {
                 command "k9s"
                 args "--headless" "-c" "hr" "-A"
             }
-            // Node status
-            pane size="50%" name="🖥️ Node Status" {
+            // Middle left - K9s starting at pods view
+            pane size="33%" name="📦 Git Sources (k9s)" {
                 command "k9s"
-                args "--headless" "-c" "nodes"
+                args "--headless" "-c" "gitrepo" "-A"
+            }
+            // Bottom left - K9s starting at events view
+            pane size="34%"  name="⚙️ Kustomizations (k9s)"{
+                command "k9s"
+                args "--headless" "-c" "kustomizations" "-A"
+            }
+        }
+
+        // Right side - kubectl watches with filtering
+        pane size="50%" split_direction="horizontal" {
+            // Top right - Watch pods in namespaces starting with pattern
+            pane size="25%" name="🚀 All Deploys" {
+                command "k9s"
+                args "--headless" "-A" "-c" "deployments"
+            }
+
+            // Upper middle - Watch deployments with filter
+            pane size="25%"  name="📦 All Mattermost Pods" {
+                command "k9s"
+                args "--headless" "-A" "-c" "pods /mattermost"
+            }
+
+            // Lower middle - Watch services with filter
+            pane size="25%" name="🌐 Ingress Routes" {
+                command "k9s"
+                args "--headless" "-c" "ingress" "-A"
+            }
+
+            // Bottom right - Watch nodes status
+            pane size="25%" name="📋 Cluster Events" {
+                command "k9s"
+                args "--headless" "-c" "events" "-A"
             }
         }
     }

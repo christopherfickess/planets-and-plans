@@ -6,53 +6,37 @@ layout {
     pane split_direction="vertical" {
         // Left side - K9s instances with namespace filtering
         pane size="50%" split_direction="horizontal" {
-            // K9s deployments - use :namespace to switch or Ctrl-n for namespace filter
-            pane size="50%" {
+            pane size="50%" name="🚀 All Deploys" {
                 command "k9s"
-                args "-c" "deployments"
+                args "--headless" "-c" "deployments" "-A"
             }
-            // K9s pods view
-            pane size="50%" {
+            pane size="50%" name="📦 All Pods" {
                 command "k9s"
-                args "-c" "pods"
+                args "--headless" "-c" "pods" "-A"
             }
         }
 
         // Right side - kubectl watches with pattern matching
         pane size="50%" split_direction="horizontal" {
-            // Pods filtered by namespace pattern
-            pane size="25%" {
-                command "bash"
-                args "-c" "kubectl get pods -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            pane size="25%" name="📦 $NAMESPACE_PATTERN Pods" {
+                command "k9s"
+                args "--headless" "-A" "-c" "pods /$NAMESPACE_PATTERN" 
             }
 
-            // Deployments filtered
-            pane size="25%" {
-                command "bash"
-                args "-c" "kubectl get deployments -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            pane size="25%" name="🚀 $NAMESPACE_PATTERN Deployments" {
+                command "k9s"
+                args "--headless" "-A" "-c" "deployments /$NAMESPACE_PATTERN"
             }
 
-            // Services filtered
-            pane size="25%" {
-                command "bash"
-                args "-c" "kubectl get services -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            pane size="25%" name="🛠️ $NAMESPACE_PATTERN Services" {
+                command "k9s"
+                args "--headless" "-A" "-c" "services /$NAMESPACE_PATTERN"
             }
 
-            // Events filtered by namespace pattern
-            pane size="25%" {
-                command "bash"
-                args "-c" "kubectl get events -A -w | grep -E '(NAMESPACE|'${NAMESPACE_PATTERN:-mattermost}')'"
+            pane size="25%" name="📅 $NAMESPACE_PATTERN Events" {
+                command "k9s"
+                args "--headless" "-A" "-c" "events /$NAMESPACE_PATTERN"
             }
-        }
-    }
-
-    tab_template name="tab" {
-        pane size=1 borderless=true {
-            plugin location="zellij:tab-bar"
-        }
-        children
-        pane size=2 borderless=true {
-            plugin location="zellij:status-bar"
         }
     }
 }
