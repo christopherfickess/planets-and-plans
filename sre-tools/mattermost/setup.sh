@@ -29,7 +29,7 @@ function __clone_mattermost_repo__() {
     #     echo -e "${RED}MATTERMOST_REPO_URL is not set. Cannot clone repository.${NC}"
     #     return 1
     # fi
-    __mm_repo_dir__="$HOME/git/mattermost/org-level"
+    __mm_repo_dir__="$HOME/git/mattermost/mattermost-repos"
     __mm_repo_url__="https://github.com/mattermost/mattermost.git"
     __mm_cloud_repo_url__="https://github.com/mattermost/mattermost-cloud.git"
     __mm_cloud_monitoring_repo_url__="https://github.com/mattermost/mattermost-cloud-monitoring.git"
