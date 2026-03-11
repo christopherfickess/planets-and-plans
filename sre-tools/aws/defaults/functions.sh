@@ -1,9 +1,5 @@
 #!/bin/bash
 
-function aws.display.auth() {
-    code ~/.aws/config
-}
-
 function aws.profile.switch(){
     if [ -z "${1}" ];then 
         while true; do
