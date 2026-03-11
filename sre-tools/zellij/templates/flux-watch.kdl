@@ -28,15 +28,15 @@ layout {
             }
 
             // Upper middle - Watch deployments with filter
-            pane size="25%"  name="📦 All Mattermost Pods" {
+            pane size="25%"  name="📦 All Flux Pods" {
                 command "k9s"
-                args "--headless" "-A" "-c" "pods /mattermost"
+                args "--headless" "-n" "flux-system" "-c" "pods"
             }
 
             // Lower middle - Watch services with filter
-            pane size="25%" name="🌐 Ingress Routes" {
+            pane size="25%" name="📦 All External Secrets Manager Pods" {
                 command "k9s"
-                args "--headless" "-c" "ingress" "-A"
+                args "--headless" "-n" "external-secrets" "-c" "pods"
             }
 
             // Bottom right - Watch nodes status

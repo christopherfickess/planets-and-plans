@@ -164,6 +164,21 @@ function __source_default_python__() {
     unset __python_functions_dir__
 }
 
+
+function __source_default_tshl__() {
+    export __tshl_functions_dir__="${__sre_tools_dir__}/tsh"
+    if command -v tsh &>/dev/null; then
+        [[ -f "${__tshl_functions_dir__}/setup.sh" ]] && source "${__tshl_functions_dir__}/setup.sh"
+        # Source user-specific connection scripts
+        for file in "${SRE_TOOLS_DIR}/tsh/defaults/users/"*.sh; do
+            [ -e "$file" ] && source "$file"
+        done
+    fi
+
+    unset -f __source_default_tshl__  # Clean up function after use
+}
+
+
 function reload_sre_tools() {
     [[ -f "${__sre_tools_dir__}/setup.sh" ]] && source "${__sre_tools_dir__}/setup.sh"
     [[ -f "${__sre_tools_dir__}/help.sh" ]] && source "${__sre_tools_dir__}/help.sh"
@@ -178,13 +193,15 @@ __source_cloud_setup__
 __source_docker_functions__
 __source_kubernetes_functions__
 __source_default_python__
+__source_default_tshl__
 reload_sre_tools
 
-unset __source_bashrc_functions__
-unset __source_env_functions__
-unset __source_os_type_functions__
-unset __source_git_functions
-unset __source_cloud_setup__
-unset __source_docker_functions__
-unset __source_kubernetes_functions__
-unset __source_default_python__
+unset -f __source_bashrc_functions__
+unset -f __source_env_functions__
+unset -f __source_os_type_functions__
+unset -f __source_git_functions
+unset -f __source_cloud_setup__
+unset -f __source_docker_functions__
+unset -f __source_kubernetes_functions__
+unset -f __source_default_python__
+unset -f __source_default_tshl__

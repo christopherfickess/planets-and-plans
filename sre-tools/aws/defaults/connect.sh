@@ -1,55 +1,64 @@
 #!/bin/bash
 
-# TELEPORT_LOGIN is set in the tmp/env.sh file
-    # e.g., mattermost.com:443
+function aws.connect.bastion(){
+    if [[ -z "${1}" ]]; then
+        echo -e "${RED}Please set __bastion_host_name__ environment variable before connecting to bastion host.${NC}"
+        return
+    else 
+        export __bastion_host_name__="${1}"
+    fi
 
-function tshl() {
-    if command -v tsh &> /dev/null; then
-        echo "Logging into Teleport proxy at ${TELEPORT_LOGIN}..."
-        tsh login --proxy "${TELEPORT_LOGIN}" --auth=microsoft
+    __bastion_host_id=$(aws ec2 describe-instances \
+        --filters "Name=tag:Name,Values=${__bastion_host_name__}" \
+        --query "Reservations[].Instances[].InstanceId" \
+        --output text)
+
+    echo -e "Starting SSM Session to Bastion Host: ${__INFO_COLOR__}${__bastion_host_id}${NC}"
+
+    aws ssm start-session --target "${__bastion_host_id}" \
+        --document-name AWS-StartInteractiveCommand \
+        --parameters 'command=["sudo -iu ec2-user"]' \
+        --profile "${AWS_PROFILE}"
+}
+
+function aws.connect.ec2.ssm(){
+    if [ -z "${1}" ];then 
+        echo -e "${RED}Pass ec2 id for instance id${NC}"
+        echo -e "${YELLOW}Example: ${NC}aws.connect.ec2.ssm i-0123456789abcdef0"
+        echo -e "${YELLOW}         ${NC}aws.connect.ec2.ssm <instance-id>"
+        echo 
+        echo -e "Additional useful functions:"
+        echo -e "  ${CYAN}aws.get.ec2.id <instance-name>${NC} - Get EC2 instance ID by name"
     else
-        echo "Teleport CLI (tsh) is not installed. Please install it to log in."
+        export __ec2_id__=$(aws ssm start-session --target "${__ec2_id__}" --profile "${AWS_PROFILE}")
     fi
 }
 
-function tshl.login(){
-    if command -v tsh &> /dev/null; then
-        if [ -z "${TELEPORT_LOGIN}" ]; then
-            echo -e "${RED}Please set TELEPORT_LOGIN environment variable before logging in.${NC}"
-            return
-        fi
-        if [ -z "${__customer_name__}" ]; then
-            echo -e "${RED}Please set __customer_name__ environment variable before logging in.${NC}"
-            return
-        fi
-        if [ -z "${__tsh_connect_eks_cluster__}" ]; then
-            echo -e "${RED}Please set __tsh_connect_eks_cluster__ environment variable before logging in.${NC}"
-            return
-        fi
-        echo -e "Logging into Teleport proxy ${MAGENTA}${TELEPORT_LOGIN}${NC}"
-        echo -e "    For Customer: ${MAGENTA}${__customer_name__}${NC}..."
+
+function aws.connect.eks_cluster(){
+    if [[ -z "${1}" ]]; then 
+        echo -e "${RED}Add the cluster name to proceed! ${NC}"
+        return
+    else
+        local __cluster_name__="${1}"
+    fi
+    
+    local __cluster_output__=$(aws eks --region "${AWS_REGION}" \
+            update-kubeconfig --name "${__cluster_name__}" 2>&1)
+    local __cluster_exit_code__=$?
+
+    if [ $__cluster_exit_code__ -ne 0 ] || [ -z "$__cluster_output__" ] || echo "$__cluster_output__" | grep -q "error\|Error\|ERROR"; then
+        echo -e "   ${RED}✗${NC}   Unable to connect to EKS cluster. Please check your credentials and cluster name."
         echo
-        tsh login --proxy="${TELEPORT_LOGIN}" --auth=microsoft "${__tsh_connect_eks_cluster__}"
-    else
-        echo "Teleport CLI (tsh) is not installed. Please install it to log in."
+        return
     fi
+    # local env_tag="${env_tag:-}"
+    echo -e "   ${GREEN}✓${NC} Connected to EKS cluster:    ${__INFO_COLOR__}${__cluster_name__}${NC}"
+    echo
 }
 
-function tshl.connect(){
-    if command -v tsh &> /dev/null; then
-        if [ -z "${__tsh_connect_eks_cluster__}" ]; then
-            echo -e "${RED}Please set __tsh_connect_eks_cluster__ environment variable before connecting.${NC}"
-            return
-        fi
-        echo -e "Connecting to Kubernetes Cluster: ${MAGENTA}${__tsh_connect_eks_cluster__}${NC}..."
-        echo
-        tsh kube login "${__tsh_connect_eks_cluster__}"
-    else
-        echo "Teleport CLI (tsh) is not installed. Please install it to log in."
-    fi
-}
-
-function cluster_connect(){
+# May be useful but dead right now
+function __cluster_connect__(){
     if [[ "${1}" == "-d" || "${1}" == "--dev" && ! -z "${__dev_eks_cluster_name__}" ]]; then
         dev
         local __cluster_name__="${__dev_eks_cluster_name__}"
@@ -76,50 +85,8 @@ function cluster_connect(){
         return
     fi
 
-    __cluster_connect__ "${__cluster_name__}"
+    aws.connect.eks_cluster "${__cluster_name__}"
 }
-
-function __cluster_connect__(){
-    if [[ -z "${1}" ]]; then 
-        echo -e "${RED}Add the cluster name to proceed! ${NC}"
-        __aws_eks_cluster_options__
-        return
-    elif [[ ! -z "${1}" ]]; then
-        local __cluster_name__="${1}"
-    else
-        __aws_eks_cluster_options__
-        return
-    fi
-    
-    local __cluster_output__=$(aws eks --region "${AWS_REGION}" \
-            update-kubeconfig --name "${__cluster_name__}" 2>&1)
-    local __cluster_exit_code__=$?
-
-    if [ $__cluster_exit_code__ -ne 0 ] || [ -z "$__cluster_output__" ] || echo "$__cluster_output__" | grep -q "error\|Error\|ERROR"; then
-        echo -e "   ${RED}✗${NC}   Unable to connect to EKS cluster. Please check your credentials and cluster name."
-        echo
-        return
-    fi
-    # local env_tag="${env_tag:-}"
-    echo -e "   ${GREEN}✓${NC} Connected to EKS cluster:    ${__INFO_COLOR__}${__cluster_name__}${NC}"
-    echo
-}
-
-# Connect to BYOC Staging Internal Bastion Host via SSM
-function __bastion_connect_host__(){
-    __bastion_host_id=$(aws ec2 describe-instances \
-        --filters "Name=tag:Name,Values=${__bastion_host_name__}" \
-        --query "Reservations[].Instances[].InstanceId" \
-        --output text)
-
-    echo -e "Starting SSM Session to Bastion Host: ${__INFO_COLOR__}${__bastion_host_id}${NC}"
-
-    aws ssm start-session --target "${__bastion_host_id}" \
-        --document-name AWS-StartInteractiveCommand \
-        --parameters 'command=["sudo -iu ec2-user"]' \
-        --profile "${AWS_PROFILE}"
-}
-
 
 function __aws_connect_options__(){
     

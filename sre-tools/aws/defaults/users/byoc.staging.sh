@@ -13,26 +13,11 @@ function aws.byoc.staging.login() {
 
 function aws.byoc.staging.connect() {
     aws.byoc.staging
-    __cluster_connect__ "${__staging_internal_eks_cluster_name__}"
+    aws.connect.eks_cluster "${__staging_internal_eks_cluster_name__}"
 }
 
 function aws.byoc.staging.bastion.connect() {
     aws.byoc.staging
     __bastion_host_name__="${__staging_internal_bastion_host_name__}"
-    __bastion_connect_host__
-}
-
-
-# TSL Connections
-function tshl.staging.login() {
-    export __customer_name__="Internal - Staging"
-    export __tsh_connect_eks_cluster__="${__staging_internal_teleport_cluster_name__}"
-    tshl.login
-}
-
-function tshl.staging.connect() {
-    tshl.staging.login
-    export __customer_name__="Internal - Staging"
-    export __tsh_connect_eks_cluster__="${__staging_internal_eks_cluster_name__}"
-    tshl.connect
+    aws.connect.bastion "${__bastion_host_name__}"
 }

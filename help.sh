@@ -81,16 +81,17 @@ function myhelp(){
         show_zellij=true
     fi
 
-    echo ""
-    echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${__HEADER_COLOR__} Dotfiles - Unified Help System${NC}"
-    echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo ""
+    
 
+    
     # If no categories specified, show summary
-    if [ $category_count -eq 0 ]; then
+    if [ $category_count -eq 0 ]; then    
+        echo ""
+        echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${__HEADER_COLOR__} Dotfiles - Unified Help System${NC}"
+        echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
         __myhelp_summary__
-
         echo ""
         echo -e "${__DESCRIPTION_COLOR__}Usage:${NC}"
         echo -e "  ${__COMMAND_COLOR__}myhelp --all${NC}                   Show all available commands"

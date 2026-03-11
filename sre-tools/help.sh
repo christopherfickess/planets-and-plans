@@ -4,7 +4,8 @@
 declare -gA __SRE_TOOLS_LOADED__ 2>/dev/null || true
 
 # Main unified help function
-function myhelp() {
+function myhelp_sre_tools() {
+    __color_help__
     echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${__HEADER_COLOR__} SRE Tools - Unified Help System${NC}"
     echo -e "${__HEADER_COLOR__}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -84,7 +85,7 @@ function myhelp() {
 function myhelp_sre_tools() {
     echo -e "${BOLD}Main Commands:${NC}"
     echo -e "  ${__COMMAND_COLOR__}sre_tools -a${NC}, ${__COMMAND_COLOR__}--all${NC}         Load all SRE tools"
-    echo -e "  ${__COMMAND_COLOR__}sre_tools -aws${NC}               Load AWS functions"
+    echo -e "  ${__COMMAND_COLOR__}sre_tools -aws${NC}, ${__COMMAND_COLOR__}--aws${NC}       Load AWS functions"
     echo -e "  ${__COMMAND_COLOR__}sre_tools -z${NC}, ${__COMMAND_COLOR__}--zellij${NC}      Load Zellij functions"
     echo -e "  ${__COMMAND_COLOR__}sre_tools -M${NC}, ${__COMMAND_COLOR__}--mattermost${NC}  Load Mattermost functions"
     echo -e "  ${__COMMAND_COLOR__}sre_tools -m${NC}, ${__COMMAND_COLOR__}--minikube${NC}    Load Minikube functions"
