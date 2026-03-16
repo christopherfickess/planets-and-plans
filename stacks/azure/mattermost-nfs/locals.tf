@@ -20,7 +20,9 @@ locals {
   nat_public_ip_name = "${local.base_identifier}-nat-pip"
   nat_gateway_name   = "${local.base_identifier}-nat"
 
-  # Figure out how to deploy this group
+  # TODO: switch to new naming convention when bad_naming_convention is removed
+  # admin_group_display_name = "mattermost-nfs-${var.environment}-admins"
+  # user_group_display_name  = "mattermost-nfs-${var.environment}-users"
   admin_group_display_name = "${var.bad_naming_convention}-admins"
   user_group_display_name  = "${var.bad_naming_convention}-users"
 

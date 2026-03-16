@@ -12,7 +12,9 @@ locals {
   nat_gateway_name   = "${local.base_identifier}-nat"
   vnet_name          = "${local.base_identifier}-vnet"
 
-  # Figure out how to deploy this group
+  # TODO: switch to new naming convention when bad_naming_convention is removed
+  # admin_group_display_name = "mattermost-aks-${var.environment}-admins"
+  # user_group_display_name  = "mattermost-aks-${var.environment}-users"
   admin_group_display_name = "${var.bad_naming_convention}-admins"
   user_group_display_name  = "${var.bad_naming_convention}-users"
 
