@@ -27,5 +27,8 @@ module "avm-res-network-virtualnetwork" {
   # Subnets with nat_gateway_enabled get nat_gateway passed so Azure module creates them attached
   subnets = local.subnet_configs_for_azure
 
-  tags = var.tags
+  tags = merge({
+    Name = "${var.unique_name_prefix}-${var.vnet_name}" },
+    var.tags
+  )
 }

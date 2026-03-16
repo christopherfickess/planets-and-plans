@@ -1,9 +1,8 @@
 # stacks/azure/mattermost-aks/tfvars/dev-chris/base.tfvars
 
 # General / Environment Variables
-email_contact       = "christopher.fickess@mattermost.com"
-environment_special = "devchris"
-environment         = "dev-chris"
+email_contact = "christopher.fickess@mattermost.com"
+environment   = "dev-chris"
 location            = "East US 2"
 resource_group_name = "chrisfickess-tfstate-azk"
 unique_name_prefix  = "mattermost-dev"

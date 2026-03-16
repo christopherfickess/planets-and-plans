@@ -1,26 +1,12 @@
 
 locals {
-  date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-  base_identifier = "mattermost-${var.environment}"
-
-  keyvault_name = "${local.base_identifier}-kv"
-
-  # Postgres Variables
-  server_name = "${local.base_identifier}-postgres-flex"
-  vnet_name   = "${local.base_identifier}-vnet"
-
-  private_dns_zone_virtual_network_link_name = "${local.base_identifier}-postgres-link"
-
+  date          = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+  vnet_name     = "${var.unique_name_prefix}-vnet"
+  keyvault_name = "${var.unique_name_prefix}-kv"
 
   # Service Account names for workload identity
-  external_secrets_uami_name = "${local.base_identifier}-external-secrets-identity"
-
-  # Create method for this password securely
-  # administrator_password = "P@ssw0rd1234!"
-
-  # VNet Variables
-  aks_subnet_name = var.aks_subnet_name
-  db_subnet_name  = var.db_subnet_name
+  # Must match uami_name from the mattermost-aks stack service_accounts
+  external_secrets_uami_name = "${var.unique_name_prefix}-external-secrets-identity"
 
   tags = {
     Date           = time_static.deployment_date.rfc3339,

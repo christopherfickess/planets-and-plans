@@ -43,7 +43,7 @@ variable "unique_name_prefix" {
 # DNS Record Variables
 # -------------------------------
 variable "private_dns_zone_vnet_link_name" {
-  description = "Name for the private DNS zone virtual network link."
+  description = "Suffix appended to unique_name_prefix for the private DNS zone VNet link name."
   type        = string
   default     = "dns-link"
 }

@@ -59,7 +59,7 @@ variable "vnet_name" {
 # -------------------------------
 
 variable "storage_share_name" {
-  description = "Name of the storage share."
+  description = "Suffix appended to unique_name_prefix for the NFS file share name."
   type        = string
   default     = "nfs-share"
 }

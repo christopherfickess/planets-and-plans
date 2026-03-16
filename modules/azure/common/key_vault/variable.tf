@@ -48,9 +48,9 @@ variable "azure_primary_group_display_name" {
 }
 
 variable "keyvault_name" {
-  description = "Name of the Azure Key Vault."
+  description = "Suffix appended to unique_name_prefix for the Key Vault name."
   type        = string
-  default    = "kv" 
+  default     = "kv"
 }
 
 variable "purge_protection_enabled" {

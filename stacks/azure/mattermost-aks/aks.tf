@@ -11,7 +11,7 @@ module "mattermost_aks" {
   environment         = var.environment
   location            = var.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
-  unique_name_prefix  = local.base_identifier
+  unique_name_prefix  = var.unique_name_prefix
 
   # Subnets from VNet module
   vnet_subnet = {
@@ -38,8 +38,6 @@ module "mattermost_aks" {
 
   # Storage settings for Azure Files
   deploy_storage                   = var.deploy_storage
-  storage_account_name             = local.storage_account_name
-  storage_share_name               = local.storage_share_name
   storage_share_quota_gb           = var.storage_share_quota_gb
   storage_account_tier             = var.storage_account_tier
   storage_account_replication_type = var.storage_account_replication_type
@@ -55,5 +53,5 @@ module "mattermost_aks" {
   grant_load_balancer_network_access = true
   load_balancer_resource_group      = data.azurerm_resource_group.mattermost_location.name
 
-  tags = merge({ name = "${local.base_identifier}-aks-cluster" }, local.tags)
+  tags = local.tags
 }

@@ -224,14 +224,16 @@ variable "deploy_storage" {
   # default     = false
 }
 
-variable "storage_account_name" {
-  description = "Name for the Azure Storage Account used for Azure Files."
+variable "storage_account_suffix" {
+  description = "Suffix appended to unique_name_prefix (alphanumeric only) for the Azure Storage Account name."
   type        = string
+  default     = "aks"
 }
 
-variable "storage_share_name" {
-  description = "Name for the Azure Files share."
+variable "storage_share_suffix" {
+  description = "Suffix appended to unique_name_prefix for the Azure Files share name."
   type        = string
+  default     = "aks-share"
 }
 
 variable "storage_share_quota_gb" {

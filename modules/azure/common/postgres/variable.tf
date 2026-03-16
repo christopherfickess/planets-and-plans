@@ -54,8 +54,9 @@ variable "high_availability" {
 }
 
 variable "server_name" {
-  description = "The name of the PostgreSQL server."
+  description = "Suffix appended to unique_name_prefix for the PostgreSQL server name."
   type        = string
+  default     = "postgres"
 }
 
 variable "administrator_login" {

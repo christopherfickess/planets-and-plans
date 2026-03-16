@@ -1,7 +1,7 @@
-# stacks/azure/mattermost-azk/variable.tf
-# Messed up Naming comvention need to fix this variable
+# stacks/azure/mattermost-aks/variable.tf
+# TODO: remove bad_naming_convention once Azure AD groups are renamed
 variable "bad_naming_convention" {
-  description = "Will be removed"
+  description = "Will be removed — used only for Azure AD group display names until groups are renamed"
   type        = string
   default     = "chrisfickess-azk-dev"
 }
@@ -16,11 +16,6 @@ variable "email_contact" {
 
 variable "environment" {
   description = "Environment type (e.g., dev, prod)."
-  type        = string
-}
-
-variable "environment_special" {
-  description = "Special environment identifier for unique naming."
   type        = string
 }
 

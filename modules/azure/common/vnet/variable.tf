@@ -83,22 +83,24 @@ variable "nat_gateway_enabled" {
 }
 
 variable "nat_public_ip_name" {
-  description = "The name of the Public IP for the NAT Gateway."
+  description = "Suffix appended to unique_name_prefix for the NAT Gateway Public IP name."
   type        = string
+  default     = "nat-pip"
 }
 
 variable "nat_gateway_name" {
-  description = "The name of the NAT Gateway."
+  description = "Suffix appended to unique_name_prefix for the NAT Gateway name."
   type        = string
+  default     = "nat"
 }
 
 # -------------------------------
 # DNS Variables
 # -------------------------------
 variable "private_dns_zone_virtual_network_link_name" {
-  description = "The name of the virtual network link for the private DNS zone."
+  description = "Suffix appended to unique_name_prefix for the private DNS zone VNet link name."
   type        = string
-  # default     = "${var.vnet_name}-postgres-link"
+  default     = "postgres-dns-link"
 }
 
 variable "private_dns_zone_name" {

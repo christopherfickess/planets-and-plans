@@ -12,7 +12,7 @@ module "load_balancer" {
   source = "../../../modules/azure/common/load_balancer"
 
   lb_type             = var.lb_type
-  unique_name_prefix  = local.base_identifier
+  unique_name_prefix  = var.unique_name_prefix
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = var.location
   subnet_name         = var.lb_type == "alb" ? var.appgw_subnet_name : var.aks_subnet_name

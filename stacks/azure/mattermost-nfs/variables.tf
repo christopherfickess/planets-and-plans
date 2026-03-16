@@ -1,4 +1,5 @@
 
+# TODO: remove once Azure AD groups are renamed
 variable "bad_naming_convention" {
   description = "Will be removed"
   type        = string
@@ -15,11 +16,6 @@ variable "email_contact" {
 
 variable "environment" {
   description = "Environment type (e.g., dev, prod)."
-  type        = string
-}
-
-variable "environment_special" {
-  description = "Special environment identifier for unique naming."
   type        = string
 }
 

@@ -1,30 +1,10 @@
 
 locals {
-  date            = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-  base_identifier = "mattermost-${var.environment}"
+  date      = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+  vnet_name = "${var.unique_name_prefix}-vnet"
 
-  vnet_name = "${local.base_identifier}-vnet"
-
-
-  # Dns and Private Endpoint names
-  private_dns_a_record_name = lower("${local.base_identifier_lower_case_only}nfs")
-  private_endpoint_name     = "${local.base_identifier}-nfs-pe"
-  storage_share_name        = "${local.base_identifier_lower_case_only}share"
-
-  base_identifier_lower_case_only = "mattermost${var.environment_special}"
-
-  # storage_account name
-  storage_account_name = "${local.base_identifier_lower_case_only}store"
-
-  # Nat Gateway and Public IP names
-  nat_public_ip_name = "${local.base_identifier}-nat-pip"
-  nat_gateway_name   = "${local.base_identifier}-nat"
-
-  # TODO: switch to new naming convention when bad_naming_convention is removed
-  # admin_group_display_name = "mattermost-nfs-${var.environment}-admins"
-  # user_group_display_name  = "mattermost-nfs-${var.environment}-users"
-  admin_group_display_name = "${var.bad_naming_convention}-admins"
-  user_group_display_name  = "${var.bad_naming_convention}-users"
+  # DNS A record name must match storage account name (alphanumeric, no hyphens)
+  private_dns_a_record_name = lower(replace(var.unique_name_prefix, "/[^a-z0-9]/", "")) + "nfs"
 
   tags = {
     Date           = time_static.deployment_date.rfc3339,
