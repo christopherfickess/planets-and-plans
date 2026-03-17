@@ -8,8 +8,8 @@ echo ""
 read -p "Namespace (default: chrisfickess): " NAMESPACE
 export APP_NAME="${NAMESPACE:-chrisfickess}"
 
-read -p "Azure Key Vault name for database credentials (default: mattermost-dev-chris-kv): " VAULT_NAME
-VAULT_NAME=${VAULT_NAME:-"mattermost-dev-chris-kv"}
+read -p "Azure Key Vault name for database credentials (default: mattermost-dev-kv): " VAULT_NAME
+VAULT_NAME=${VAULT_NAME:-"mattermost-dev-kv"}
 
 if [ $(az keyvault secret show --vault-name "$VAULT_NAME" --name postgresadmin --query value -o tsv) ]; then
     echo "Retrieved database admin username from Key Vault."
@@ -25,22 +25,27 @@ else
     read -s -p "Admin password: " PGPASSWORD
 fi
 
-read -p "Azure Postgres server name (Default: mattermost-dev-chris-postgres-flex): " PGSERVER
-PGSERVER=${PGSERVER:-mattermost-dev-chris-postgres-flex}
+read -p "Azure Postgres server name (Default: mattermost-dev-postgres): " PGSERVER
+PGSERVER=${PGSERVER:-mattermost-dev-postgres}
+
+read -p "Azure resource group (Default: chrisfickess-tfstate-azk): " PGRESOURCE_GROUP
+PGRESOURCE_GROUP=${PGRESOURCE_GROUP:-chrisfickess-tfstate-azk}
 
 echo ""
 
 PGHOST=$(az postgres flexible-server show \
     --name "$PGSERVER" \
+    --resource-group "$PGRESOURCE_GROUP" \
     --query fullyQualifiedDomainName \
-    -o tsv 2>/dev/null)
+    -o tsv) || true
 
 if [ -n "$PGHOST" ]; then
     echo "Successfully resolved PostgreSQL server hostname."
     echo "Host: $PGHOST"
 else
     echo "Error: Unable to resolve PostgreSQL server hostname."
-    echo "Check server name and resource group."
+    echo "Check server name and resource group: $PGRESOURCE_GROUP"
+    exit 1
 fi
 
 echo "Resolved host: $PGHOST"

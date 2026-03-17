@@ -29,23 +29,8 @@ variable "unique_name_prefix" {
 }
 
 # -------------------------------
-# AKS Cluster Variables (Optional)
-# -------------------------------
-variable "aks_cluster_resource_id" {
-  description = "Resource ID of the AKS cluster. If not provided and aks_cluster_name is set, will be derived from the cluster name."
-  type        = string
-  default     = ""
-}
-
-# -------------------------------
 # Bastion Host Variables
 # -------------------------------
-
-variable "aks_subnet_name" {
-  description = "The name of the AKS subnet."
-  type        = string
-  default     = "aks-subnet"
-}
 
 variable "bastion_subnet_name" {
   description = "The name of the bastion subnet."
