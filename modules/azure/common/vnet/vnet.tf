@@ -7,8 +7,8 @@ locals {
   subnet_configs_for_azure = {
     for k, v in var.subnet_configs : k => merge(
       v,
-      lookup(v, "nat_gateway_enabled", false) == true && lookup(v, "nat_gateway_id", "") != ""
-      ? { nat_gateway = { id = v.nat_gateway_id } }
+      lookup(v, "nat_gateway_enabled", false) == true
+      ? { nat_gateway = { id = azurerm_nat_gateway.nat_gateway.id } }
       : {}
     )
   }

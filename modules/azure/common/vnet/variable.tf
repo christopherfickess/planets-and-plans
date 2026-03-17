@@ -62,7 +62,6 @@ variable "subnet_configs" {
     name                = string
     address_prefixes    = list(string)
     nat_gateway_enabled = bool
-    nat_gateway_id      = string
     delegations = optional(list(object({
       name = string
       service_delegation = object({

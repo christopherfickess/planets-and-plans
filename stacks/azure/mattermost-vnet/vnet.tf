@@ -24,19 +24,16 @@ module "mattermost_vnet" {
       name                = var.aks_subnet_name
       address_prefixes    = var.aks_subnet_addresses
       nat_gateway_enabled = true
-      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
     }
     "bastion-subnet" = {
       name                = var.bastion_subnet_name
       address_prefixes    = var.bastion_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
     }
     "db-subnet" = {
       name                = var.db_subnet_name
       address_prefixes    = var.db_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
 
       delegations = [{
         name = "postgres-flex"
@@ -54,7 +51,6 @@ module "mattermost_vnet" {
       name                = var.jumpbox_subnet_name
       address_prefixes    = var.jumpbox_subnet_addresses
       nat_gateway_enabled = true
-      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
       # NSG is managed by mattermost-bastion stack (azurerm_subnet_network_security_group_association)
       # Do not add nsg here - the Azure module expects network_security_group = { id = "..." }
       # and the bastion stack owns the jumpbox NSG to avoid cross-stack subnet churn
@@ -63,7 +59,6 @@ module "mattermost_vnet" {
       name                = var.appgw_subnet_name
       address_prefixes    = var.appgw_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
     }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {
