@@ -20,3 +20,7 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 8065
+    - name: app
+      protocol: TCP
+      port: 8065
+      targetPort: 8065
