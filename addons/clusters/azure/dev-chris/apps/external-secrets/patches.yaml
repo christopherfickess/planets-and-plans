@@ -12,7 +12,10 @@ spec:
       name: external-secrets
       automount: true
       annotations:
-        azure.workload.identity/client-id: "2d358d95-2457-49dd-a7c8-9479cac7b2b0"
+        # comes from output at aks module
+        # module.mattermost_aks.identity_client_ids["external-secrets"]
+        azure.workload.identity/client-id: "b906bc86-26bc-4a34-b573-58b9ba6654b0"
         azure.workload.identity/tenant-id: "7419f71d-0b07-4d0a-89b8-3a4be2ec8627"
+        azure.workload.identity/use: "true"
         eks.amazonaws.com/role-arn: null
   interval: 5m0s

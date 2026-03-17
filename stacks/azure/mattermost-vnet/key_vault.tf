@@ -9,6 +9,7 @@ module "mattermost_key_vault" {
   environment                      = var.environment
   email_contact                    = var.email_contact
   azure_primary_group_display_name = var.azure_primary_group_display_name
+  enable_rbac_authorization        = true
   tags                             = local.tags
 }
 

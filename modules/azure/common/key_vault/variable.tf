@@ -58,3 +58,9 @@ variable "purge_protection_enabled" {
   type        = bool
   default     = true
 }
+
+variable "enable_rbac_authorization" {
+  description = "Enable Azure RBAC authorization for the Key Vault. When true, access policies are replaced by role assignments."
+  type        = bool
+  default     = false
+}

@@ -1,43 +1,56 @@
 
+# -------------------------------------------------------
+# Cluster identity
+# -------------------------------------------------------
+output "aks_id" {
+  value       = module.mattermost_aks.aks_id
+  description = "Resource ID of the AKS cluster."
+}
 
-# Output AKS Variables
-output "aks_variables" {
+output "aks_name" {
+  value       = module.mattermost_aks.aks_name
+  description = "Name of the AKS cluster."
+}
+
+output "oidc_issuer_url" {
+  value       = module.mattermost_aks.oidc_issuer_url
+  description = "OIDC issuer URL — needed when creating federated identity credentials outside Terraform."
+}
+
+# -------------------------------------------------------
+# Workload identity — one entry per service account
+# -------------------------------------------------------
+output "workload_identity" {
   value = {
-    aks_id                               = module.mattermost_aks.aks_id
-    admin_username                       = module.mattermost_aks.admin_username
-    aks_name                             = module.mattermost_aks.aks_name
-    azure_policy_enabled                 = module.mattermost_aks.azure_policy_enabled
-    azurerm_log_analytics_workspace_id   = module.mattermost_aks.azurerm_log_analytics_workspace_id
-    azurerm_log_analytics_workspace_name = module.mattermost_aks.azurerm_log_analytics_workspace_name
-    ingress_application_gateway_enabled  = module.mattermost_aks.ingress_application_gateway_enabled
-    key_vault_secrets_provider           = module.mattermost_aks.key_vault_secrets_provider
-    key_vault_secrets_provider_enabled   = module.mattermost_aks.key_vault_secrets_provider_enabled
-    location                             = module.mattermost_aks.location
-    network_profile                      = module.mattermost_aks.network_profile
-    oidc_issuer_url                      = module.mattermost_aks.oidc_issuer_url
-    username                             = module.mattermost_aks.username
+    for k in keys(module.mattermost_aks.identity_client_ids) : k => {
+      client_id    = module.mattermost_aks.identity_client_ids[k]
+      principal_id = module.mattermost_aks.identity_principal_ids[k]
+      annotation   = "azure.workload.identity/client-id: \"${module.mattermost_aks.identity_client_ids[k]}\""
+      namespace    = local.service_account_names[k].namespace
+    }
   }
-  sensitive = true
+  description = "Per service account: client_id, principal_id, ready-to-paste annotation, and namespace."
 }
 
-output "current_time" {
-  value = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
-}
-
+# -------------------------------------------------------
+# RBAC group IDs
+# -------------------------------------------------------
 output "aks_admin_group_object_id" {
   value       = module.mattermost_aks.aks_admin_group_object_id
-  description = "Object ID of the Azure AD group with admin access to AKS"
+  description = "Object ID of the Azure AD group with admin access to AKS."
 }
 
 output "aks_user_group_object_id" {
   value       = module.mattermost_aks.aks_user_group_object_id
-  description = "Object ID of the Azure AD group with user access to AKS"
+  description = "Object ID of the Azure AD group with user access to AKS."
 }
 
-# output "mattermost_fqdn" {
-#   value       = module.dns_record.mattermost_fqdn
-#   description = "Fully qualified domain name for Mattermost deployment"
-# }
+# -------------------------------------------------------
+# Connection instructions
+# -------------------------------------------------------
+output "current_time" {
+  value = formatdate("YYYY-DD-MM", time_static.deployment_date.rfc3339)
+}
 
 output "connect_cluster" {
   value       = <<-EOT
@@ -48,11 +61,13 @@ az account set --subscription ${data.azurerm_subscription.current.subscription_i
 To connect to the AKS cluster, run the following command:
 az aks get-credentials \
   --resource-group ${var.resource_group_name} \
-  --name ${module.mattermost_aks.aks_name} \
-  --admin
+  --name ${module.mattermost_aks.aks_name}
 
 Update your kubeconfig with the AKS cluster credentials:
-kubelogin azurecli --subscription-id ${data.azurerm_subscription.current.subscription_id} --resource-group ${var.resource_group_name} --name ${module.mattermost_aks.aks_name}
+kubelogin azurecli \
+  --subscription-id ${data.azurerm_subscription.current.subscription_id} \
+  --resource-group ${var.resource_group_name} \
+  --name ${module.mattermost_aks.aks_name}
 EOT
-  description = "Instructions for connecting to the AKS cluster using Azure CLI and kubectl."
+  description = "Instructions for connecting to the AKS cluster."
 }

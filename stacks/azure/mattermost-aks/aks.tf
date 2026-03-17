@@ -45,6 +45,7 @@ module "mattermost_aks" {
 
   ## Service_accounts
   service_accounts = local.service_account_names
+  key_vault_id     = data.azurerm_key_vault.mattermost.id
 
   # Load balancer deployed in mattermost-vnet stack; use AGIC brownfield or NLB annotations
   enable_application_gateway_ingress = false

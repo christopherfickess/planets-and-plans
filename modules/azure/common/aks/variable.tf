@@ -255,21 +255,29 @@ variable "storage_account_replication_type" {
 }
 
 variable "service_accounts" {
-  description = "Map of service accounts to create and manage with UAMI + federated identity"
+  description = "Map of service accounts to create and manage with UAMI + federated identity. Set key_vault_roles to grant RBAC access to the Key Vault (requires key_vault_id)."
   type = map(object({
-    namespace : string
-    uami_name : string
+    namespace        = string
+    uami_name        = string
+    key_vault_roles  = optional(list(string), [])
   }))
   # default = {
-  #     external-secrets = { 
-  #       namespace = "external-secrets", 
-  #       uami_name = "external-secrets-identity" 
+  #     external-secrets = {
+  #       namespace       = "external-secrets"
+  #       uami_name       = "external-secrets-identity"
+  #       key_vault_roles = ["Key Vault Secrets User"]
   #   }
-  #     db-secrets       = { 
-  #       namespace = "secrets", 
-  #       uami_name = "db-secrets-identity" 
+  #     db-secrets = {
+  #       namespace = "secrets"
+  #       uami_name = "db-secrets-identity"
   #   }
   # }
+}
+
+variable "key_vault_id" {
+  description = "Resource ID of the Key Vault to grant service account role assignments. Required if any service account has key_vault_roles set."
+  type        = string
+  default     = null
 }
 
 variable "enable_application_gateway_ingress" {

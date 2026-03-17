@@ -12,8 +12,9 @@ locals {
   # service account for workload identity
   service_account_names = {
     external-secrets = {
-      namespace = "external-secrets"
-      uami_name = "${var.unique_name_prefix}-external-secrets-identity"
+      namespace       = "external-secrets"
+      uami_name       = "${var.unique_name_prefix}-external-secrets-identity"
+      key_vault_roles = ["Key Vault Secrets User"]
     }
     db-secrets = {
       namespace = "secrets"
