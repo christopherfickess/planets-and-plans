@@ -1,6 +1,6 @@
 
 data "azuread_group" "aks_pde_admins" {
-  display_name = var.azure_pde_admin_group_display_name
+  display_name = var.azure_primary_group_display_name
 }
 
 resource "azurerm_role_assignment" "aks_pde_admins" {

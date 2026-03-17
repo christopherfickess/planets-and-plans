@@ -54,7 +54,6 @@ variable "private_dns_zone_name" {
 variable "azure_primary_group_display_name" {
   description = "Display name of the Azure AD group to grant access to the NFS."
   type        = string
-  default     = "Azure PDE"
 }
 
 # -------------------------------

@@ -12,3 +12,4 @@ aks_subnet_name = "aks-subnet"
 db_subnet_name  = "db-subnet"
 
 # Database Variables
+azure_primary_group_display_name = "Azure PDE"

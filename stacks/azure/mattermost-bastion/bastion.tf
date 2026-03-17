@@ -1,41 +1,13 @@
 # stacks/azure/mattermost-bastion/bastion.tf
 
-# Public IP for Azure Bastion
-# # Create Bastion Subnet 
-# resource "azurerm_subnet" "bastion" { 
-#   depends_on = [data.azurerm_virtual_network.vnet] 
-#   name = "AzureBastionSubnet" 
-#   resource_group_name = data.azurerm_virtual_network.vnet.resource_group_name 
-#   virtual_network_name = data.azurerm_virtual_network.vnet.name 
-#   address_prefixes = var.bastion_subnet_addresses 
-# } 
-
-# # Create Jumpbox Subnet 
-# resource "azurerm_subnet" "jumpbox" { 
-#   depends_on = [data.azurerm_virtual_network.vnet] 
-#   name = "jumpbox-subnet" 
-#   resource_group_name = data.azurerm_virtual_network.vnet.resource_group_name 
-#   virtual_network_name = data.azurerm_virtual_network.vnet.name 
-#   address_prefixes = var.jumpbox_subnet_addresses 
-# } 
-# # Public IP for Azure Bastion 
-# resource "azurerm_public_ip" "bastion" { 
-#   name = "${local.base_identifier}-bastion-pip" 
-#   location = var.location 
-#   resource_group_name = data.azurerm_resource_group.mattermost_location.name 
-#   allocation_method = "Static" 
-#   sku = "Standard" 
-#   tags = merge({ name = "${local.base_identifier}-bastion-pip" }, local.tags) 
-# }
-
 resource "azurerm_public_ip" "bastion" {
-  name                = "${local.base_identifier}-bastion-pip"
+  name                = "${var.unique_name_prefix}-bastion-pip"
   location            = data.azurerm_resource_group.mattermost_location.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   allocation_method   = "Static"
   sku                 = "Standard"
 
-  tags = merge({ name = "${local.base_identifier}-bastion-pip" }, local.tags)
+  tags = merge({ name = "${var.unique_name_prefix}-bastion-pip" }, local.tags)
 }
 
 # Azure Bastion Host
@@ -63,7 +35,7 @@ resource "azurerm_bastion_host" "main" {
 
 # Network Security Group for Jumpbox Subnet
 resource "azurerm_network_security_group" "jumpbox" {
-  name                = local.jumpbox_network_security_group_name
+  name                = "${var.unique_name_prefix}-jumpbox-nsg"
   location            = data.azurerm_resource_group.mattermost_location.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
 
@@ -104,7 +76,7 @@ resource "azurerm_subnet_network_security_group_association" "jumpbox" {
 
 # Network Interface for Jumpbox VM
 resource "azurerm_network_interface" "jumpbox" {
-  name                = local.jumpbox_network_interface_name
+  name                = "${var.unique_name_prefix}-jumpbox-nic"
   location            = data.azurerm_resource_group.mattermost_location.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
 
@@ -119,7 +91,7 @@ resource "azurerm_network_interface" "jumpbox" {
 
 # User Assigned Managed Identity for Jumpbox
 resource "azurerm_user_assigned_identity" "jumpbox" {
-  name                = local.jumpbox_identifier_name
+  name                = "${var.unique_name_prefix}-jumpbox-identity"
   location            = data.azurerm_resource_group.mattermost_location.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
 
@@ -152,7 +124,7 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
     data.azurerm_kubernetes_cluster.aks
   ]
 
-  name                = local.jumpbox_name
+  name                = "${var.unique_name_prefix}-jumpbox"
   location            = data.azurerm_resource_group.mattermost_location.location
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   size                = var.jumpbox_vm_size
@@ -174,7 +146,7 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
   }
 
   os_disk {
-    name                 = local.jumpbox_os_disk_name
+    name                 = "${var.unique_name_prefix}-jumpbox-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
@@ -190,12 +162,13 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
 
   # Custom data script to install kubectl, Azure CLI, and configure AKS access
   custom_data = base64encode(templatefile("${path.module}/scripts/jumpbox-centos-setup.yaml", {
-    AKS_NAME            = local.aks_cluster_name
+    AKS_NAME            = "${var.unique_name_prefix}-aks"
     ADMIN_USERNAME      = var.jumpbox_admin_username
     MANAGED_IDENTITY_ID = azurerm_user_assigned_identity.jumpbox.client_id
     PUBLIC_KEY_CONTENT  = tls_private_key.jumpbox.public_key_openssh
     RESOURCE_GROUP_NAME = data.azurerm_resource_group.mattermost_location.name
   }))
 
-  tags = merge({ name = local.jumpbox_name }, local.tags)
+  tags = merge({ name = "${var.unique_name_prefix}-jumpbox" }, local.tags)
+  # tags = merge({ name = local.jumpbox_name }, local.tags)
 }

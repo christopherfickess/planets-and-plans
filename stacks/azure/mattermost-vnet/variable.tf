@@ -44,13 +44,11 @@ variable "aks_admin_rbac_name" {
 variable "address_space" {
   description = "The address space that is used by the Virtual Network."
   type        = list(string)
-  default     = ["172.16.12.0/23"]
 }
 
 variable "aks_subnet_name" {
   description = "The name of the AKS subnet."
   type        = string
-  default     = "aks-subnet"
 }
 
 variable "aks_subnet_addresses" {
@@ -62,49 +60,41 @@ variable "aks_subnet_addresses" {
 variable "bastion_subnet_name" {
   description = "The name of the bastion subnet."
   type        = string
-  default     = "AzureBastionSubnet"
 }
 
 variable "bastion_subnet_addresses" {
   description = "The address prefixes for the bastion subnet."
   type        = list(string)
-  default     = ["172.16.13.0/26"]
 }
 
 variable "db_subnet_name" {
   description = "The name of the database subnet."
   type        = string
-  default     = "db-subnet"
 }
 
 variable "db_subnet_addresses" {
   description = "The address prefixes for the database subnet."
   type        = list(string)
-  default     = ["172.16.13.64/27"]
 }
 
 variable "jumpbox_subnet_name" {
   description = "The name of the jumpbox subnet."
   type        = string
-  default     = "jumpbox-subnet"
 }
 
 variable "jumpbox_subnet_addresses" {
   description = "The address prefixes for the jumpbox subnet."
   type        = list(string)
-  default     = ["172.16.13.96/28"]
 }
 
 variable "appgw_subnet_name" {
   description = "The name of the Application Gateway subnet (dedicated, no other resources)."
   type        = string
-  default     = "appgw-subnet"
 }
 
 variable "appgw_subnet_addresses" {
   description = "The address prefixes for the Application Gateway subnet (min /26)."
   type        = list(string)
-  default     = ["172.16.13.128/28"]
 }
 
 # -------------------------------
@@ -143,7 +133,6 @@ variable "deploy_gateway" {
 variable "mattermost_domain" {
   description = "Custom domain for Mattermost deployment (full hostname)."
   type        = string
-  default     = "dev-chris.dev.cloud.mattermost.com"
 }
 
 # -------------------------------
@@ -158,13 +147,11 @@ variable "deploy_mattermost_public_dns" {
 variable "mattermost_dns_zone_name" {
   description = "DNS zone name for Mattermost (e.g. testing.cloud.mattermost.com). Used when deploy_mattermost_public_dns = true."
   type        = string
-  default     = "testing.cloud.mattermost.com"
 }
 
 variable "mattermost_dns_record_name" {
   description = "CNAME record name in the zone (e.g. mattermost for mattermost.testing.cloud.mattermost.com)."
   type        = string
-  default     = "mattermost"
 }
 
 variable "private_dns_zone_vnet_link_name" {
@@ -180,7 +167,6 @@ variable "private_dns_zone_vnet_link_name" {
 variable "azure_primary_group_display_name" {
   description = "Display name of the Azure AD group to grant access to the Key Vault."
   type        = string
-  default     = "Azure PDE"
 }
 
 # -------------------------------

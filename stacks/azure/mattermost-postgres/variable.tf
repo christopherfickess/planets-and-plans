@@ -147,7 +147,7 @@ variable "external_secrets_uami_name" {
 # -------------------------------
 # DNS Variables
 # -------------------------------
-variable "azure_pde_admin_group_display_name" {
+variable "azure_primary_group_display_name" {
   description = "Display name for the Azure PDE admin group."
   type        = string
   default     = "Azure PDE"

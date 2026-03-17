@@ -1,21 +1,24 @@
 # stacks/azure/mattermost-aks/tfvars/dev-chris/base.tfvars
 
 # General / Environment Variables
-email_contact = "christopher.fickess@mattermost.com"
-environment   = "dev-chris"
+email_contact       = "christopher.fickess@mattermost.com"
+environment         = "dev-chris"
 location            = "East US 2"
 resource_group_name = "chrisfickess-tfstate-azk"
 unique_name_prefix  = "mattermost-dev"
 
 # Azure AD / Group Variables
-azure_pde_admin_group_display_name = "Azure PDE"
-aks_admin_rbac_name                = "aks-admin"
+azure_primary_group_display_name = "Azure PDE"
+aks_admin_rbac_name              = "aks-admin"
 
 # Networking / Virtual Network Variables
 # These should match your existing VNet configuration
-# address_space        = ["172.16.12.0/23"]
-# aks_subnet_name      = "aks-subnet"
-# aks_subnet_addresses = ["172.16.12.0/24"]
+address_space                    = ["172.16.12.0/23"]
+aks_subnet_name                  = "aks-subnet"
+aks_subnet_addresses             = ["172.16.12.0/24"]
+application_gateway_subnet_cidrs = ["172.16.13.128/28"]
+application_gateway_subnet_name  = "appgw-subnet"
+
 
 # AKS Cluster Core Variables
 # Match existing cluster values to prevent replacement
