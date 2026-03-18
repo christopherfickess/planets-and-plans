@@ -26,7 +26,7 @@ spec:
     # Dev: disable strict hostname/backchannel checks
   # Must match spec.rules[0].host in service.yaml (the Ingress).
   hostname:
-    hostname: keycloak.mattermost-dev-agic.eastus2.cloudapp.azure.com
+    hostname: keycloak-dev-chris.dev.cloud.mattermost.com
     strict: false
     strictBackchannel: false
 
