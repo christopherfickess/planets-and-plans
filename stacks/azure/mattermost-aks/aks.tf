@@ -47,8 +47,12 @@ module "mattermost_aks" {
   service_accounts = local.service_account_names
   key_vault_id     = data.azurerm_key_vault.mattermost.id
 
-  # Load balancer deployed in mattermost-vnet stack; use AGIC brownfield or NLB annotations
-  enable_application_gateway_ingress = false
+  # AGIC — greenfield: AKS provisions the Application Gateway and AGIC add-on automatically.
+  # Subnet and CIDR come from tfvars; App Gateway lands in the MC_ node resource group.
+  enable_application_gateway_ingress              = var.enable_application_gateway_ingress
+  application_gateway_subnet_name                 = var.application_gateway_subnet_name
+  application_gateway_subnet_cidrs                = var.application_gateway_subnet_cidrs
+  create_role_assignments_for_application_gateway = true
 
   # Grant AKS kubelet identity Network Contributor on RG containing PIP (azure-pip-name)
   grant_load_balancer_network_access = true

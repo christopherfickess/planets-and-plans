@@ -1,15 +1,42 @@
-apiVersion: v1
-kind: Service
+# addons/clusters/azure/dev-chris/apps/keycloak/keycloak/service.yaml
+
+# Previous (dedicated LoadBalancer service — replaced by AGIC Ingress):
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: keycloak-lb
+#   namespace: keycloak
+#   annotations:
+#     service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
+#     service.beta.kubernetes.io/azure-pip-name: "keycloak-dev-pip"
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: keycloak
+#   ports:
+#     - port: 80
+#       targetPort: 8080
+
+# AGIC Ingress — routes keycloak.{domain} through the shared Application Gateway.
+# Update spec.rules[0].host after running terraform apply to get the App Gateway FQDN,
+# then update hostname in release.yaml to match.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: keycloak-lb
+  name: keycloak
   namespace: keycloak
   annotations:
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
-    service.beta.kubernetes.io/azure-pip-name: "keycloak-dev-pip"
+    kubernetes.io/ingress.class: azure/application-gateway
 spec:
-  type: LoadBalancer
-  selector:
-    app: keycloak # verify this matches the operator's pod labels
-  ports:
-    - port: 80
-      targetPort: 8080
+  rules:
+    - host: keycloak.mattermost-dev-alb.eastus2.cloudapp.azure.com  # TODO: replace with actual App Gateway FQDN after terraform apply
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak-service
+                port:
+                  number: 8080
