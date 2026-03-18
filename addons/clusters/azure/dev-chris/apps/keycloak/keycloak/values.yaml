@@ -12,10 +12,7 @@
 #   security:
 #     allowInsecureImages: true
 
-# Pin image tag — chart default may reference a tag not yet pushed to Docker Hub
-# Check available tags: https://hub.docker.com/r/bitnami/keycloak/tags
-image:
-  tag: 22.0.5
+# image.tag: 22.0.5  # removed — tag doesn't exist on Docker Hub; let chart 21.x.x pick its default (Keycloak 24.x)
 
 nameOverride: keycloak
 fullnameOverride: keycloak
