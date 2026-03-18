@@ -9,8 +9,8 @@
 
 # Pin image tag — chart default may reference a tag not yet pushed to Docker Hub
 # Check available tags: https://hub.docker.com/r/bitnami/postgresql/tags
-# image:
-#   tag: "16.6.0-debian-12-r4"
+image:
+  tag: latest
 
 nameOverride: keycloak-postgres
 fullnameOverride: keycloak-postgres
