@@ -11,7 +11,7 @@
 data "azuread_group" "cluster_admin" {
   count = var.manage_entra_groups ? 0 : 1
 
-  display_name     = "${var.unique_name_prefix}-aks-admin"
+  display_name     = var.admin_group_display_name
   security_enabled = true
 
   lifecycle {
@@ -33,7 +33,7 @@ data "azuread_group" "cluster_admin" {
 data "azuread_group" "cluster_user" {
   count = var.manage_entra_groups ? 0 : 1
 
-  display_name     = "${var.unique_name_prefix}-aks-user"
+  display_name     = var.user_group_display_name
   security_enabled = true
 
   lifecycle {
