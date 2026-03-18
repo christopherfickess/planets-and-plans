@@ -17,7 +17,8 @@ externalDatabase:
   port: 5432
   database: keycloak
   user: keycloak
-  password: "keycloak-dev-password"
+  existingSecret: keycloak-db-credentials
+  existingSecretPasswordKey: keycloak-dev-password
 
 # Dev mode: disables strict hostname/TLS checks, no clustering needed
 production: false
