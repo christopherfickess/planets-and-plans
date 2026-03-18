@@ -21,19 +21,19 @@ spec:
   image: mattermost/mattermost-enterprise-fips-edition
   mattermostEnv:
     # OpenID Settings
-    - name: MM_OPENIDSETTINGS_ENABLE
-      value: "true"
-    - name: MM_OPENIDSETTINGS_BUTTONTEXT
-      value: "Login with Keycloak"
-    - name: MM_OPENIDSETTINGS_DISCOVERYENDPOINT
-      value: "https://<keycloak-external-url>/realms/mattermost/.well-known/openid-configuration"
-    - name: MM_OPENIDSETTINGS_ID
-      value: "<your-client-id>"
-    - name: MM_OPENIDSETTINGS_SECRET
-      valueFrom:
-        secretKeyRef:
-          name: keycloak-oidc
-          key: client-secret
+    # - name: MM_OPENIDSETTINGS_ENABLE
+    #   value: "true"
+    # - name: MM_OPENIDSETTINGS_BUTTONTEXT
+    #   value: "Login with Keycloak"
+    # - name: MM_OPENIDSETTINGS_DISCOVERYENDPOINT
+    #   value: "https://<keycloak-external-url>/realms/mattermost/.well-known/openid-configuration"
+    # - name: MM_OPENIDSETTINGS_ID
+    #   value: "<your-client-id>"
+    # - name: MM_OPENIDSETTINGS_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: keycloak-oidc
+    #       key: client-secret
     - name: MM_SITEURL
       value: "https://dev-chris.dev.cloud.mattermost.com"
     - name: MM_FILESETTINGS_DRIVERNAME
