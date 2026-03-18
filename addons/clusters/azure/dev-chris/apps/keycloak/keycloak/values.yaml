@@ -12,6 +12,8 @@
 
 global:
   imageRegistry: oci.bitnami.com
+  security:
+    allowInsecureImages: true
 
 nameOverride: keycloak
 fullnameOverride: keycloak

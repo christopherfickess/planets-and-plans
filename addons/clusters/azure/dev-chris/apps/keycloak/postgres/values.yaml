@@ -7,6 +7,8 @@
 
 global:
   imageRegistry: oci.bitnami.com
+  security:
+    allowInsecureImages: true
 
 nameOverride: keycloak-postgres
 fullnameOverride: keycloak-postgres
