@@ -5,8 +5,17 @@ nameOverride: keycloak
 fullnameOverride: keycloak
 
 auth:
-  adminUser: admin
-  adminPassword: "admin-dev-password"
+  adminUser:
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-db-credentials
+        key: keycloak-admin-user
+
+  adminPassword:
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-db-credentials
+        key: keycloak-admin-password
 
 # Use the in-cluster postgres pod — disable the bundled postgres subchart
 postgresql:

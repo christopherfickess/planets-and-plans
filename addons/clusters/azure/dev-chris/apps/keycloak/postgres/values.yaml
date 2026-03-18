@@ -10,7 +10,7 @@ auth:
   existingSecret: keycloak-db-credentials
   secretKeys:
     userPasswordKey: keycloak-dev-password
-    adminPasswordKey: postgres-password
+    adminPasswordKey: keycloak-postgres-password
 
 primary:
   persistence:
