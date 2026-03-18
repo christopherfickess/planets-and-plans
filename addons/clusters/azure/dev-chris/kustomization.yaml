@@ -11,7 +11,7 @@ resources:
   - apps/external-secrets
   - apps/keycloak/postgres
   - apps/keycloak/operator
-  - apps/keycloak/keycloak
+  # - apps/keycloak/keycloak
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
   # - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost

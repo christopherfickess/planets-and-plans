@@ -10,3 +10,4 @@ namespace: flux-system
 resources:
   - source.yaml
   - install.yaml
+  - keycloak-instance.yaml
