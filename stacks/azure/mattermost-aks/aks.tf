@@ -26,7 +26,7 @@ module "mattermost_aks" {
   # AKS RBAC groups
   rbac_aad_tenant_id = data.azurerm_client_config.current.tenant_id
   # azure_pde_admin_group_display_name = var.azure_pde_admin_group_display_name
-  aks_admin_rbac_name      = var.aks_admin_rbac_name
+  # aks_admin_rbac_name      = var.aks_admin_rbac_name
   admin_group_display_name = local.admin_group_display_name
   user_group_display_name  = local.user_group_display_name
 
@@ -52,7 +52,7 @@ module "mattermost_aks" {
 
   # Grant AKS kubelet identity Network Contributor on RG containing PIP (azure-pip-name)
   grant_load_balancer_network_access = true
-  load_balancer_resource_group      = data.azurerm_resource_group.mattermost_location.name
+  load_balancer_resource_group       = data.azurerm_resource_group.mattermost_location.name
 
   tags = local.tags
 }

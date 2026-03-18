@@ -13,6 +13,8 @@ mattermost_domain            = "dev-chris.dev.cloud.mattermost.com"
 mattermost_dns_zone_name     = "dev.cloud.mattermost.com"
 mattermost_dns_record_name   = "dev-chris"
 
+azure_primary_group_display_name = "Azure PDE"
+
 # Networking Variables
 address_space = ["172.16.12.0/23"]
 

@@ -47,12 +47,12 @@ output "username" {
 }
 
 output "aks_admin_group_object_id" {
-  value       = data.azuread_group.aks_admins.object_id
+  value       = local.cluster_admin_object_id
   description = "Object ID of the Azure AD group with admin access to AKS"
 }
 
 output "aks_user_group_object_id" {
-  value       = data.azuread_group.aks_users.object_id
+  value       = local.cluster_user_object_id
   description = "Object ID of the Azure AD group with user access to AKS"
 }
 

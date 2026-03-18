@@ -43,15 +43,17 @@ variable "unique_name_prefix" {
 # -------------------------------
 # Azure AD / Group Variables
 # -------------------------------
-# variable "azure_pde_admin_group_display_name" {
-#   description = "Display name for the Azure PDE admin group."
+
+variable "manage_entra_groups" {
+  description = "Set to true if the Terraform SP has Entra ID Groups Administrator role. If false, groups must be pre-created and their display names set in var.cluster_admin_group_name and var.cluster_user_group_name."
+  type        = bool
+  default     = false
+}
+
+# variable "aks_admin_rbac_name" {
+#   description = "User or service principal UPN that should have cluster-admin binding inside AKS"
 #   type        = string
 # }
-
-variable "aks_admin_rbac_name" {
-  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
-  type        = string
-}
 
 variable "admin_group_display_name" {
   description = "Display name for the Azure AD admin group."
@@ -257,9 +259,9 @@ variable "storage_account_replication_type" {
 variable "service_accounts" {
   description = "Map of service accounts to create and manage with UAMI + federated identity. Set key_vault_roles to grant RBAC access to the Key Vault (requires key_vault_id)."
   type = map(object({
-    namespace        = string
-    uami_name        = string
-    key_vault_roles  = optional(list(string), [])
+    namespace       = string
+    uami_name       = string
+    key_vault_roles = optional(list(string), [])
   }))
   # default = {
   #     external-secrets = {

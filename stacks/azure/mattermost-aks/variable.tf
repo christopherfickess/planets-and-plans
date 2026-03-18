@@ -43,12 +43,6 @@ variable "azure_primary_group_display_name" {
   type        = string
 }
 
-variable "aks_admin_rbac_name" {
-  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
-  type        = string
-  default     = "aks-admin"
-}
-
 # -------------------------------
 # Networking / Virtual Network Variables
 # -------------------------------

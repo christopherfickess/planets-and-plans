@@ -72,7 +72,7 @@ module "aks" {
 
   rbac_aad_tenant_id              = var.rbac_aad_tenant_id
   rbac_aad_azure_rbac_enabled     = true
-  rbac_aad_admin_group_object_ids = [data.azuread_group.aks_admins.object_id]
+  rbac_aad_admin_group_object_ids = [local.cluster_admin_object_id]
 
   local_account_disabled = true
 
