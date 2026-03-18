@@ -11,8 +11,8 @@ spec:
   # Azure Files NFS requires path: /<storage-account-name>/<file-share-name>
   # Verify share name from: terraform output -json nfs | jq -r '.nfs_share_name'
   nfs:
-    server: mattermostdevchrisnfs.privatelink.file.core.windows.net
-    path: /mattermostdevchrisnfs/mattermostdevchrisshare
+    server: mattermostdevnfs.privatelink.file.core.windows.net
+    path: /mattermostdevnfs/mattermostdevshare
   mountOptions:
     - vers=4
     - minorversion=1
@@ -27,11 +27,10 @@ metadata:
   name: mattermost-nfs-pvc
   namespace: mattermost
 spec:
-  storageClassName: ""  # Required: use pre-provisioned PV, not default StorageClass
+  storageClassName: "" # Required: use pre-provisioned PV, not default StorageClass
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: 5Gi
   volumeName: mattermost-nfs-volume
-

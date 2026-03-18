@@ -1,5 +1,5 @@
 resource "azurerm_postgresql_flexible_server" "mattermost_postgressql" {
-  name                = var.server_name
+  name                = "${var.unique_name_prefix}-${var.server_name}"
   resource_group_name = var.resource_group_name
   location            = var.location
 
@@ -23,7 +23,7 @@ resource "azurerm_postgresql_flexible_server" "mattermost_postgressql" {
   # high_availability = var.high_availability
 
 
-  tags = var.tags
+  tags = merge(var.tags, { Name = "${var.unique_name_prefix}-${var.server_name}" })
 }
 
 resource "azurerm_postgresql_flexible_server_database" "mattermost_databases" {

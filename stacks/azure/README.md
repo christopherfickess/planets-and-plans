@@ -65,10 +65,10 @@ pushd stacks/azure/mattermost-vnet/
 popd
 ```
 
-### 4.2 Deploy the AZK Stack
+### 4.2 Deploy the AKS Stack
 
 ```bash
-pushd stacks/azure/mattermost-azk/
+pushd stacks/azure/mattermost-aks/
     TF_VARS="dev-chris"
     terraform init --migrate-state -backend-config=tfvars/${TF_VARS}/backend.hcl
     terraform plan -var-file="tfvars/${TF_VARS}/base.tfvars" -out="plan.tfplan"

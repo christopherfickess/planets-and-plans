@@ -42,20 +42,30 @@ variable "availability_zone" {
 # -------------------------------
 variable "high_availability" {
   type = object({
-    mode                      = string # either "ZoneRedundant" or "SameZone"
-    standby_availability_zone = string # optional, required if mode is SameZone
+    mode                      = string
+    standby_availability_zone = optional(string, "")
   })
   default = {
-    mode                      = "Disabled"
-    standby_availability_zone = ""
+    mode = "Disabled"
   }
 
-  # default = null
+  validation {
+    condition     = contains(["Disabled", "ZoneRedundant", "SameZone"], var.high_availability.mode)
+    error_message = "high_availability.mode must be one of: Disabled, ZoneRedundant, SameZone."
+  }
+
+  validation {
+    condition     = !(var.high_availability.mode == "SameZone" && var.high_availability.standby_availability_zone == "")
+    error_message = "standby_availability_zone must be set when mode is SameZone."
+  }
 }
 
+
+
 variable "server_name" {
-  description = "The name of the PostgreSQL server."
+  description = "Suffix appended to unique_name_prefix for the PostgreSQL server name."
   type        = string
+  default     = "postgres"
 }
 
 variable "administrator_login" {

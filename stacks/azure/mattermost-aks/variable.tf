@@ -1,7 +1,7 @@
-# stacks/azure/mattermost-azk/variable.tf
-# Messed up Naming comvention need to fix this variable
+# stacks/azure/mattermost-aks/variable.tf
+# TODO: remove bad_naming_convention once Azure AD groups are renamed
 variable "bad_naming_convention" {
-  description = "Will be removed"
+  description = "Will be removed — used only for Azure AD group display names until groups are renamed"
   type        = string
   default     = "chrisfickess-azk-dev"
 }
@@ -16,11 +16,6 @@ variable "email_contact" {
 
 variable "environment" {
   description = "Environment type (e.g., dev, prod)."
-  type        = string
-}
-
-variable "environment_special" {
-  description = "Special environment identifier for unique naming."
   type        = string
 }
 
@@ -43,16 +38,9 @@ variable "unique_name_prefix" {
 # -------------------------------
 # Azure AD / Group Variables
 # -------------------------------
-variable "azure_pde_admin_group_display_name" {
-  description = "Display name for the Azure PDE admin group."
+variable "azure_primary_group_display_name" {
+  description = "Display name for the Azure primary admin group."
   type        = string
-  default     = "Azure PDE"
-}
-
-variable "aks_admin_rbac_name" {
-  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
-  type        = string
-  default     = "aks-admin"
 }
 
 # -------------------------------
@@ -61,20 +49,17 @@ variable "aks_admin_rbac_name" {
 variable "address_space" {
   description = "The address space that is used by the Virtual Network."
   type        = list(string)
-  default     = ["172.16.12.0/23"]
   # ["10.0.0.0/16"]
 }
 
 variable "aks_subnet_name" {
   description = "The name of the AKS subnet."
   type        = string
-  default     = "aks-subnet"
 }
 
 variable "aks_subnet_addresses" {
   description = "The address prefixes for the AKS subnet."
   type        = list(string)
-  default     = ["172.16.12.0/24"]
   # ["10.0.0.0/24"]
 }
 
@@ -91,13 +76,11 @@ variable "kubernetes_version" {
 variable "net_profile_service_cidr" {
   description = "The service CIDR for the AKS cluster."
   type        = string
-  default     = "10.2.0.0/16"
 }
 
 variable "net_profile_dns_service_ip" {
   description = "The DNS service IP for the AKS cluster."
   type        = string
-  default     = "10.2.0.10"
 }
 
 # Changes access to the cluster API endpoint (bastion required if true)
@@ -244,13 +227,11 @@ variable "enable_application_gateway_ingress" {
 variable "application_gateway_subnet_cidrs" {
   description = "Address prefixes for the Application Gateway subnet."
   type        = list(string)
-  default     = ["172.16.13.128/28"]
 }
 
 variable "application_gateway_subnet_name" {
   description = "Name of the subnet for Application Gateway."
   type        = string
-  default     = "appgw-subnet"
 }
 
 # -------------------------------

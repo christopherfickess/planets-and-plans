@@ -48,13 +48,19 @@ variable "azure_primary_group_display_name" {
 }
 
 variable "keyvault_name" {
-  description = "Name of the Azure Key Vault."
+  description = "Suffix appended to unique_name_prefix for the Key Vault name."
   type        = string
-  default    = "kv" 
+  default     = "kv"
 }
 
 variable "purge_protection_enabled" {
   description = "Enable purge protection. Once enabled, cannot be disabled. Set to true to match existing Key Vaults that have it enabled."
   type        = bool
   default     = true
+}
+
+variable "enable_rbac_authorization" {
+  description = "Enable Azure RBAC authorization for the Key Vault. When true, access policies are replaced by role assignments."
+  type        = bool
+  default     = false
 }

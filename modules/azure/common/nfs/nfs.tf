@@ -19,6 +19,8 @@ resource "azurerm_storage_account" "nfs_sa" {
   network_rules {
     default_action = var.storage_account_network_rules_default_action
   }
+
+  tags = merge(var.tags, { Name = lower("${local.unique_name_prefix}nfs") })
 }
 
 # File share with NFS

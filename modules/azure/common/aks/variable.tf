@@ -43,15 +43,17 @@ variable "unique_name_prefix" {
 # -------------------------------
 # Azure AD / Group Variables
 # -------------------------------
-# variable "azure_pde_admin_group_display_name" {
-#   description = "Display name for the Azure PDE admin group."
+
+variable "manage_entra_groups" {
+  description = "Set to true if the Terraform SP has Entra ID Groups Administrator role. If false, groups must be pre-created and their display names set in var.cluster_admin_group_name and var.cluster_user_group_name."
+  type        = bool
+  default     = false
+}
+
+# variable "aks_admin_rbac_name" {
+#   description = "User or service principal UPN that should have cluster-admin binding inside AKS"
 #   type        = string
 # }
-
-variable "aks_admin_rbac_name" {
-  description = "User or service principal UPN that should have cluster-admin binding inside AKS"
-  type        = string
-}
 
 variable "admin_group_display_name" {
   description = "Display name for the Azure AD admin group."
@@ -224,14 +226,16 @@ variable "deploy_storage" {
   # default     = false
 }
 
-variable "storage_account_name" {
-  description = "Name for the Azure Storage Account used for Azure Files."
+variable "storage_account_suffix" {
+  description = "Suffix appended to unique_name_prefix (alphanumeric only) for the Azure Storage Account name."
   type        = string
+  default     = "aks"
 }
 
-variable "storage_share_name" {
-  description = "Name for the Azure Files share."
+variable "storage_share_suffix" {
+  description = "Suffix appended to unique_name_prefix for the Azure Files share name."
   type        = string
+  default     = "aks-share"
 }
 
 variable "storage_share_quota_gb" {
@@ -253,21 +257,29 @@ variable "storage_account_replication_type" {
 }
 
 variable "service_accounts" {
-  description = "Map of service accounts to create and manage with UAMI + federated identity"
+  description = "Map of service accounts to create and manage with UAMI + federated identity. Set key_vault_roles to grant RBAC access to the Key Vault (requires key_vault_id)."
   type = map(object({
-    namespace : string
-    uami_name : string
+    namespace       = string
+    uami_name       = string
+    key_vault_roles = optional(list(string), [])
   }))
   # default = {
-  #     external-secrets = { 
-  #       namespace = "external-secrets", 
-  #       uami_name = "external-secrets-identity" 
+  #     external-secrets = {
+  #       namespace       = "external-secrets"
+  #       uami_name       = "external-secrets-identity"
+  #       key_vault_roles = ["Key Vault Secrets User"]
   #   }
-  #     db-secrets       = { 
-  #       namespace = "secrets", 
-  #       uami_name = "db-secrets-identity" 
+  #     db-secrets = {
+  #       namespace = "secrets"
+  #       uami_name = "db-secrets-identity"
   #   }
   # }
+}
+
+variable "key_vault_id" {
+  description = "Resource ID of the Key Vault to grant service account role assignments. Required if any service account has key_vault_roles set."
+  type        = string
+  default     = null
 }
 
 variable "enable_application_gateway_ingress" {

@@ -7,15 +7,10 @@
 # Set load_balancer_resource_group to the RG containing the PIP (from mattermost-vnet).
 # -----------------------------------------------------------------------------
 
-data "azurerm_kubernetes_cluster" "cluster" {
-  name                = module.aks.aks_name
-  resource_group_name = var.resource_group_name
-}
-
 resource "azurerm_role_assignment" "aks_network_contributor" {
   count = var.grant_load_balancer_network_access ? 1 : 0
 
   scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${coalesce(var.load_balancer_resource_group, var.resource_group_name)}"
   role_definition_name = "Network Contributor"
-  principal_id         = data.azurerm_kubernetes_cluster.cluster.identity[0].principal_id
+  principal_id         = module.aks.cluster_identity.principal_id
 }

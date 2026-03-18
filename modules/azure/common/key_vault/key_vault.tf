@@ -8,13 +8,14 @@ resource "azurerm_key_vault" "mattermost_key_vault" {
   sku_name                   = "standard"
   soft_delete_retention_days = 90
   purge_protection_enabled   = var.purge_protection_enabled
-  enable_rbac_authorization  = false
+  enable_rbac_authorization  = var.enable_rbac_authorization
 
   tags = merge(var.tags, { Name = "${var.unique_name_prefix}-${var.keyvault_name}" })
 }
 
 
 resource "azurerm_key_vault_access_policy" "terraform_sp" {
+  count        = var.enable_rbac_authorization ? 0 : 1
   key_vault_id = azurerm_key_vault.mattermost_key_vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azurerm_client_config.current.object_id
@@ -27,6 +28,7 @@ resource "azurerm_key_vault_access_policy" "terraform_sp" {
 }
 
 resource "azurerm_key_vault_access_policy" "primary_group_admin" {
+  count        = var.enable_rbac_authorization ? 0 : 1
   key_vault_id = azurerm_key_vault.mattermost_key_vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azuread_group.primary_group.object_id
@@ -88,4 +90,19 @@ resource "azurerm_key_vault_access_policy" "primary_group_admin" {
     "SetSAS",
     "Update"
   ]
+}
+
+# RBAC mode equivalents — active when enable_rbac_authorization = true
+resource "azurerm_role_assignment" "terraform_sp_kv" {
+  count                = var.enable_rbac_authorization ? 1 : 0
+  scope                = azurerm_key_vault.mattermost_key_vault.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_role_assignment" "primary_group_admin_kv" {
+  count                = var.enable_rbac_authorization ? 1 : 0
+  scope                = azurerm_key_vault.mattermost_key_vault.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azuread_group.primary_group.object_id
 }

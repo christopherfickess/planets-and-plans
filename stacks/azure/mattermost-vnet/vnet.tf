@@ -4,42 +4,36 @@
 module "mattermost_vnet" {
   source = "../../../modules/azure/common/vnet"
 
-  unique_name_prefix = local.base_identifier
+  unique_name_prefix = var.unique_name_prefix
 
   resource_group_name = data.azurerm_resource_group.mattermost_location.name
   location            = var.location
 
   address_space = var.address_space
 
-  private_dns_zone_name                      = var.private_dns_zone_name
-  private_dns_zone_virtual_network_link_name = local.private_dns_zone_virtual_network_link_name
+  private_dns_zone_name = var.private_dns_zone_name
 
   environment   = var.environment
   email_contact = var.email_contact
 
   # Nat Gateway
   nat_gateway_enabled = true
-  nat_gateway_name    = local.nat_gateway_name
-  nat_public_ip_name  = local.nat_public_ip_name
 
   subnet_configs = {
     "aks-subnet" = {
       name                = var.aks_subnet_name
       address_prefixes    = var.aks_subnet_addresses
       nat_gateway_enabled = true
-      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
     }
     "bastion-subnet" = {
       name                = var.bastion_subnet_name
       address_prefixes    = var.bastion_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
     }
     "db-subnet" = {
       name                = var.db_subnet_name
       address_prefixes    = var.db_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
 
       delegations = [{
         name = "postgres-flex"
@@ -57,7 +51,6 @@ module "mattermost_vnet" {
       name                = var.jumpbox_subnet_name
       address_prefixes    = var.jumpbox_subnet_addresses
       nat_gateway_enabled = true
-      nat_gateway_id      = module.mattermost_vnet.nat_gateway_id
       # NSG is managed by mattermost-bastion stack (azurerm_subnet_network_security_group_association)
       # Do not add nsg here - the Azure module expects network_security_group = { id = "..." }
       # and the bastion stack owns the jumpbox NSG to avoid cross-stack subnet churn
@@ -66,7 +59,6 @@ module "mattermost_vnet" {
       name                = var.appgw_subnet_name
       address_prefixes    = var.appgw_subnet_addresses
       nat_gateway_enabled = false
-      nat_gateway_id      = ""
     }
     # Make a second subnet for pods if needed
     # "pods-subnet" = {
@@ -78,5 +70,5 @@ module "mattermost_vnet" {
   }
 
 
-  tags = merge({ name = "${local.base_identifier}-vnet" }, local.tags)
+  tags = local.tags
 }

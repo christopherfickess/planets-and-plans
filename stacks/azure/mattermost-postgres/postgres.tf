@@ -12,7 +12,6 @@ module "mattermost_postgres" {
   unique_name_prefix     = var.unique_name_prefix
   resource_group_name    = var.resource_group_name
   location               = var.location
-  server_name            = local.server_name
   administrator_login    = azurerm_key_vault_secret.postgres_admin_user.value
   administrator_password = azurerm_key_vault_secret.postgres_admin_password.value
   database_names         = var.database_names

@@ -32,5 +32,10 @@ data "azurerm_subnet" "aks" {
 }
 
 data "azuread_group" "pde_group" {
-  display_name = var.azure_pde_admin_group_display_name
+  display_name = var.azure_primary_group_display_name
+}
+
+data "azurerm_key_vault" "mattermost" {
+  name                = "${var.unique_name_prefix}-kv"
+  resource_group_name = var.resource_group_name
 }

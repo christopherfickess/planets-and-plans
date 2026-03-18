@@ -14,9 +14,9 @@ spec:
   #     url: https://mattermostdevchris.file.core.windows.net
   #     secret: filestore
   ingress:
-    enabled: true
-    # httproute_enabled: false
-    # CNAME setup: dev-chris.dev.cloud.mattermost.com -> mattermost-dev-chris-mattermost.eastus2.cloudapp.azure.com
+    enabled: false
+    # Using mattermost-lb LoadBalancer service with Azure PIP instead of nginx ingress
+    # CNAME: dev-chris.dev.cloud.mattermost.com -> mattermost-dev-mattermost.eastus2.cloudapp.azure.com
     host: dev-chris.dev.cloud.mattermost.com
   mattermostEnv:
     - name: MM_SITEURL

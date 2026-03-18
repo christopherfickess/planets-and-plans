@@ -1,11 +1,6 @@
 # stacks/azure/mattermost-bastion/data.tf
 
 data "azurerm_client_config" "current" {}
-data "azurerm_subscription" "current" {}
-
-data "azurerm_resource_group" "mattermost_location" {
-  name = var.resource_group_name
-}
 
 resource "time_static" "deployment_date" {
   triggers = {
@@ -13,7 +8,10 @@ resource "time_static" "deployment_date" {
   }
 }
 
-# VNet Data
+data "azurerm_resource_group" "mattermost_location" {
+  name = var.resource_group_name
+}
+
 data "azurerm_virtual_network" "vnet" {
   name                = local.vnet_name
   resource_group_name = var.resource_group_name

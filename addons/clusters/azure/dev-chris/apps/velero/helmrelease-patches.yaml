@@ -9,17 +9,17 @@ spec:
   values:
     namespace:
       labels:
-        environment: dev-chris
+        environment: mattermost-dev
     podAnnotations:
-      app.kubernetes.io/environment: dev-chris
+      app.kubernetes.io/environment: mattermost-dev
     configuration:
       podLabels:
-        app.kubernetes.io/environment: dev-chris
+        app.kubernetes.io/environment: mattermost-dev
 
       backupStorageLocation:
         - provider: aws
           name: default
-          bucket: cloud-velero-dev-chris
+          bucket: cloud-velero-mattermost-dev
           config:
             region: us-east-2
           default: true
@@ -42,9 +42,9 @@ spec:
         disabled: false
         schedule: "0 8 * * *"
         labels:
-          environment: dev-chris
+          environment: mattermost-dev
         annotations:
-          environment: dev-chris
+          environment: mattermost-dev
         template:
           ttl: "720h0m0s"
         useOwnerReferencesInBackup: true
