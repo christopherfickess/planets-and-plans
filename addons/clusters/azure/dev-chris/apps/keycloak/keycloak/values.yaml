@@ -1,12 +1,18 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/keycloak/values.yaml
-# Dev-only — plain-text creds and no TLS are intentional for testbed use
+# Dev-only — no TLS intentional for testbed use
+
+# Previous auth section (plain-text creds — replaced with secret ref):
+# auth:
+#   adminUser: keycloak
+#   adminPassword: admin-dev-password
 
 nameOverride: keycloak
 fullnameOverride: keycloak
 
 auth:
-  adminUser: keycloak
-  adminPassword: admin-dev-password
+  adminUser: admin
+  existingSecret: keycloak-db-credentials
+  passwordSecretKey: keycloak-admin-password
 
 # Use the in-cluster postgres pod — disable the bundled postgres subchart
 postgresql:

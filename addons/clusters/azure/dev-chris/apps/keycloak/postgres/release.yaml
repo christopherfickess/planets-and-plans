@@ -1,33 +1,43 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/postgres/release.yaml
 
+# Previous (had stray `type: oci` / `url:` at spec level, wrong namespace on sourceRef):
+# spec:
+#   type: oci
+#   url: oci://registry-1.docker.io/bitnamicharts
+#   ...
+#   chart:
+#     spec:
+#       chart: postgresql
+#       version: "17.6.0"
+#       sourceRef:
+#         kind: HelmRepository
+#         name: bitnami
+#         namespace: flux-system
+
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: keycloak-postgres
   namespace: flux-system
 spec:
-  type: oci
-  url: oci://registry-1.docker.io/bitnamicharts
   interval: 10m
   targetNamespace: keycloak
 
   chart:
     spec:
       chart: postgresql
-      version: "17.6.0" # Use a version constraint to control upgrades
+      version: "16.x.x"
       sourceRef:
         kind: HelmRepository
         name: bitnami
-        namespace: flux-system
-      interval: 1h # How often to check for new chart versions
+      interval: 1h
+
   install:
-    # Create the target namespace if it does not exist
     createNamespace: true
-    remediation:
-      retries: 3 # Retry up to 3 times if install fails
+
   upgrade:
-    remediation:
-      retries: 3
+    cleanupOnFail: true
+    timeout: 5m
 
   valuesFrom:
     - kind: ConfigMap

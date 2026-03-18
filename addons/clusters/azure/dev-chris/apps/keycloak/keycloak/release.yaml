@@ -1,5 +1,14 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/keycloak/release.yaml
 
+# Previous (chart: . is OCIRepository syntax; wrong sourceRef kind and name):
+#   chart:
+#     spec:
+#       chart: .
+#       sourceRef:
+#         kind: OCIRepository
+#         name: bitnami-keycloak
+# Also: dependsOn.namespace was flux-system (should be keycloak after kustomization override)
+
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -12,13 +21,14 @@ spec:
   # Wait for postgres to be ready before deploying keycloak
   dependsOn:
     - name: keycloak-postgres
-      namespace: flux-system
+      namespace: keycloak
 
   chart:
     spec:
-      chart: .
+      chart: keycloak
+      version: "24.x.x"
       sourceRef:
-        kind: OCIRepository
+        kind: HelmRepository
         name: bitnami-keycloak
       interval: 1h
 
