@@ -18,7 +18,7 @@ spec:
     # Using mattermost-lb LoadBalancer service with Azure PIP instead of nginx ingress
     # CNAME: dev-chris.dev.cloud.mattermost.com -> mattermost-dev-mattermost.eastus2.cloudapp.azure.com
     host: dev-chris.dev.cloud.mattermost.com
-  image: mattermost/mattermost-enterprise-fips-edition
+  image: mattermost/mattermost-enterprise-edition
   mattermostEnv:
     # OpenID Settings
     # use SAML
