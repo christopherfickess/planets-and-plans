@@ -16,12 +16,10 @@ spec:
 
   chart:
     spec:
-      chart: keycloak
-      version: "24.x.x"
+      chart: .
       sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: keycloak
+        kind: OCIRepository
+        name: bitnami-keycloak
       interval: 1h
 
   install:

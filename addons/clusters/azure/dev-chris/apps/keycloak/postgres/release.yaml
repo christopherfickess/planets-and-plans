@@ -11,12 +11,10 @@ spec:
 
   chart:
     spec:
-      chart: postgresql
-      version: "16.x.x"
+      chart: .
       sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: keycloak
+        kind: OCIRepository
+        name: bitnami-postgresql
       interval: 1h
 
   install:

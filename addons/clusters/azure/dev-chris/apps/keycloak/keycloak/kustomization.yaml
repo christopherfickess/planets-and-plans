@@ -6,6 +6,7 @@ kind: Kustomization
 namespace: keycloak
 
 resources:
+  - helmrepositories.yaml
   - release.yaml
 
 configMapGenerator:

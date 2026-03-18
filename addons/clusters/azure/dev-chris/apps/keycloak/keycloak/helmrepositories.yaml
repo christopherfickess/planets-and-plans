@@ -1,11 +1,11 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/keycloak/helmrepositories.yaml
-# bitnami repo is shared — if already created by postgres, Kubernetes handles the duplicate idempotently
 
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
 metadata:
-  name: bitnami
-  namespace: flux-system
+  name: bitnami-keycloak
 spec:
   interval: 1h
-  url: https://charts.bitnami.com/bitnami
+  url: oci://registry-1.docker.io/bitnamicharts/keycloak
+  ref:
+    semver: ">=24.0.0 <25.0.0"
