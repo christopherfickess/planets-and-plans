@@ -12,41 +12,50 @@
 #   security:
 #     allowInsecureImages: true
 
-# image.tag: 22.0.5  # removed — tag doesn't exist on Docker Hub; let chart 21.x.x pick its default (Keycloak 24.x)
+# Previous attempts — Bitnami has stopped publishing to Docker Hub for recent versions:
+# image:
+#   tag: 22.0.5               # not found on docker.io
+#   tag: 24.0.5-debian-12-r8  # chart 21.x.x default — also not on docker.io
+# global:
+#   imageRegistry: oci.bitnami.com  # DNS fails in cluster (NXDOMAIN)
+# image:
+#   registry: quay.io          # NOT compatible — Bitnami chart scripts expect /opt/bitnami/ paths
+#   repository: keycloak/keycloak
 
-nameOverride: keycloak
-fullnameOverride: keycloak
+# No longer used — Keycloak is now managed by the operator via a Keycloak CR (release.yaml).
+# All configuration previously here is expressed in the CR spec.
 
-auth:
-  adminUser: admin
-  existingSecret: keycloak-db-credentials
-  passwordSecretKey: keycloak-admin-password
-
-# Use the in-cluster postgres pod — disable the bundled postgres subchart
-postgresql:
-  enabled: false
-
-externalDatabase:
-  host: keycloak-postgres.keycloak.svc.cluster.local
-  port: 5432
-  database: keycloak
-  user: keycloak
-  existingSecret: keycloak-db-credentials
-  existingSecretPasswordKey: keycloak-dev-password
-
-# Dev mode: disables strict hostname/TLS checks, no clustering needed
-production: false
-proxy: edge
-
-service:
-  type: ClusterIP
-  ports:
-    http: 80
-
-resources:
-  requests:
-    cpu: 250m
-    memory: 512Mi
-  limits:
-    cpu: 1000m
-    memory: 1Gi
+# nameOverride: keycloak
+# fullnameOverride: keycloak
+#
+# auth:
+#   adminUser: admin
+#   existingSecret: keycloak-db-credentials
+#   passwordSecretKey: keycloak-admin-password
+#
+# postgresql:
+#   enabled: false
+#
+# externalDatabase:
+#   host: keycloak-postgres.keycloak.svc.cluster.local
+#   port: 5432
+#   database: keycloak
+#   user: keycloak
+#   existingSecret: keycloak-db-credentials
+#   existingSecretPasswordKey: keycloak-dev-password
+#
+# production: false
+# proxy: edge
+#
+# service:
+#   type: ClusterIP
+#   ports:
+#     http: 80
+#
+# resources:
+#   requests:
+#     cpu: 250m
+#     memory: 512Mi
+#   limits:
+#     cpu: 1000m
+#     memory: 1Gi

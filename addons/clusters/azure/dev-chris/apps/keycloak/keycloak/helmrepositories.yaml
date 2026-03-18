@@ -1,5 +1,5 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/keycloak/helmrepositories.yaml
-# Separate HelmRepository resource — different name to avoid conflict with postgres bitnami
+# No longer referenced by kustomization.yaml — operator replaces the Helm approach.
 
 # Previous (OCIRepository — not a valid sourceRef kind for HelmRelease):
 # apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -12,11 +12,12 @@
 #   ref:
 #     semver: ">=24.0.0 <25.0.0"
 
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
-metadata:
-  name: bitnami-keycloak
-spec:
-  type: oci
-  interval: 1h
-  url: oci://registry-1.docker.io/bitnamicharts
+# Previous (Bitnami OCI HelmRepository — abandoned: images not on Docker Hub, oci.bitnami.com NXDOMAIN):
+# apiVersion: source.toolkit.fluxcd.io/v1beta2
+# kind: HelmRepository
+# metadata:
+#   name: bitnami-keycloak
+# spec:
+#   type: oci
+#   interval: 1h
+#   url: oci://registry-1.docker.io/bitnamicharts

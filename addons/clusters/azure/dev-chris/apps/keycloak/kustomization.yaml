@@ -7,4 +7,5 @@ namespace: keycloak
 
 resources:
   - postgres
+  - operator
   - keycloak

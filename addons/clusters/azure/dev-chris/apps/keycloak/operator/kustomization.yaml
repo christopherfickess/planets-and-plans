@@ -1,0 +1,12 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/operator/kustomization.yaml
+# Installs the Keycloak Operator via Flux — GitRepository + Kustomization
+# are Flux CRs; the parent Flux Kustomization applies them, then Flux installs the operator.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: flux-system
+
+resources:
+  - source.yaml
+  - install.yaml
