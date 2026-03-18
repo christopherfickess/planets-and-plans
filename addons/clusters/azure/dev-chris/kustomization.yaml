@@ -9,7 +9,8 @@ resources:
   # - apps/cluster-autoscaler
   # - apps/aws-load-balancer-controller
   - apps/external-secrets
-  - apps/keycloak
+  - apps/keycloak/postgres
+  - apps/keycloak/keycloak
   # - apps/alb-cilium-gateway
   # - apps/fluent-bit
   # - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost
