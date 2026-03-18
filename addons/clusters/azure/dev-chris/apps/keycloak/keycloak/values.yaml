@@ -6,14 +6,11 @@
 #   adminUser: keycloak
 #   adminPassword: admin-dev-password
 
-# Previous: no imageRegistry set — Bitnami removed free images from Docker Hub in 2024
+# Previous (wrong — oci.bitnami.com does not exist, DNS fails):
 # global:
-#   imageRegistry: ""
-
-global:
-  imageRegistry: oci.bitnami.com
-  security:
-    allowInsecureImages: true
+#   imageRegistry: oci.bitnami.com
+#   security:
+#     allowInsecureImages: true
 
 nameOverride: keycloak
 fullnameOverride: keycloak
