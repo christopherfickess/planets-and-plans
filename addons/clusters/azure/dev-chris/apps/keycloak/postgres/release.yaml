@@ -6,23 +6,28 @@ metadata:
   name: keycloak-postgres
   namespace: flux-system
 spec:
+  type: oci
+  url: oci://registry-1.docker.io/bitnamicharts
   interval: 10m
   targetNamespace: keycloak
 
   chart:
     spec:
-      chart: .
+      chart: postgresql
+      version: "16.x" # Use a version constraint to control upgrades
       sourceRef:
-        kind: OCIRepository
-        name: bitnami-postgresql
-      interval: 1h
-
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      interval: 1h # How often to check for new chart versions
   install:
+    # Create the target namespace if it does not exist
     createNamespace: true
-
+    remediation:
+      retries: 3 # Retry up to 3 times if install fails
   upgrade:
-    cleanupOnFail: true
-    timeout: 5m
+    remediation:
+      retries: 3
 
   valuesFrom:
     - kind: ConfigMap
