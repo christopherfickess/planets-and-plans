@@ -7,14 +7,10 @@ fullnameOverride: keycloak-postgres
 auth:
   database: keycloak
   username: keycloak
-  password:
-    valueFrom:
-      - keyRef:
-          name: keycloak-dev-password
-  postgresPassword:
-    valuesFrom:
-      - keyRef:
-          name: keycloak-postgres-password
+  existingSecret: keycloak-db-credentials
+  secretKeys:
+    userPasswordKey: keycloak-dev-password
+    adminPasswordKey: postgres-password
 
 primary:
   persistence:
