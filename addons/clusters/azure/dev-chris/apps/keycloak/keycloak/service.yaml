@@ -30,7 +30,7 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
 spec:
   rules:
-    - host: keycloak.mattermost-dev-alb.eastus2.cloudapp.azure.com  # TODO: replace with actual App Gateway FQDN after terraform apply
+    - host: keycloak.mattermost-dev-agic.eastus2.cloudapp.azure.com
       http:
         paths:
           - path: /

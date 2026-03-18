@@ -24,13 +24,9 @@ spec:
     httpPort: 8080
 
     # Dev: disable strict hostname/backchannel checks
-  # TODO: update hostname after terraform apply — get App Gateway FQDN with:
-  #   az network public-ip show --ids $(az network application-gateway show \
-  #     -n appgw-ingress -g <MC_resource_group> --query frontendIPConfigurations[0].publicIPAddress.id -o tsv) \
-  #     --query dnsSettings.fqdn -o tsv
   # Must match spec.rules[0].host in service.yaml (the Ingress).
   hostname:
-    hostname: keycloak.mattermost-dev-alb.eastus2.cloudapp.azure.com  # TODO: replace with actual FQDN
+    hostname: keycloak.mattermost-dev-agic.eastus2.cloudapp.azure.com
     strict: false
     strictBackchannel: false
 
