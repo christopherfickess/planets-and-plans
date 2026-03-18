@@ -1,0 +1,29 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/postgres/values.yaml
+# Dev-only postgres — no persistence, plain-text creds are intentional for testbed use
+
+nameOverride: keycloak-postgres
+fullnameOverride: keycloak-postgres
+
+auth:
+  database: keycloak
+  username: keycloak
+  password:
+    valueFrom:
+      - keyRef:
+          name: keycloak-dev-password
+  postgresPassword:
+    valuesFrom:
+      - keyRef:
+          name: keycloak-postgres-password
+
+primary:
+  persistence:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

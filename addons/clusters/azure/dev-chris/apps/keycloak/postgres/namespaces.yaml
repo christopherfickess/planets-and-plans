@@ -1,0 +1,6 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/postgres/namespaces.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloak

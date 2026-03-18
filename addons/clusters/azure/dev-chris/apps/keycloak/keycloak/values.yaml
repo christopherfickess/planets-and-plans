@@ -1,0 +1,37 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/keycloak/values.yaml
+# Dev-only — plain-text creds and no TLS are intentional for testbed use
+
+nameOverride: keycloak
+fullnameOverride: keycloak
+
+auth:
+  adminUser: admin
+  adminPassword: "admin-dev-password"
+
+# Use the in-cluster postgres pod — disable the bundled postgres subchart
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: keycloak-postgres.keycloak.svc.cluster.local
+  port: 5432
+  database: keycloak
+  user: keycloak
+  password: "keycloak-dev-password"
+
+# Dev mode: disables strict hostname/TLS checks, no clustering needed
+production: false
+proxy: edge
+
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi

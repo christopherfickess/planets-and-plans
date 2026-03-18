@@ -1,0 +1,32 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/postgres/release.yaml
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: keycloak-postgres
+  namespace: flux-system
+spec:
+  interval: 10m
+  targetNamespace: keycloak
+
+  chart:
+    spec:
+      chart: postgresql
+      version: "16.x.x"
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      interval: 1h
+
+  install:
+    createNamespace: true
+
+  upgrade:
+    cleanupOnFail: true
+    timeout: 5m
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: keycloak-postgres-values
+      valuesKey: values.yaml
