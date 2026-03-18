@@ -7,7 +7,6 @@ namespace: keycloak
 
 resources:
   - namespaces.yaml
-  - secrets.yaml
   - helmrepositories.yaml
   - release.yaml
 
