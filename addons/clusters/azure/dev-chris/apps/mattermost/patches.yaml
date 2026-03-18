@@ -21,6 +21,7 @@ spec:
   image: mattermost/mattermost-enterprise-fips-edition
   mattermostEnv:
     # OpenID Settings
+    # use SAML
     # - name: MM_OPENIDSETTINGS_ENABLE
     #   value: "true"
     # - name: MM_OPENIDSETTINGS_BUTTONTEXT
