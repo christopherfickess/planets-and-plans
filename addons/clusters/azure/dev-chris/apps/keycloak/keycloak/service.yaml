@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-lb
+  namespace: keycloak
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
+    service.beta.kubernetes.io/azure-pip-name: "keycloak-dev-pip"
+spec:
+  type: LoadBalancer
+  selector:
+    app: keycloak # verify this matches the operator's pod labels
+  ports:
+    - port: 80
+      targetPort: 8080
