@@ -14,7 +14,7 @@ spec:
   chart:
     spec:
       chart: postgresql
-      version: "16.x" # Use a version constraint to control upgrades
+      version: "17.6.0" # Use a version constraint to control upgrades
       sourceRef:
         kind: HelmRepository
         name: bitnami
