@@ -1,8 +1,8 @@
 # addons/clusters/azure/dev-chris/apps/keycloak/operator/install.yaml
 # Flux Kustomization that applies the operator CRDs and Deployment from the GitRepository.
 # path: ./kubernetes — check keycloak-k8s-resources repo for the actual layout; adjust if needed.
-# No targetNamespace: the operator YAML defines its own namespacing; forcing one here
-# would break CRDs (cluster-scoped resources reject a namespace override).
+# targetNamespace: keycloak — applies to namespace-scoped resources (ServiceAccount, Deployment, etc.).
+# Flux skips namespace injection on cluster-scoped resources (CRDs, ClusterRole, etc.) automatically.
 
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -15,6 +15,7 @@ spec:
     kind: GitRepository
     name: keycloak-operator
   path: ./kubernetes
+  targetNamespace: keycloak
   prune: true
   timeout: 5m
   wait: true
