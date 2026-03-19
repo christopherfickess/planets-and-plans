@@ -28,15 +28,20 @@ metadata:
   namespace: keycloak
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: keycloak-dev-chris.dev.cloud.mattermost.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak-service
-                port:
-                  number: 8080
+    - hosts:
+        - keycloak-dev-chris.dev.cloud.mattermost.com
+      tls:
+        secretName: keycloak-tls
+    # - host: keycloak-dev-chris.dev.cloud.mattermost.com
+    #   http:
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    #         backend:
+    #           service:
+    #             name: keycloak-service
+    #             port:
+    #               number: 8080
