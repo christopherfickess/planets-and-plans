@@ -9,6 +9,7 @@ resources:
   # - apps/cluster-autoscaler
   # - apps/aws-load-balancer-controller
   - apps/external-secrets
+  - apps/cert-manager
   - apps/keycloak/postgres
   - apps/keycloak/operator
   - apps/keycloak/keycloak
