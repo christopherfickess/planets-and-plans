@@ -37,11 +37,8 @@ spec:
       value: "https://dev-chris.dev.cloud.mattermost.com/login/sso/saml"
     - name: MM_SAMLSETTINGS_LOGINBUTTONTEXT
       value: "Login with Keycloak"
-    - name: MM_SAMLSETTINGS_IDPCERTIFICATEFILECONTENTS
-      valueFrom:
-        secretKeyRef:
-          name: keycloak-saml-idp-cert
-          key: certificate
+    - name: MM_SAMLSETTINGS_IDPCERTIFICATEFILE
+      value: "/mattermost/config/saml/idp.crt"
     - name: MM_SAMLSETTINGS_EMAILATTRIBUTE
       value: "Email"
     - name: MM_SAMLSETTINGS_USERNAMEATTRIBUTE
@@ -68,6 +65,14 @@ spec:
       value: ""
     - name: MM_PLUGINSETTINGS_PLUGINSTATES
       value: '{"com.mattermost.calls":{"Enable":false},"mattermost-ai":{"Enable":false}}'
+  volumes:
+    - name: saml-idp-cert
+      configMap:
+        name: keycloak-saml-idp-cert
+  volumeMounts:
+    - name: saml-idp-cert
+      mountPath: /mattermost/config/saml
+      readOnly: true
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
