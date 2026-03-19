@@ -19,7 +19,7 @@ resources:
   # - apps/mattermost-crd   # CRD for Mattermost kind - must exist before apps/mattermost
   - apps/mattermost-crd
   - apps/mattermost-operator
-  # - apps/mattermost
+  - apps/mattermost
   # - apps/mattermost-ext
   # - apps/prometheus
   # - apps/metrics-server
