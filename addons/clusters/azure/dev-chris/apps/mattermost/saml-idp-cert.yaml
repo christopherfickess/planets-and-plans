@@ -6,6 +6,7 @@
 #     | grep -oP '(?<=<ds:X509Certificate>)[^<]+'
 # Then replace the placeholder below with the output (no PEM headers needed — just the base64 block).
 
+# addons/clusters/azure/dev-chris/apps/mattermost/saml-idp-cert.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,6 +14,24 @@ metadata:
   namespace: mattermost
 data:
   idp.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIICozCCAYsCBgGdBvYr9TANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDDAptYXR0
+    ZXJtb3N0MB4XDTI2MDMxOTE2MzYyOVoXDTM2MDMxOTE2MzgwOVowFTETMBEGA1UE
+    AwwKbWF0dGVybW9zdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM1M
+    NRLltC3cMyxVIlCud/StGeTQcLXqH9KObWybN72SmlFP9SOaeS3ou4efS1yzPRXN
+    k9NDlNW8J9ymeZVcPu7BPSy7Yx1BBm/0Ql1MDpPMuhqF04v0Nb43m9ohNoWp0PL
+    dLUvQW/aJqnqbkiuEJf5/k4sJlmqntTHAsNQOlz+RjW1THo8kZob46IrroVoh2o5
+    RWQpP/o/kKMcm1KMgQTErIodcYiQ8p8tP8CO55oSI/BbjlTQYOg3tFlCRTtb1qpM
+    8O+WjlcKXuznNPrNoLbd2gB/ey1jAdXuaFKem8E9YnV+0/lYA90z05Tnrp5aDAhQ
+    DL6WJ8y0XSQZRcu5Sm8ECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEASqaSjpj+jqg3
+    snSIlj4iLw6y40sbG4vL8aYqrKmT45EduxCh+tC3SpS6usG13mPbXM/1wBmrEP85
+    XeNILGO3WsA0hNojPwae5US31mktCxZ9OycDpGfk8rXnsGsgMfTaLC6A/H0R3itC
+    /foEJ7XU2HlGJoTOjBQtY1kbmp+Jomb3Bznklr+mOiu7CucWgKhFHwaxzxvv3br8
+    4TyXGxz4HmvGCLkODkslyKjjylY2GmpOalxWeTXSXp1SJ83pM8Tq/NaaqYTBXBQY
+    kTNEDuaDQ524zMXJ91/MRuDBDDkrx1FleXgMElxZJmDZrPzrLgM3iUrueq5RpJoM
+    2a8HOfzTag==
+    -----END CERTIFICATE-----
+  staging-ca.pem: |
     -----BEGIN CERTIFICATE-----
     MIIFmDCCA4CgAwIBAgIQU9C87nMpOIFKYpfvOHFHFDANBgkqhkiG9w0BAQsFADBm
     MQswCQYDVQQGEwJVUzEzMDEGA1UEChMqKFNUQUdJTkcpIEludGVybmV0IFNlY3Vy
