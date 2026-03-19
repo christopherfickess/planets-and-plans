@@ -5,7 +5,6 @@ metadata:
   name: mattermost
 spec:
   replicas: 1 # Use 1 until HA license is available
-  samlIdpCertificateSecret: keycloak-saml-idp-cert
   fileStore:
     externalVolume:
       volumeClaimName: mattermost-nfs-pvc
@@ -21,38 +20,21 @@ spec:
     host: dev-chris.dev.cloud.mattermost.com
   image: mattermost/mattermost-enterprise-fips-edition
   mattermostEnv:
-    # SAML — Keycloak (mattermost realm, SAML client)
-    - name: MM_SAMLSETTINGS_ENABLE
-      value: "true"
-    - name: MM_SAMLSETTINGS_VERIFY
-      value: "true"
-    - name: MM_SAMLSETTINGS_ENCRYPT
-      value: "false"
-    - name: MM_SAMLSETTINGS_SIGNREQUEST
-      value: "false"
-    - name: MM_SAMLSETTINGS_IDPURL
-      value: "https://keycloak-dev-chris.dev.cloud.mattermost.com/realms/mattermost/protocol/saml"
-    - name: MM_SAMLSETTINGS_IDPDESCRIPTORURL
-      value: "https://keycloak-dev-chris.dev.cloud.mattermost.com/realms/mattermost"
-    - name: MM_SAMLSETTINGS_IDPMETADATAURL
-      value: "https://keycloak-dev-chris.dev.cloud.mattermost.com/realms/mattermost/protocol/saml/descriptor"
-    - name: MM_SAMLSETTINGS_ASSERTIONCONSUMERSERVICEURL
-      value: "https://dev-chris.dev.cloud.mattermost.com/login/sso/saml"
-    - name: MM_SAMLSETTINGS_SERVICEPROVIDERIDENTIFIER
-      value: "https://dev-chris.dev.cloud.mattermost.com"
-    - name: MM_SAMLSETTINGS_LOGINBUTTONTEXT
-      value: "Login with Keycloak"
-    # - name: MM_SAMLSETTINGS_IDPCERTIFICATEFILE
-    #   value: "/mattermost/config/saml/idp.crt"
-    - name: MM_SAMLSETTINGS_EMAILATTRIBUTE
-      value: "Email"
-    - name: MM_SAMLSETTINGS_USERNAMEATTRIBUTE
-      value: "Username"
-    - name: MM_SAMLSETTINGS_FIRSTNAMEATTRIBUTE
-      value: "FirstName"
-    - name: MM_SAMLSETTINGS_LASTNAMEATTRIBUTE
-      value: "LastName"
-    # base configuration
+    # OpenID Settings
+    # use SAML
+    # - name: MM_OPENIDSETTINGS_ENABLE
+    #   value: "true"
+    # - name: MM_OPENIDSETTINGS_BUTTONTEXT
+    #   value: "Login with Keycloak"
+    # - name: MM_OPENIDSETTINGS_DISCOVERYENDPOINT
+    #   value: "https://<keycloak-external-url>/realms/mattermost/.well-known/openid-configuration"
+    # - name: MM_OPENIDSETTINGS_ID
+    #   value: "<your-client-id>"
+    # - name: MM_OPENIDSETTINGS_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: keycloak-oidc
+    #       key: client-secret
     - name: MM_SITEURL
       value: "https://dev-chris.dev.cloud.mattermost.com"
     - name: MM_FILESETTINGS_DRIVERNAME
@@ -70,18 +52,6 @@ spec:
       value: ""
     - name: MM_PLUGINSETTINGS_PLUGINSTATES
       value: '{"com.mattermost.calls":{"Enable":false},"mattermost-ai":{"Enable":false}}'
-  volumes:
-    - name: saml-idp-cert
-      configMap:
-        name: keycloak-saml-idp-cert
-  volumeMounts:
-    - name: saml-idp-cert
-      mountPath: /mattermost/config/saml
-      readOnly: true
-    - name: saml-idp-cert
-      mountPath: /etc/ssl/certs/staging-ca.pem
-      subPath: staging-ca.pem # mounts just this file, not the whole configmap
-      readOnly: true
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
