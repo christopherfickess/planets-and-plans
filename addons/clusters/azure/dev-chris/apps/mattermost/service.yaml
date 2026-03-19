@@ -28,31 +28,31 @@
 # TODO: after terraform apply, update DNS CNAME:
 #   dev-chris.dev.cloud.mattermost.com -> <app-gateway-fqdn>
 
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: mattermost
-spec:
-  hostnames:
-    - dev-chris.dev.cloud.mattermost.com
 # ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: HTTPRoute
 # metadata:
 #   name: mattermost
-#   namespace: mattermost
-#   annotations:
-#     kubernetes.io/ingress.class: azure/application-gateway
 # spec:
-#   rules:
-#     - host: dev-chris.dev.cloud.mattermost.com
-#       http:
-#         paths:
-#           - path: /
-#             pathType: Prefix
-#             backend:
-#               service:
-#                 name: mattermost
-#                 port:
-#                   number: 8065
+#   hostnames:
+#     - dev-chris.dev.cloud.mattermost.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mattermost
+  namespace: mattermost
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+spec:
+  rules:
+    - host: dev-chris.dev.cloud.mattermost.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost
+                port:
+                  number: 8065
