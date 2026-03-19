@@ -5,6 +5,7 @@ metadata:
   name: mattermost
 spec:
   replicas: 1 # Use 1 until HA license is available
+  samlIdpCertificateSecret: keycloak-saml-idp-cert
   fileStore:
     externalVolume:
       volumeClaimName: mattermost-nfs-pvc
