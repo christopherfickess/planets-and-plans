@@ -27,6 +27,8 @@ spec:
       value: "true"
     - name: MM_SAMLSETTINGS_ENCRYPT
       value: "false"
+    - name: MM_SAMLSETTINGS_SIGNREQUEST
+      value: "false"
     - name: MM_SAMLSETTINGS_IDPURL
       value: "https://keycloak-dev-chris.dev.cloud.mattermost.com/realms/mattermost/protocol/saml"
     - name: MM_SAMLSETTINGS_IDPDESCRIPTORURL
