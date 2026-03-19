@@ -16,7 +16,7 @@ spec:
     displayName: Mattermost
 
     clients:
-      - clientId: mattermost
+      - clientId: https://dev-chris.dev.cloud.mattermost.com
         name: Mattermost
         description: SAML client for Mattermost
         protocol: saml
