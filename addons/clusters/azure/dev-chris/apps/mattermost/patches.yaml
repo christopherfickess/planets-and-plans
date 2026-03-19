@@ -77,6 +77,10 @@ spec:
     - name: saml-idp-cert
       mountPath: /mattermost/config/saml
       readOnly: true
+    - name: saml-idp-cert
+      mountPath: /etc/ssl/certs/staging-ca.pem
+      subPath: staging-ca.pem # mounts just this file, not the whole configmap
+      readOnly: true
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
