@@ -22,7 +22,7 @@ spec:
   mattermostEnv:
     # SAML — Keycloak (mattermost realm, SAML client)
     - name: MM_SAMLSETTINGS_ENABLE
-      value: "false"
+      value: "true"
     - name: MM_SAMLSETTINGS_VERIFY
       value: "true"
     - name: MM_SAMLSETTINGS_ENCRYPT
