@@ -6,11 +6,22 @@ metadata:
   name: mattermost
   namespace: mattermost
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
+    # kubernetes.io/ingress.class: azure/application-gateway
     cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
-  rules:
+  ingressClassName: azure-application-gateway
+  tls:
     - hosts:
         - dev-chris.dev.cloud.mattermost.com
-      tls:
-        secretName: mattermost-tls
+      secretName: mattermost-tls
+  rules:
+    - host: dev-chris.dev.cloud.mattermost.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost
+                port:
+                  number: 8065
