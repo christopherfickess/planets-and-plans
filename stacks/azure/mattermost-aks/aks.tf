@@ -22,6 +22,8 @@ module "mattermost_aks" {
   # Network profile
   net_profile_service_cidr   = var.net_profile_service_cidr
   net_profile_dns_service_ip = var.net_profile_dns_service_ip
+  network_plugin_mode        = var.network_plugin_mode
+  ebpf_data_plane            = var.ebpf_data_plane
 
   # AKS RBAC groups
   rbac_aad_tenant_id = data.azurerm_client_config.current.tenant_id

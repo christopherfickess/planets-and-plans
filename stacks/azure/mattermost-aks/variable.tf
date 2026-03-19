@@ -216,6 +216,21 @@ variable "storage_account_replication_type" {
 }
 
 # -------------------------------
+# Networking — CNI / Data Plane
+# -------------------------------
+variable "network_plugin_mode" {
+  description = "Network plugin mode for AKS. Set to \"overlay\" when using cilium eBPF data plane."
+  type        = string
+  default     = "overlay"
+}
+
+variable "ebpf_data_plane" {
+  description = "(Optional) eBPF data plane. Set to \"cilium\" to enable Azure CNI Powered by Cilium. Requires network_plugin_mode = \"overlay\". WARNING: changing this on an existing cluster forces replacement."
+  type        = string
+  default     = "cilium"
+}
+
+# -------------------------------
 # Gateway Variables
 # -------------------------------
 variable "enable_application_gateway_ingress" {
