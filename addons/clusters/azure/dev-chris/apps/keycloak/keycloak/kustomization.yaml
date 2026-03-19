@@ -8,6 +8,7 @@ namespace: keycloak
 resources:
   - release.yaml
   - service.yaml
+  - realm.yaml
 
 # Removed: helmrepositories.yaml — no longer using Helm for Keycloak; operator handles deployment
 # Removed: configMapGenerator for keycloak-values — values.yaml replaced by Keycloak CR spec
