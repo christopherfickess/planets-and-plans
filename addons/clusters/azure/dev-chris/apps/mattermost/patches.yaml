@@ -35,6 +35,8 @@ spec:
     #     secretKeyRef:
     #       name: keycloak-oidc
     #       key: client-secret
+    - name: MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS
+      value: "true"
     - name: MM_SITEURL
       value: "https://dev-chris.dev.cloud.mattermost.com"
     - name: MM_FILESETTINGS_DRIVERNAME
