@@ -37,6 +37,11 @@ spec:
       value: "https://dev-chris.dev.cloud.mattermost.com/login/sso/saml"
     - name: MM_SAMLSETTINGS_LOGINBUTTONTEXT
       value: "Login with Keycloak"
+    - name: MM_SAMLSETTINGS_IDPCERTIFICATEFILECONTENTS
+      valueFrom:
+        secretKeyRef:
+          name: keycloak-saml-idp-cert
+          key: certificate
     - name: MM_SAMLSETTINGS_EMAILATTRIBUTE
       value: "Email"
     - name: MM_SAMLSETTINGS_USERNAMEATTRIBUTE
