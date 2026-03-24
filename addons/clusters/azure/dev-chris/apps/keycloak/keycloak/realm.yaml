@@ -1,0 +1,74 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/keycloak/realm.yaml
+#
+# Creates the "mattermost" realm and a SAML client for Mattermost.
+# The Keycloak operator reconciles this automatically.
+
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: mattermost-realm
+  namespace: keycloak
+spec:
+  keycloakCRName: keycloak
+  realm:
+    realm: mattermost
+    enabled: true
+    displayName: Mattermost
+
+    clients:
+      - clientId: https://dev-chris.dev.cloud.mattermost.com
+        name: Mattermost
+        description: SAML client for Mattermost
+        protocol: saml
+        enabled: true
+        rootUrl: https://dev-chris.dev.cloud.mattermost.com
+        adminUrl: https://dev-chris.dev.cloud.mattermost.com
+        baseUrl: /
+        redirectUris:
+          - https://dev-chris.dev.cloud.mattermost.com/*
+        attributes:
+          saml_name_id_format: username
+          saml.authn.statement: "true"
+          saml.force.post.binding: "true"
+          saml.server.signature: "true"
+          saml.assertion.signature: "false"
+          saml.client.signature: "false"
+          saml.encrypt: "false"
+          saml.multivalued.roles: "false"
+        protocolMappers:
+          - name: email
+            protocol: saml
+            protocolMapper: saml-user-property-mapper
+            consentRequired: false
+            config:
+              user.attribute: email
+              attribute.name: Email
+              attribute.nameformat: Basic
+              friendly.name: email
+          - name: username
+            protocol: saml
+            protocolMapper: saml-user-property-mapper
+            consentRequired: false
+            config:
+              user.attribute: username
+              attribute.name: Username
+              attribute.nameformat: Basic
+              friendly.name: username
+          - name: firstName
+            protocol: saml
+            protocolMapper: saml-user-property-mapper
+            consentRequired: false
+            config:
+              user.attribute: firstName
+              attribute.name: FirstName
+              attribute.nameformat: Basic
+              friendly.name: firstName
+          - name: lastName
+            protocol: saml
+            protocolMapper: saml-user-property-mapper
+            consentRequired: false
+            config:
+              user.attribute: lastName
+              attribute.name: LastName
+              attribute.nameformat: Basic
+              friendly.name: lastName

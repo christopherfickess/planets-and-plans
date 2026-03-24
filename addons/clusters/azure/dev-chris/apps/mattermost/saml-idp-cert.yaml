@@ -1,0 +1,66 @@
+# addons/clusters/azure/dev-chris/apps/mattermost/saml-idp-cert.yaml
+#
+# Keycloak SAML signing certificate (public cert — not sensitive).
+# Fetch the cert value with:
+#   curl -s https://keycloak-dev-chris.dev.cloud.mattermost.com/realms/mattermost/protocol/saml/descriptor \
+#     | grep -oP '(?<=<ds:X509Certificate>)[^<]+'
+# Then replace the placeholder below with the output (no PEM headers needed — just the base64 block).
+
+# addons/clusters/azure/dev-chris/apps/mattermost/saml-idp-cert.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-saml-idp-cert
+  namespace: mattermost
+data:
+  idp.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIICozCCAYsCBgGdBvYr9TANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDDAptYXR0
+    ZXJtb3N0MB4XDTI2MDMxOTE2MzYyOVoXDTM2MDMxOTE2MzgwOVowFTETMBEGA1UE
+    AwwKbWF0dGVybW9zdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM1M
+    NRLltC3cMyxVIlCud/StGeTQcLXqH9KObWybN72SmlFP9SOaeS3ou4efS1yzPRXN
+    k9NDlNW8J9ymeZVcPu7BPSy7Yx1BBm/0Ql1MDpPMuhqF04v0Nb43m9ohNoWp0PL
+    dLUvQW/aJqnqbkiuEJf5/k4sJlmqntTHAsNQOlz+RjW1THo8kZob46IrroVoh2o5
+    RWQpP/o/kKMcm1KMgQTErIodcYiQ8p8tP8CO55oSI/BbjlTQYOg3tFlCRTtb1qpM
+    8O+WjlcKXuznNPrNoLbd2gB/ey1jAdXuaFKem8E9YnV+0/lYA90z05Tnrp5aDAhQ
+    DL6WJ8y0XSQZRcu5Sm8ECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEASqaSjpj+jqg3
+    snSIlj4iLw6y40sbG4vL8aYqrKmT45EduxCh+tC3SpS6usG13mPbXM/1wBmrEP85
+    XeNILGO3WsA0hNojPwae5US31mktCxZ9OycDpGfk8rXnsGsgMfTaLC6A/H0R3itC
+    /foEJ7XU2HlGJoTOjBQtY1kbmp+Jomb3Bznklr+mOiu7CucWgKhFHwaxzxvv3br8
+    4TyXGxz4HmvGCLkODkslyKjjylY2GmpOalxWeTXSXp1SJ83pM8Tq/NaaqYTBXBQY
+    kTNEDuaDQ524zMXJ91/MRuDBDDkrx1FleXgMElxZJmDZrPzrLgM3iUrueq5RpJoM
+    2a8HOfzTag==
+    -----END CERTIFICATE-----
+  staging-ca.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIFmDCCA4CgAwIBAgIQU9C87nMpOIFKYpfvOHFHFDANBgkqhkiG9w0BAQsFADBm
+    MQswCQYDVQQGEwJVUzEzMDEGA1UEChMqKFNUQUdJTkcpIEludGVybmV0IFNlY3Vy
+    aXR5IFJlc2VhcmNoIEdyb3VwMSIwIAYDVQQDExkoU1RBR0lORykgUHJldGVuZCBQ
+    ZWFyIFgxMB4XDTE1MDYwNDExMDQzOFoXDTM1MDYwNDExMDQzOFowZjELMAkGA1UE
+    BhMCVVMxMzAxBgNVBAoTKihTVEFHSU5HKSBJbnRlcm5ldCBTZWN1cml0eSBSZXNl
+    YXJjaCBHcm91cDEiMCAGA1UEAxMZKFNUQUdJTkcpIFByZXRlbmQgUGVhciBYMTCC
+    AiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBALbagEdDTa1QgGBWSYkyMhsc
+    ZXENOBaVRTMX1hceJENgsL0Ma49D3MilI4KS38mtkmdF6cPWnL++fgehT0FbRHZg
+    jOEr8UAN4jH6omjrbTD++VZneTsMVaGamQmDdFl5g1gYaigkkmx8OiCO68a4QXg4
+    wSyn6iDipKP8utsE+x1E28SA75HOYqpdrk4HGxuULvlr03wZGTIf/oRt2/c+dYmD
+    oaJhge+GOrLAEQByO7+8+vzOwpNAPEx6LW+crEEZ7eBXih6VP19sTGy3yfqK5tPt
+    TdXXCOQMKAp+gCj/VByhmIr+0iNDC540gtvV303WpcbwnkkLYC0Ft2cYUyHtkstO
+    fRcRO+K2cZozoSwVPyB8/J9RpcRK3jgnX9lujfwA/pAbP0J2UPQFxmWFRQnFjaq6
+    rkqbNEBgLy+kFL1NEsRbvFbKrRi5bYy2lNms2NJPZvdNQbT/2dBZKmJqxHkxCuOQ
+    FjhJQNeO+Njm1Z1iATS/3rts2yZlqXKsxQUzN6vNbD8KnXRMEeOXUYvbV4lqfCf8
+    mS14WEbSiMy87GB5S9ucSV1XUrlTG5UGcMSZOBcEUpisRPEmQWUOTWIoDQ5FOia/
+    GI+Ki523r2ruEmbmG37EBSBXdxIdndqrjy+QVAmCebyDx9eVEGOIpn26bW5LKeru
+    mJxa/CFBaKi4bRvmdJRLAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMB
+    Af8EBTADAQH/MB0GA1UdDgQWBBS182Xy/rAKkh/7PH3zRKCsYyXDFDANBgkqhkiG
+    9w0BAQsFAAOCAgEAncDZNytDbrrVe68UT6py1lfF2h6Tm2p8ro42i87WWyP2LK8Y
+    nLHC0hvNfWeWmjZQYBQfGC5c7aQRezak+tHLdmrNKHkn5kn+9E9LCjCaEsyIIn2j
+    qdHlAkepu/C3KnNtVx5tW07e5bvIjJScwkCDbP3akWQixPpRFAsnP+ULx7k0aO1x
+    qAeaAhQ2rgo1F58hcflgqKTXnpPM02intVfiVVkX5GXpJjK5EoQtLceyGOrkxlM/
+    sTPq4UrnypmsqSagWV3HcUlYtDinc+nukFk6eR4XkzXBbwKajl0YjztfrCIHOn5Q
+    CJL6TERVDbM/aAPly8kJ1sWGLuvvWYzMYgLzDul//rUF10gEMWaXVZV51KpS9DY/
+    5CunuvCXmEQJHo7kGcViT7sETn6Jz9KOhvYcXkJ7po6d93A/jy4GKPIPnsKKNEmR
+    xUuXY4xRdh45tMJnLTUDdC9FIU0flTeO9/vNpVA8OPU1i14vCz+MU8KX1bV3GXm/
+    fxlB7VBBjX9v5oUep0o/j68R/iDlCOM4VVfRa8gX6T2FU7fNdatvGro7uQzIvWof
+    gN9WUwCbEMBy/YhBSrXycKA8crgGg3x1mIsopn88JKwmMBa68oS7EHM9w7C4y71M
+    7DiA+/9Qdp9RBWJpTS9i/mDnJg1xvo8Xz49mrrgfmcAXTCJqXi24NatI3Oc=
+    -----END CERTIFICATE-----

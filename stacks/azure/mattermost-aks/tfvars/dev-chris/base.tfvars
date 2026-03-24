@@ -16,8 +16,10 @@ aks_admin_rbac_name              = "aks-admin"
 address_space                    = ["172.16.12.0/23"]
 aks_subnet_name                  = "aks-subnet"
 aks_subnet_addresses             = ["172.16.12.0/24"]
-application_gateway_subnet_cidrs = ["172.16.13.128/28"]
-application_gateway_subnet_name  = "appgw-subnet"
+# appgw-subnet (172.16.13.128/28) already exists in VNet — greenfield AGIC cannot reuse it.
+# Using a new subnet/CIDR; clean up appgw-subnet from mattermost-vnet stack when convenient.
+application_gateway_subnet_cidrs = ["172.16.13.192/26"]
+application_gateway_subnet_name  = "agic-subnet"
 
 
 # AKS Cluster Core Variables

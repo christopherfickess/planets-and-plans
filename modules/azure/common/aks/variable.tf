@@ -96,6 +96,12 @@ variable "network_plugin_mode" {
   default     = null
 }
 
+variable "ebpf_data_plane" {
+  description = "(Optional) eBPF data plane for AKS. Set to \"cilium\" to enable Azure CNI Powered by Cilium. Requires network_plugin_mode = \"overlay\"."
+  type        = string
+  default     = null
+}
+
 # -------------------------------
 # AKS Cluster Core Variables
 # -------------------------------

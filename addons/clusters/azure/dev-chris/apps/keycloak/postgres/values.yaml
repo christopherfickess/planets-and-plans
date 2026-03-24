@@ -1,0 +1,37 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/postgres/values.yaml
+# Dev-only postgres — no persistence, plain-text creds are intentional for testbed use
+
+# Previous (wrong — oci.bitnami.com does not exist, DNS fails):
+# global:
+#   imageRegistry: oci.bitnami.com
+#   security:
+#     allowInsecureImages: true
+
+# Pin image tag — chart default may reference a tag not yet pushed to Docker Hub
+# Check available tags: https://hub.docker.com/r/bitnami/postgresql/tags
+image:
+  tag: latest
+
+nameOverride: keycloak-postgres
+fullnameOverride: keycloak-postgres
+
+auth:
+  database: keycloak
+  username: keycloak
+  existingSecret: keycloak-db-credentials
+  secretKeys:
+    userPasswordKey: keycloak-dev-password
+    adminPasswordKey: keycloak-postgres-password
+
+primary:
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

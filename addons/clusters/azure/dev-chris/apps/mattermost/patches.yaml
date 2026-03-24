@@ -18,7 +18,27 @@ spec:
     # Using mattermost-lb LoadBalancer service with Azure PIP instead of nginx ingress
     # CNAME: dev-chris.dev.cloud.mattermost.com -> mattermost-dev-mattermost.eastus2.cloudapp.azure.com
     host: dev-chris.dev.cloud.mattermost.com
+  image: mattermost/mattermost-enterprise-fips-edition
   mattermostEnv:
+    # OpenID Settings
+    # use SAML
+    # - name: MM_OPENIDSETTINGS_ENABLE
+    #   value: "true"
+    # - name: MM_OPENIDSETTINGS_BUTTONTEXT
+    #   value: "Login with Keycloak"
+    # - name: MM_OPENIDSETTINGS_DISCOVERYENDPOINT
+    #   value: "https://<keycloak-external-url>/realms/mattermost/.well-known/openid-configuration"
+    # - name: MM_OPENIDSETTINGS_ID
+    #   value: "<your-client-id>"
+    # - name: MM_OPENIDSETTINGS_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: keycloak-oidc
+    #       key: client-secret
+    - name: MM_SERVICESETTINGS_ENABLEAPIUSERDELETE
+      value: "true"
+    - name: MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS
+      value: "true"
     - name: MM_SITEURL
       value: "https://dev-chris.dev.cloud.mattermost.com"
     - name: MM_FILESETTINGS_DRIVERNAME

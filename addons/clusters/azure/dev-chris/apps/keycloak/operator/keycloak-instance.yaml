@@ -1,0 +1,21 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/operator/keycloak-instance.yaml
+# Separate Flux Kustomization for the Keycloak CR so it can dependsOn keycloak-operator.
+# Without this split, the Keycloak CR and the operator CRD installation are in the same
+# reconciliation loop, causing "no matches for kind Keycloak" on every reconcile.
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: keycloak-instance
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: planets-and-plans
+  path: ./addons/clusters/azure/dev-chris/apps/keycloak/keycloak
+  prune: true
+  timeout: 5m
+  dependsOn:
+    - name: keycloak-operator
+      namespace: flux-system

@@ -1,0 +1,35 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  instances: 1
+
+  db:
+    vendor: postgres
+    host: keycloak-postgres.keycloak.svc.cluster.local
+    port: 5432
+    database: keycloak
+    # keycloak-admin-user value is "keycloak" — reused here as the DB username
+    usernameSecret:
+      name: keycloak-db-credentials
+      key: keycloak-admin-user
+    passwordSecret:
+      name: keycloak-db-credentials
+      key: keycloak-dev-password
+
+  http:
+    httpEnabled: true
+    httpPort: 8080
+
+    # Dev: disable strict hostname/backchannel checks
+  # Must match spec.rules[0].host in service.yaml (the Ingress).
+  hostname:
+    hostname: keycloak-dev-chris.dev.cloud.mattermost.com
+    strict: false
+    strictBackchannel: false
+
+  # Equivalent of Bitnami proxy: edge — trust X-Forwarded-* headers from the ingress
+  proxy:
+    headers: xforwarded

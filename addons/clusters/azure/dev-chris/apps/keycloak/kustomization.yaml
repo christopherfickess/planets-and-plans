@@ -1,0 +1,12 @@
+# addons/clusters/azure/dev-chris/apps/keycloak/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: keycloak
+
+resources:
+  - postgres
+  - operator
+  # keycloak/ removed from direct kustomize path — applied by keycloak-instance Flux Kustomization
+  # (operator/keycloak-instance.yaml) which dependsOn keycloak-operator, ensuring CRDs exist first

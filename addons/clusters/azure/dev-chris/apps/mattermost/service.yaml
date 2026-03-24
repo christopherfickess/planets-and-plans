@@ -1,26 +1,27 @@
-apiVersion: v1
-kind: Service
+# addons/clusters/azure/dev-chris/apps/mattermost/service.yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: mattermost-lb
+  name: mattermost
   namespace: mattermost
   annotations:
-    # Terraform mattermost-vnet: mattermost_lb_pip_name (has FQDN for CNAME)
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: "chrisfickess-tfstate-azk"
-    service.beta.kubernetes.io/azure-pip-name: "mattermost-dev-mattermost-pip"
-    # Azure PIP FQDN; view with: kubectl get svc mattermost-lb -n mattermost -o jsonpath='{.metadata.annotations.lb-fqdn}'
-    lb-fqdn: mattermost-dev-mattermost.eastus2.cloudapp.azure.com
+    # kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
-  type: LoadBalancer
-  selector:
-    app: mattermost
-    installation.mattermost.com/installation: mattermost
-    installation.mattermost.com/resource: mattermost
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 8065
-    - name: app
-      protocol: TCP
-      port: 8065
-      targetPort: 8065
+  ingressClassName: azure-application-gateway
+  tls:
+    - hosts:
+        - dev-chris.dev.cloud.mattermost.com
+      secretName: mattermost-tls
+  rules:
+    - host: dev-chris.dev.cloud.mattermost.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost
+                port:
+                  number: 8065

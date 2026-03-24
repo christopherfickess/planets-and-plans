@@ -1,0 +1,5 @@
+# values.yaml
+
+# Install CRDs as part of the Helm release
+crds:
+  enabled: true

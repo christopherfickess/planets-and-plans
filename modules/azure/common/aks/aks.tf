@@ -51,10 +51,11 @@ module "aks" {
   # NETWORKING
   # ------------------------------------------------------------------
   network_plugin            = "azure"
-  network_policy            = "azure"
+  network_policy            = var.ebpf_data_plane == "cilium" ? "cilium" : "azure"
+  network_plugin_mode       = var.network_plugin_mode
+  ebpf_data_plane           = var.ebpf_data_plane
   net_profile_outbound_type = "loadBalancer"
   load_balancer_sku         = "standard"
-  network_plugin_mode       = var.network_plugin_mode
   # node_resource_group       = "${var.unique_name_prefix}-nodes"
 
 

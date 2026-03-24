@@ -8,6 +8,7 @@ resources:
   # - license.yaml
   - service.yaml
   - pvc.yaml
+  - saml-idp-cert.yaml
 
 patches:
   - path: patches.yaml
