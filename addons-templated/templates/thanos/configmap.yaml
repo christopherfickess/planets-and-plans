@@ -1,0 +1,108 @@
+{{- if .Values.thanos.enabled }}
+{{- $app := .Values.thanos }}
+
+{{/* ── Scheduling defaults ── */}}
+{{- $nodeSelector := $app.nodeSelector | default dict }}
+{{- $tolerations  := $app.tolerations  | default list }}
+
+{{/* ── Query component ────────────────────────────────────────────────────────
+     dnsDiscovery auto-discovers the Prometheus Thanos sidecar gRPC endpoint by
+     resolving a headless Service in the same namespace. The sidecarsService name
+     must match whatever kube-prometheus-stack names the thanosService — typically
+     "<release>-thanos-discovery". Use kubectl get svc -n monitoring to confirm,
+     then set query.dnsDiscovery.sidecarsService in your cluster values override.
+     ─────────────────────────────────────────────────────────────────────────── */}}
+{{- $dnsDiscovery := ($app.query).dnsDiscovery | default dict }}
+{{- $grpcService  := ($app.query).grpcService  | default dict }}
+
+{{- $queryConfig := dict
+    "replicaCount"   (($app.query).replicaCount  | default 1)
+    "replicaLabel"   (($app.query).replicaLabels | default (list "prometheus_replica"))
+    "stores"         (($app.query).stores        | default list)
+    "nodeSelector"   $nodeSelector
+    "tolerations"    $tolerations
+    "dnsDiscovery" (dict
+        "enabled"           ($dnsDiscovery.enabled           | default false)
+        "sidecarsService"   ($dnsDiscovery.sidecarsService   | default "")
+        "sidecarsNamespace" ($dnsDiscovery.sidecarsNamespace | default $app.namespace))
+    "serviceGrpc" (dict
+        "type"        ($grpcService.type        | default "ClusterIP")
+        "annotations" ($grpcService.annotations | default dict))
+}}
+
+{{/* ── Query frontend — optional caching layer in front of Thanos Query ── */}}
+{{- $queryFrontendConfig := dict
+    "enabled"      (($app.queryFrontend).enabled      | default false)
+    "replicaCount" (($app.queryFrontend).replicaCount | default 1)
+    "nodeSelector" $nodeSelector
+    "tolerations"  $tolerations
+}}
+
+{{/* ── Compactor — single-replica block compaction and downsampling ── */}}
+{{- $compactorConfig := dict
+    "enabled"      (($app.compactor).enabled | default false)
+    "nodeSelector" $nodeSelector
+    "tolerations"  $tolerations
+}}
+
+{{/* ── Store gateway — serves historical S3 blocks for long-term query ── */}}
+{{- $sgPersistence := (($app.storegateway).persistence) | default dict }}
+{{- $storeGatewayConfig := dict
+    "enabled"      (($app.storegateway).enabled      | default false)
+    "replicaCount" (($app.storegateway).replicaCount | default 1)
+    "persistence" (dict
+        "enabled"      true
+        "size"         ($sgPersistence.size         | default "50Gi")
+        "storageClass" ($sgPersistence.storageClass | default ""))
+    "nodeSelector" $nodeSelector
+    "tolerations"  $tolerations
+}}
+
+{{/* ── Metrics — Prometheus scraping of all Thanos components ── */}}
+{{- $metricsConfig := dict
+    "enabled" ((($app.metrics).enabled) | default true)
+    "serviceMonitor" (dict
+        "enabled" (((($app.metrics).serviceMonitor).enabled) | default false))
+}}
+
+{{/* ── Top-level chart values ── */}}
+{{- $chartValues := dict
+    "query"         $queryConfig
+    "queryFrontend" $queryFrontendConfig
+    "compactor"     $compactorConfig
+    "storegateway"  $storeGatewayConfig
+    "metrics"       $metricsConfig
+    "bucketweb"     (dict "enabled" false)
+    "ruler"         (dict "enabled" false)
+    "global" (dict
+        "security" (dict
+            "allowInsecureImages" true))
+}}
+
+{{/* ── Image — default to the official Thanos image on quay.io ──────────────
+     The Bitnami chart ships a docker.io/bitnami/thanos image that has historically
+     had missing or delayed tags (e.g. 0.39.2-debian-12-r2 did not exist at chart
+     release time). Using the upstream quay.io/thanos/thanos image avoids this and
+     is the standard image used by non-Bitnami Thanos deployments.
+     Override via thanos.image.{registry,repository,tag} in cluster values. ── */}}
+{{- $imageRegistry   := (($app.image).registry)   | default "quay.io" }}
+{{- $imageRepository := (($app.image).repository) | default "thanos/thanos" }}
+{{- $imageTag        := (($app.image).tag)        | default "v0.38.0" }}
+{{- $_ := set $chartValues "image" (dict
+    "registry"   $imageRegistry
+    "repository" $imageRepository
+    "tag"        $imageTag) }}
+
+{{/* ── Object storage secret — points all Thanos components at the S3 config.
+     Created by thanos/secret.yaml when thanos.objstore.bucket is set.
+     The Bitnami chart mounts this as objstore.yml for sidecar, storegateway,
+     and compactor. Prometheus sidecar reads the same secret via
+     prometheus.thanos.objectStorageSecret in the kube-prometheus-stack chart. ── */}}
+{{- if (($app.objstore).bucket) }}
+{{- $_ := set $chartValues "existingObjstoreSecret" "thanos-objstore-config" }}
+{{- end }}
+
+{{/* ── Merge extraValues last so operators can override anything ── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "thanos" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

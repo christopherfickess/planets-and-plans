@@ -1,0 +1,9 @@
+{{- if .Values.teleport.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"          "teleport"
+    "releaseName"   "teleport-kube-agent"
+    "namespace"     .Values.teleport.namespace
+    "chart"         .Values.teleport.chart
+    "configmapName" "teleport"
+    "global"        .Values.global) }}
+{{- end }}

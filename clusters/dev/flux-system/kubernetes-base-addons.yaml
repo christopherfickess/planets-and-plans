@@ -1,0 +1,26 @@
+# ==============================================================================
+# WHY THIS IS A KUSTOMIZATION (not a bare HelmRelease)
+# ---------------------------------------------------------------
+# HelmRelease.spec.dependsOn can only reference other HelmReleases.
+# cluster-crds is a Kustomization, so a HelmRelease cannot depend on it directly.
+#
+# Solution: wrap the HelmRelease in a Kustomization that CAN depend on cluster-crds.
+# This Kustomization reconciles ./examples/basic/clusters/dev/flux-system, whose
+# kustomization.yaml lists only helmrelease.yaml — so only the HelmRelease is applied
+# (not the Kustomization objects, which the bootstrap applies directly).
+# ==============================================================================
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kubernetes-base-addons
+  namespace: flux-system
+spec:
+  interval: 1m
+  dependsOn:
+    - name: cluster-crds
+  sourceRef:
+    kind: GitRepository
+    name: terraform-aws-eks
+  path: ./examples/basic/clusters/dev/flux-system
+  prune: true
+  wait: true  # wait for HelmRelease to reach Ready before cluster-extras starts

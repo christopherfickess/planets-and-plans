@@ -1,0 +1,8 @@
+{{- if .Values.metricsServer.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "metrics-server"
+    "releaseName" "metrics-server"
+    "namespace"   .Values.metricsServer.namespace
+    "chart"       .Values.metricsServer.chart
+    "global"      .Values.global) }}
+{{- end }}

@@ -1,0 +1,60 @@
+{{- range $name, $instance := ((.Values.mattermost).instances | default dict) }}
+{{- $wsValues := dict
+    "global"          $.Values.global
+    "instanceName"    $name
+    "instance"        $instance
+    "externalSecrets" (dict "enabled" (($.Values.externalSecrets).enabled | default false)) }}
+
+{{/* ── Values ConfigMap ────────────────────────────────────────────── */}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "mattermost-%s-values" $name }}
+  namespace: {{ $instance.namespace }}
+data:
+  values.yaml: |
+{{ toYaml $wsValues | indent 4 }}
+
+{{/* ── HelmRelease per instance ────────────────────────────────────── */}}
+{{/* Add external-secrets dependency only when the instance actually uses it */}}
+{{- $usesExternalSecrets := and ($.Values.externalSecrets).enabled
+    (or (($instance.db).externalSecret).secretKey
+        (($instance.license).externalSecret).secretKey) }}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: {{ printf "mattermost-%s" $name }}
+  namespace: {{ $instance.namespace }}
+spec:
+  interval: {{ $instance.reconcileInterval | default $.Values.global.helmReleaseInterval | default "10m" }}
+  dependsOn:
+    - name: kubernetes-base-addons
+      namespace: flux-system
+    {{- if $usesExternalSecrets }}
+    - name: external-secrets
+      namespace: {{ $.Values.externalSecrets.namespace }}
+    {{- end }}
+  chart:
+    spec:
+      chart: ./addons/mattermost-workspace
+      sourceRef:
+        kind: GitRepository
+        name: kubernetes-base-addons
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      strategy: rollback
+  valuesFrom:
+    - kind: ConfigMap
+      name: {{ printf "mattermost-%s-values" $name }}
+      valuesKey: values.yaml
+{{- end }}

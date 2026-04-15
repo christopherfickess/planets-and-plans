@@ -1,0 +1,15 @@
+# mattermost-operator v1.0.4 CRDs
+# Source: crds/ inside the mattermost/mattermost-operator chart
+# When upgrading: helm pull mattermost/mattermost-operator --version <new> --untar
+#                 then overwrite these files from <chart>/crds/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - crd-clusterinstallations.yaml
+  - crd-mattermostrestoredbs.yaml
+  - crd-mattermosts.yaml
+  # MinioInstance CRD — required when any instance uses fileStore.mode: operatorManaged.
+  # Safe to keep even when all instances use s3/nfs; unused CRDs are harmless.
+  # Remove only if you are certain operatorManaged will never be used cluster-wide.
+  - crd-minioinstances.yaml

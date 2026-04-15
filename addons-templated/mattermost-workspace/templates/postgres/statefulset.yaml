@@ -1,0 +1,79 @@
+{{- $instance := .Values.instance }}
+{{- if ($instance.postgres).enabled }}
+{{- $name         := .Values.instanceName }}
+{{- $svcName      := printf "postgres-%s" $name }}
+{{- $secretName   := printf "%s-database" $instance.namespace }}
+{{- $username     := $instance.postgres.username     | default "mattermost" }}
+{{- $storage      := $instance.postgres.storage      | default "10Gi" }}
+{{- $storageClass := $instance.postgres.storageClass | default "" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $svcName }}
+  namespace: {{ $instance.namespace }}
+spec:
+  serviceName: {{ $svcName }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      instance: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: postgres
+        instance: {{ $name }}
+    spec:
+      {{- with $instance.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ $username | quote }}]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ $username | quote }}]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if $storageClass }}
+        storageClassName: {{ $storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $storage | quote }}
+{{- end }}

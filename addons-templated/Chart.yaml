@@ -1,0 +1,10 @@
+apiVersion: v2
+name: flux-addons
+description: |
+  Master Helm chart for Flux-based cluster addon deployment.
+  Toggle addons on/off and configure them from a single values.yaml.
+  Each enabled app generates: Namespace, HelmRepository, ConfigMap (values),
+  and HelmRelease. Mattermost instances and wrapper-charts are loop-generated.
+type: application
+version: 1.0.2 # change this when you make changes to the chart
+appVersion: "1.0.0"

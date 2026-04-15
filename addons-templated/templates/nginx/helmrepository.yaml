@@ -1,0 +1,3 @@
+{{- if .Values.nginx.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.nginx.chart.repo "global" .Values.global) }}
+{{- end }}

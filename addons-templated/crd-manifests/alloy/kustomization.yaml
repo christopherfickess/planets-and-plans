@@ -1,0 +1,21 @@
+# grafana/alloy v0.12.5 CRDs
+# Source: crds/ inside the grafana/alloy chart
+#
+# To populate this folder, run:
+#   helm repo add grafana https://grafana.github.io/helm-charts
+#   helm pull grafana/alloy --version 0.12.5 --untar --destination /tmp/alloy-chart
+#   cp /tmp/alloy-chart/alloy/charts/crds/crds/*.yaml gitops/kubernetes-base-addons/crds/alloy/
+#
+# Note: CRDs are in charts/crds/crds/ (subchart), not a top-level crds/ folder.
+#
+# When upgrading: bump the version above, re-run the commands, overwrite the files,
+# and commit alongside the chart version bump in addons/values.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # PodLogs CRD — used by loki.source.podLogs component (monitoring.grafana.com/v1alpha2)
+  # Note: our River config uses loki.source.kubernetes (direct API, no CRD required),
+  # but the CRD must still be present because crds.create: false tells the chart to
+  # skip installing it, and the chart will fail to start if the CRD is missing entirely.
+  - podlogs.yaml

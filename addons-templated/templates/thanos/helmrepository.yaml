@@ -1,0 +1,4 @@
+{{/* Thanos shares the prometheus namespace — no namespace.yaml needed */}}
+{{- if .Values.thanos.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.thanos.chart.repo "global" .Values.global) }}
+{{- end }}

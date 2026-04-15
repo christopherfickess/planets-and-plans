@@ -1,0 +1,100 @@
+{{- if .Values.nginx.enabled }}
+{{- $app := .Values.nginx }}
+
+{{/* ── Replica floor for autoscaling — prefer explicit minReplicas, then replicaCount ── */}}
+{{- $minReplicas := $app.autoscaling.minReplicas | default $app.replicaCount | default 2 }}
+
+{{/* ── Controller base config — ingress class, metrics, volumes ───── */}}
+{{- $nginxConfig := dict
+    "replicaCount"         $app.replicaCount
+    "ingressClassResource" (dict
+        "name"            $app.ingressClass
+        "controllerValue" ($app.ingressClassController | default "k8s.io/ingress-nginx"))
+    "ingressClass"    $app.ingressClass
+    "publishService"  (dict "enabled" true)
+    "metrics"         (dict "enabled" true)
+    "resources"       $app.resources
+    "tolerations"     ($app.tolerations | default list)
+    "extraVolumeMounts" (list
+        (dict "name" "cache"            "mountPath" "/cache/nginx")
+        (dict "name" "mattermost-cache" "mountPath" "/cache/mattermost"))
+    "extraVolumes" (list
+        (dict "name" "cache"            "emptyDir" dict)
+        (dict "name" "mattermost-cache" "emptyDir" dict))
+}}
+
+{{/* ── Autoscaling — attach HPA config when autoscaling is enabled ── */}}
+{{- if $app.autoscaling.enabled }}
+{{- $autoscalingConfig := dict
+    "enabled"                           true
+    "minReplicas"                       $minReplicas
+    "maxReplicas"                       ($app.autoscaling.maxReplicas | default 15)
+    "targetCPUUtilizationPercentage"    ($app.autoscaling.targetCPU    | default 300)
+    "targetMemoryUtilizationPercentage" ($app.autoscaling.targetMemory | default 300)
+}}
+{{/* Attach HPA settings to the controller block */}}
+{{- $_ := set $nginxConfig "autoscaling" $autoscalingConfig }}
+{{- end }}
+
+{{/* ── Service — LoadBalancer with optional Cloudflare source ranges ─ */}}
+{{- $serviceConfig := dict "annotations" ($app.service.annotations | default dict) "type" "LoadBalancer" }}
+{{- if $app.cloudflare.enabled }}
+{{/* Restrict LB source ranges to Cloudflare IP blocks when Cloudflare proxy is in use */}}
+{{- $_ := set $serviceConfig "loadBalancerSourceRanges" $app.cloudflare.ipRanges }}
+{{- end }}
+{{/* Attach the fully-built service config to the controller */}}
+{{- $_ := set $nginxConfig "service" $serviceConfig }}
+
+{{/* ── Nginx controller config map — proxy, SSL, and snippet settings ─ */}}
+{{/* Set all nginx.conf tuning knobs, including the 410 redirect server-snippet */}}
+{{- $_ := set $nginxConfig "config" (dict
+    "allow-snippet-annotations"  "true"
+    "annotations-risk-level"     "Critical"
+    "compute-full-forwarded-for" "true"
+    "custom-http-errors"         "403"
+    "enable-real-ip"             "true"
+    "force-ssl-redirect"         (ternary "true" "false" $app.ssl.forceRedirect)
+    "forwarded-for-header"       "CF-Connecting-IP"
+    "keep-alive"                 "3600"
+    "proxy-max-temp-file-size"   "0"
+    "proxy-read-timeout"         "3600"
+    "proxy-real-ip-cidr"         "0.0.0.0/0"
+    "proxy-send-timeout"         "3600"
+    "server-tokens"              "false"
+    "use-forwarded-headers"      "true"
+    "server-snippet"             "proxy_intercept_errors on;\nerror_page 410 \"https://customers.mattermost.com/cloud/inactive?dns=$host&uri=$request_uri\";\n") }}
+
+{{/* ── Default backend — custom error pages, doubled in HA mode ───── */}}
+{{- $defaultBackendConfig := dict
+    "enabled"      true
+    "replicaCount" (ternary 2 1 ($app.ha | default false))
+    "image" (dict
+        "registry" "registry.k8s.io"
+        "image"    "ingress-nginx/custom-error-pages"
+        "tag"      "v1.1.1")
+    "tolerations" ($app.tolerations | default list)
+}}
+
+{{/* ── Custom 403 error page — mount HTML redirect page via ConfigMap ─ */}}
+{{- if $app.customErrors.enabled }}
+{{- $redirectUrl := $app.customErrors.code403Url | default "https://customers.mattermost.com/cloud/inaccessible" }}
+{{/* Build a ConfigMap with the 403 HTML redirect page and mount it into the backend pod */}}
+{{- $_ := set $defaultBackendConfig "extraConfigMaps" (list (dict
+    "name"   "custom-error-pages"
+    "labels" (dict "type" "custom-error")
+    "data"   (dict "403" (printf "<!DOCTYPE html>\n<html><head>\n  <meta charset=\"UTF-8\">\n  <meta http-equiv=\"refresh\" content=\"0; url=%s\" />\n</head><body></body></html>\n" $redirectUrl)))) }}
+{{/* Project the ConfigMap as a volume so the error-pages server can serve it */}}
+{{- $_ := set $defaultBackendConfig "extraVolumes" (list (dict
+    "name"      "custom-error-pages"
+    "configMap" (dict "name" "custom-error-pages" "items" (list (dict "key" "403" "path" "403.html"))))) }}
+{{/* Mount the volume at /www where the custom-error-pages image serves static files */}}
+{{- $_ := set $defaultBackendConfig "extraVolumeMounts" (list (dict "name" "custom-error-pages" "mountPath" "/www")) }}
+{{- end }}
+
+{{/* ── Top-level chart values — controller + default backend ─────── */}}
+{{- $chartValues := dict "controller" $nginxConfig "defaultBackend" $defaultBackendConfig }}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "nginx" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

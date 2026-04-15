@@ -1,0 +1,105 @@
+{{- if .Values.loki.enabled }}
+{{- $app    := .Values.loki }}
+{{- $global := .Values.global }}
+
+{{/* ── IRSA role ARN ── arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix> */}}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" $global.aws.accountNumber $global.aws.clusterName $app.irsaRoleSuffix }}
+
+{{/* ── S3 region — falls back to global.aws.region ── */}}
+{{- $region := $app.s3.region | default $global.aws.region | default "us-east-2" }}
+
+{{/* ── S3 storage config — same bucket for chunks, ruler, and admin.
+     bucketNames must sit at the storage root (not under s3) — that is where
+     loki.commonStorageConfig in _helpers.tpl reads them from.
+     Use extraValues to override individual bucket names if separation is needed. */}}
+{{- $storageConfig := dict
+    "type" "s3"
+    "bucketNames" (dict
+        "chunks" $app.s3.bucket
+        "ruler"  $app.s3.bucket
+        "admin"  $app.s3.bucket)
+    "s3" (dict
+        "region"           $region
+        "s3ForcePathStyle" false
+        "insecure"         false) }}
+
+{{/* ── Schema config — TSDB + v13 is the current recommended schema.
+     The from date should predate any data you intend to ingest.
+     Do not change this on an existing installation without a migration. */}}
+{{- $schemaConfig := dict
+    "configs" (list (dict
+        "from"         "2024-01-01"
+        "store"        "tsdb"
+        "object_store" "s3"
+        "schema"       "v13"
+        "index" (dict
+            "prefix" "index_"
+            "period" "24h"))) }}
+
+{{/* ── singleBinary persistence — WAL and index cache stored on a PVC.
+     storageClass.enabled creates a dedicated loki-gp3 class; otherwise falls back
+     to persistence.storageClass (explicit override) or blank (cluster default). */}}
+{{- $scName := $app.persistence.storageClass | default "" }}
+{{- if (($app.storageClass).enabled) }}
+{{-   $scName = $app.storageClass.name | default "loki-gp3" }}
+{{- end }}
+{{- $persistence := dict
+    "enabled"      true
+    "size"         ($app.persistence.size | default "10Gi")
+    "storageClass" $scName }}
+
+{{/* ── Retention — compactor is included in SingleBinary and runs automatically.
+     Only rendered when retention.enabled is true. */}}
+{{- $compactorConfig := dict }}
+{{- if (($app.retention).enabled) }}
+{{- $compactorConfig = dict
+    "compactor" (dict
+        "retention_enabled"             true
+        "delete_request_store"          "s3"
+        "retention_delete_delay"        "2h"
+        "retention_delete_worker_count" 150
+        "working_directory"             "/var/loki/compactor") }}
+{{- $_ := set $compactorConfig "limits_config" (dict
+    "retention_period" ($app.retention.period | default "744h")) }}
+{{- end }}
+
+{{/* ── Top-level chart values ── */}}
+{{- $chartValues := dict
+    "deploymentMode" ($app.deploymentMode | default "SingleBinary")
+    "loki" (mergeOverwrite
+        (dict
+            "auth_enabled"   ($app.authEnabled | default true)
+            "commonConfig"   (dict "replication_factor" ($app.replicationFactor | default 1))
+            "storage"        $storageConfig
+            "schemaConfig"   $schemaConfig)
+        $compactorConfig)
+    "serviceAccount" (dict
+        "create"      true
+        "name"        "loki"
+        "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+    "singleBinary" (dict
+        "replicas"     ($app.replicas | default 1)
+        "nodeSelector" ($app.nodeSelector | default dict)
+        "tolerations"  ($app.tolerations  | default list)
+        "persistence"  $persistence)
+    "read"    (dict "replicas" 0)
+    "write"   (dict "replicas" 0)
+    "backend" (dict "replicas" 0)
+    "gateway" (dict
+        "enabled"      (($app.gateway).enabled | default true)
+        "replicas"     (($app.gateway).replicas | default 1)
+        "nodeSelector" ($app.nodeSelector | default dict)
+        "tolerations"  ($app.tolerations  | default list))
+    "monitoring" (dict
+        "selfMonitoring" (dict
+            "enabled"      false
+            "grafanaAgent" (dict "installOperator" false))
+        "lokiCanary" (dict "enabled" false))
+    "test"         (dict "enabled" false)
+    "chunksCache"  (dict "enabled" false)
+    "resultsCache" (dict "enabled" false) }}
+
+{{/* ── Merge extraValues last so operators can override anything ── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "loki" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

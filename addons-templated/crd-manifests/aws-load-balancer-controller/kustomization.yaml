@@ -1,0 +1,13 @@
+# aws-load-balancer-controller v1.11.0 CRDs
+# Source: crds/ inside the eks/aws-load-balancer-controller chart
+#
+# To update when bumping the chart version:
+#   helm pull eks/aws-load-balancer-controller --version <ver> --untar --destination /tmp/alb-chart
+#   Split <chart>/crds/crds.yaml into one file per CRD and overwrite files here.
+#   Commit alongside the chart version bump in addons/values.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ingressclassparams.yaml
+  - targetgroupbindings.yaml

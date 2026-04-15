@@ -1,0 +1,84 @@
+{{- $instance := .Values.instance }}
+{{- $namespace := $instance.namespace }}
+{{- $fileStoreMode := (($instance.fileStore).mode) | default "s3" }}
+{{- /* Build mattermostEnv: NFS mode adds file driver vars automatically;
+       instance.mattermostEnv lets callers pass any additional Mattermost env vars.
+       MM_CONFIG is NOT injected here — the Mattermost operator already sets it from
+       DB_CONNECTION_STRING in the database secret. Pass it via instance.mattermostEnv
+       if you need to override the operator's value. */}}
+{{- $envVars := list }}
+{{- if eq $fileStoreMode "nfs" }}
+{{- $nfsMountPath := (($instance.fileStore.nfs).mountPath) | default "/mattermost/data" }}
+{{- $envVars = append $envVars (dict "name" "MM_FILESETTINGS_DRIVERNAME" "value" "local") }}
+{{- $envVars = append $envVars (dict "name" "MM_FILESETTINGS_DIRECTORY" "value" $nfsMountPath) }}
+{{- end }}
+{{- $envVars = concat $envVars ($instance.mattermostEnv | default list) }}
+---
+apiVersion: installation.mattermost.com/v1beta1
+kind: Mattermost
+metadata:
+  name: mattermost
+  namespace: {{ $namespace }}
+  labels:
+    deployment: {{ $namespace }}
+spec:
+  version: {{ $instance.version | quote }}
+  replicas: {{ $instance.replicas | default 1 }}
+  serviceAccountName: mattermost
+  database:
+    external:
+      secret: {{ printf "%s-database" $namespace }}
+  fileStore:
+{{- if eq $fileStoreMode "s3" }}
+    external:
+      url: "s3.amazonaws.com"
+      bucket: {{ $instance.fileStore.s3.bucket }}
+      secret: filestore
+{{- else if eq $fileStoreMode "operatorManaged" }}
+    operatorManaged:
+      replicas: {{ (($instance.fileStore.operatorManaged).replicas) | default 1 }}
+      storageSize: {{ (($instance.fileStore.operatorManaged).storageSize) | default "50Gi" }}
+{{- else if eq $fileStoreMode "nfs" }}
+    external:
+      url: "local"
+      bucket: ""
+    operatorManaged: {}
+{{- else if eq $fileStoreMode "blobStorage" }}
+    {{- fail "blobStorage fileStore mode is not yet implemented" }}
+{{- end }}
+{{- if eq $fileStoreMode "nfs" }}
+  volumes:
+    - name: mattermost-data
+      persistentVolumeClaim:
+        claimName: {{ printf "%s-nfs" $namespace }}
+  volumeMounts:
+    - name: mattermost-data
+      mountPath: {{ (($instance.fileStore.nfs).mountPath) | default "/mattermost/data" }}
+{{- end }}
+{{- if ($instance.license).enabled }}
+  licenseSecret: {{ printf "%s-license" $namespace }}
+{{- end }}
+  {{- if $envVars }}
+  mattermostEnv:
+    {{- toYaml $envVars | nindent 4 }}
+  {{- end }}
+  probes:
+    livenessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    readinessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 50
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+  {{- with $instance.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  ingress:
+    enabled: false
+    host: {{ $instance.host }}

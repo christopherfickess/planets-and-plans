@@ -1,0 +1,3 @@
+{{- if .Values.externalSecrets.enabled }}
+{{- include "flux-addons.namespace" (dict "name" .Values.externalSecrets.namespace) }}
+{{- end }}

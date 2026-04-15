@@ -1,0 +1,7 @@
+# Helm packages everything in the chart directory into the release secret.
+# These subdirectories are applied by separate Flux Kustomizations and must
+# not be included in the flux-addons chart bundle — they'd inflate the release
+# secret by hundreds of KB (CRD manifests alone are ~500KB) and push the
+# rendered release over the 1MB Kubernetes Secret limit.
+crd-manifests/
+mattermost-workspace/

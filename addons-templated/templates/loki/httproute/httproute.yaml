@@ -1,0 +1,38 @@
+{{/*
+  Loki HTTPRoute — exposes the Loki gateway externally via Cilium Gateway API.
+
+  Use this when:
+    - Alloy in a different cluster needs to push logs to this Loki instance
+    - Grafana in a different cluster queries this Loki instance
+
+  Not required when Alloy and Grafana are in the same cluster — they reach
+  Loki via internal DNS: http://loki-gateway.<namespace>.svc.cluster.local
+
+  The backend points at the loki-gateway Service (nginx reverse proxy that
+  routes /loki/api/v1/push → ingesters and /loki/api/v1/query → queriers).
+*/}}
+{{- if and .Values.loki.enabled ((.Values.loki.httproute).enabled) }}
+{{- $app              := .Values.loki }}
+{{- $gatewayName      := $app.httproute.gatewayName      | default "cilium-gateway" }}
+{{- $gatewayNamespace := $app.httproute.gatewayNamespace | default "kube-system" }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: loki
+  namespace: {{ $app.namespace }}
+spec:
+  hostnames:
+    - {{ $app.httproute.host }}
+  parentRefs:
+    - name: {{ $gatewayName }}
+      namespace: {{ $gatewayNamespace }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: loki-gateway
+          port: 80
+{{- end }}

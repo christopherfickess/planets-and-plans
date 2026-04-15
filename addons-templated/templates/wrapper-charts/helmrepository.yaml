@@ -1,0 +1,14 @@
+{{- /*
+  Renders one HelmRepository per unique repo name across all custom addons.
+  Two addons sharing the same chart.repo.name must also share the same URL —
+  only the first entry wins. Use the same repo.name to avoid duplicate errors.
+*/ -}}
+{{- $seen := dict }}
+{{- range $name, $app := (.Values.wrapperCharts | default dict) }}
+{{- if $app.enabled }}
+{{- if not (hasKey $seen $app.chart.repo.name) }}
+{{- $_ := set $seen $app.chart.repo.name true }}
+{{- include "flux-addons.helmrepository" (dict "repo" $app.chart.repo "global" $.Values.global) }}
+{{- end }}
+{{- end }}
+{{- end }}

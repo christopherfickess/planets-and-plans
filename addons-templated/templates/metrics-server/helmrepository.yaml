@@ -1,0 +1,4 @@
+{{/* kube-system already exists — no namespace.yaml needed */}}
+{{- if .Values.metricsServer.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.metricsServer.chart.repo "global" .Values.global) }}
+{{- end }}

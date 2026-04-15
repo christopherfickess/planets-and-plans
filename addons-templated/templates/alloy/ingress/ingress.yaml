@@ -1,0 +1,32 @@
+{{- if and .Values.alloy.enabled ((.Values.alloy.ingress).enabled) }}
+{{- $app := .Values.alloy }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alloy
+  namespace: {{ $app.namespace }}
+  {{- with $app.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $app.ingress.ingressClass | default "nginx-controller" }}
+  rules:
+    - host: {{ $app.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: alloy
+                port:
+                  number: 12345
+  {{- if $app.ingress.tlsSecretName }}
+  tls:
+    - secretName: {{ $app.ingress.tlsSecretName }}
+      hosts:
+        - {{ $app.ingress.host }}
+  {{- end }}
+{{- end }}

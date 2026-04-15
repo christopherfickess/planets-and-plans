@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ── Entry point for the bootstrap Kustomization ───────────────────────────────
+# Flux resource definitions live in flux-system/.
+# Plain cluster resources (postgres, service accounts, etc.) live in extras/.
+#
+# To add extras: drop a subfolder under extras/ and list it in extras/kustomization.yaml.
+# ─────────────────────────────────────────────────────────────────────────────
+
+resources:
+  # ── Flux resource definitions ─────────────────────────────────────────────
+  - flux-system/gitrepositories.yaml
+  - flux-system/bootstrap-kustomization.yaml
+  - flux-system/cluster-crds.yaml
+  - flux-system/kubernetes-base-addons.yaml
+  # HelmReleases are rendered directly by the flux-addons umbrella chart — no separate Kustomization needed
+
+  # ── Plain New Kubernetes Resources ───────────────────────────────────────────────
+  # Extra K8s resources applied by Flux after CRDs exist (ExternalSecrets,
+  # ServiceAccounts, RBAC, etc.). Safe to have listed once Flux is running.
+  - addons/external-secrets-examples/test-externalsecret.yaml
+  - extras/postgres-test/postgres.yaml
+  # - addons/grafana-examples/service-account.yaml
+  # - addons/grafana-examples/backup-storage-location.yaml
+  # - addons/grafana-examples/secrets/grafana-admin.sops.yaml
+  # - addons/velero-examples/backup-storage-location.yaml
+
+# -----------------------------------------------------------
+# How to patch existing Kubernetes resources
+# -----------------------------------------------------------
+# To patch existing Kubernetes resources, create a file in the addons/patches/ directory.
+# The file should be named <resource-name>.yaml.
+# The file should contain the patch to apply to the resource.
+# The patch should be a YAML object.
+# The patch should be applied to the resource in the addons/patches/ directory.
+# The patch should be applied to the resource in the addons/patches/ directory.
+# -------------------------------------------------------------------------------
+# patchesStrategicMerge:
+#   - addons/patches/<app-name>-<resource-name>.yaml
+
+configMapGenerator:
+  - name: flux-addons-values-dev
+    namespace: flux-system
+    files:
+      - values.yaml=values.yaml
+    options:
+      disableNameSuffixHash: true

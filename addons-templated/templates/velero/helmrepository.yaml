@@ -1,0 +1,3 @@
+{{- if .Values.velero.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.velero.chart.repo "global" .Values.global) }}
+{{- end }}

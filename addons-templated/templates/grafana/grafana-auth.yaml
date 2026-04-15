@@ -1,0 +1,64 @@
+{{- if .Values.grafana.enabled }}
+{{- $app       := .Values.grafana }}
+{{- $namespace := $app.namespace }}
+
+{{/* ── Postgres database credentials ──────────────────────────────────────
+     Always a direct in-cluster Secret — postgres runs in-cluster so there
+     is no external secrets path for it. Password is auto-generated on first
+     install and preserved across upgrades via lookup on the existing Secret. */}}
+{{- if ((($app.postgres).internal).enabled) }}
+{{- $secretName := "grafana-database" }}
+{{- $username   := $app.postgres.internal.username | default "grafana" }}
+{{- $password   := "" }}
+{{- if or $app.postgres.internal.randomPassword (not (hasKey $app.postgres.internal "randomPassword")) }}
+{{-   $existingSecret := lookup "v1" "Secret" $namespace $secretName }}
+{{-   if and $existingSecret $existingSecret.data (index $existingSecret.data "POSTGRES_PASSWORD") }}
+{{-     $password = index $existingSecret.data "POSTGRES_PASSWORD" | b64dec }}
+{{-   else }}
+{{-     $password = randAlphaNum 32 }}
+{{-   end }}
+{{- else }}
+{{-   $password = $app.postgres.internal.password | default "" }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $secretName }}
+  namespace: {{ $namespace }}
+type: Opaque
+stringData:
+  POSTGRES_USER:     {{ $username | quote }}
+  POSTGRES_PASSWORD: {{ $password | quote }}
+  POSTGRES_DB:       "grafana"
+  DB_HOST:           "postgres-grafana.{{ $namespace }}.svc.cluster.local"
+  DB_CONNECTION_STRING: {{ printf "postgres://%s:%s@postgres-grafana.%s.svc.cluster.local:5432/grafana?connect_timeout=10&sslmode=disable" $username ($password | urlquery) $namespace | quote }}
+{{- end }}
+
+{{/* ── Admin credentials (no External Secrets) ────────────────────────────
+     Rendered when externalSecrets is disabled or adminExternalSecret.secretKey
+     is not set. The ExternalSecret path lives in external-secrets/grafana-secret.yaml.
+     Password is auto-generated on first install and preserved across upgrades
+     via lookup on the existing Secret — same pattern as the postgres credential. */}}
+{{- $adminSecretName := $app.adminPasswordSecretRef.name | default "grafana-admin-secret" }}
+{{- if not (and .Values.externalSecrets.enabled (($app.adminExternalSecret).secretKey)) }}
+{{- $adminPassword       := "" }}
+{{- $existingAdminSecret := lookup "v1" "Secret" $namespace $adminSecretName }}
+{{- if and $existingAdminSecret $existingAdminSecret.data (index $existingAdminSecret.data "admin-password") }}
+{{-   $adminPassword = index $existingAdminSecret.data "admin-password" | b64dec }}
+{{- else }}
+{{-   $adminPassword = randAlphaNum 32 }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $adminSecretName }}
+  namespace: {{ $namespace }}
+type: Opaque
+stringData:
+  admin-user:     "admin"
+  admin-password: {{ $adminPassword | quote }}
+{{- end }}
+
+{{- end }}

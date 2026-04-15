@@ -1,0 +1,15 @@
+{{- if .Values.metricsServer.enabled }}
+{{- $app := .Values.metricsServer }}
+{{- $replicas := $app.replicaCount | default 1 }}
+{{- if $app.ha }}{{- $replicas = 2 }}{{- end }}
+{{- $built := dict
+    "replicaCount" $replicas
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+}}
+{{- if $app.ha }}
+{{- $_ := set $built "podDisruptionBudget" (dict "enabled" true "minAvailable" 1) }}
+{{- end }}
+{{- $final := mergeOverwrite $built ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "metrics-server" "namespace" $app.namespace "values" $final) }}
+{{- end }}

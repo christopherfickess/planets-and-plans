@@ -1,0 +1,16 @@
+# Self-referential Kustomization — tells Flux to watch clusters/dev/ in the
+# terraform-aws-eks repo. Applied once during bootstrap (via kubectl apply -k
+# examples/basic/clusters/dev/), then Flux owns it from Git permanently.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: terraform-aws-eks
+  namespace: flux-system
+spec:
+  interval: 1m
+  path: ./examples/basic/clusters/dev
+  sourceRef:
+    kind: GitRepository
+    name: terraform-aws-eks
+  prune: true
+  wait: true

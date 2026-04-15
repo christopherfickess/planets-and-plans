@@ -1,0 +1,3 @@
+{{- if .Values.externalSecrets.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.externalSecrets.chart.repo "global" .Values.global) }}
+{{- end }}

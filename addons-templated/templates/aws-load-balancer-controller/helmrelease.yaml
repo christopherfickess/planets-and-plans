@@ -1,0 +1,8 @@
+{{- if .Values.awsLoadBalancerController.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "aws-load-balancer-controller"
+    "releaseName" "aws-load-balancer-controller"
+    "namespace"   .Values.awsLoadBalancerController.namespace
+    "chart"       .Values.awsLoadBalancerController.chart
+    "global"      .Values.global) }}
+{{- end }}

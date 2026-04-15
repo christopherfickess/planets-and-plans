@@ -1,0 +1,3 @@
+{{- if .Values.prometheus.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.prometheus.chart.repo "global" .Values.global) }}
+{{- end }}

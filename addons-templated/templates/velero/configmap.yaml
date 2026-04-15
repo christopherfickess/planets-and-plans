@@ -1,0 +1,77 @@
+{{- if .Values.velero.enabled }}
+{{- $app := .Values.velero }}
+
+{{/* ── S3 config — region shared by both BSL and VSL ─────────────── */}}
+{{- $s3Config := dict "region" ($app.s3.region | default "us-east-2") }}
+
+{{/* ── Backup storage location — points Velero at the S3 bucket ───── */}}
+{{- $backupStorageLocation := list (dict
+    "name"     "default"
+    "provider" "aws"
+    "bucket"   ($app.s3.bucket | default "REPLACE_ME")
+    "config"   $s3Config)
+}}
+{{- if $app.s3.prefix }}
+{{/* Re-build the BSL entry to include the optional key prefix when set */}}
+{{- $backupStorageLocation = list (dict
+    "name"     "default"
+    "provider" "aws"
+    "bucket"   ($app.s3.bucket | default "REPLACE_ME")
+    "prefix"   $app.s3.prefix
+    "config"   $s3Config)
+}}
+{{- end }}
+
+{{/* ── Volume snapshot location — AWS EBS snapshots in the same region ─ */}}
+{{- $volumeSnapshotLocation := list (dict
+    "name"     "default"
+    "provider" "aws"
+    "config"   (dict "region" ($app.s3.region | default "us-east-2"))) }}
+
+{{/* ── Backup schedules — built from the schedules list in values ──── */}}
+{{- $scheduleMap := dict }}
+{{- range $app.schedules }}
+{{/* Register each schedule by name; default TTL is 30 days (720h) */}}
+{{- $_ := set $scheduleMap .name (dict
+    "schedule" .cron
+    "template" (dict
+        "ttl"                      (.ttl | default "720h0m0s")
+        "storageLocation"          "default"
+        "volumeSnapshotLocations"  (list "default")
+        "defaultVolumesToFsBackup" ($.Values.velero.defaultVolumesToFsBackup | default false))) }}
+{{- end }}
+
+{{/* ── AWS plugin image — constructed from configurable image + tag ── */}}
+{{- $pluginImage := printf "%s:%s"
+    ($app.plugin.image | default "velero/velero-plugin-for-aws")
+    ($app.plugin.tag   | default "v1.8.0") }}
+
+{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
+
+{{/* ── Top-level chart values — service account, configuration, plugin ─ */}}
+{{- $chartValues := dict
+    "serviceAccount" (dict
+        "server" (dict
+            "create"      true
+            "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn)))
+    "configuration" (dict
+        "backupStorageLocation"    $backupStorageLocation
+        "volumeSnapshotLocation"   $volumeSnapshotLocation
+        "defaultVolumesToFsBackup" ($app.defaultVolumesToFsBackup | default false))
+    "initContainers" (list (dict
+        "name"  "velero-plugin-for-aws"
+        "image" $pluginImage
+        "volumeMounts" (list (dict "mountPath" "/target" "name" "plugins"))))
+}}
+
+{{/* ── Schedules — only added to values when at least one is defined ─ */}}
+{{- if $scheduleMap }}
+{{/* Attach the rendered schedule map so Velero creates the CronJob resources */}}
+{{- $_ := set $chartValues "schedules" $scheduleMap }}
+{{- end }}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "velero" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

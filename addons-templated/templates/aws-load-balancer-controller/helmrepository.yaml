@@ -1,0 +1,4 @@
+{{/* kube-system already exists — no namespace.yaml needed */}}
+{{- if .Values.awsLoadBalancerController.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.awsLoadBalancerController.chart.repo "global" .Values.global) }}
+{{- end }}

@@ -1,0 +1,42 @@
+{{- if .Values.rtcd.enabled }}
+{{- $app := .Values.rtcd }}
+
+{{/* ── WebRTC service — type and annotations set per-cluster in values override.
+     WebRTC media is UDP so this must be an NLB (Layer 4), not an ALB/HTTPRoute. */}}
+{{- $svc := $app.service | default dict }}
+{{/* ── Logger env vars — RTCD reads config from RTCD_* env vars, not a config
+     file. RTCD_LOGGER_ENABLEFILE disables writing rtcd.log to the working
+     directory, which is read-only in the distroless container image. */}}
+{{- $envVars := dict
+    "RTCD_LOGGER_ENABLEFILE"    "\"false\""
+    "RTCD_LOGGER_ENABLECONSOLE" "\"true\""
+    "RTCD_LOGGER_CONSOLELEVEL"  "\"INFO\"" }}
+
+{{- if $app.rtcPort }}
+{{- $_ := set $envVars "RTCD_RTC_ICEPORTUDP" (printf "\"%v\"" $app.rtcPort) }}
+{{- $_ := set $envVars "RTCD_RTC_ICEPORTTCP" (printf "\"%v\"" $app.rtcPort) }}
+{{- end }}
+
+{{- $built := dict
+    "configuration" (dict
+        "replicas"             ($app.replicaCount | default 1)
+        "environmentVariables" $envVars)
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+    "service" (dict
+        "type"        ($svc.type        | default "ClusterIP")
+        "annotations" ($svc.annotations | default dict)
+        "RTCport"     ($app.rtcPort     | default 8443))
+}}
+
+{{/* ── IRSA — only needed when pulling the RTCD API key from Secrets Manager ── */}}
+{{- if $app.irsaRoleSuffix }}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
+{{- $_ := set $built "serviceAccount" (dict
+    "create"      true
+    "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn)) }}
+{{- end }}
+
+{{- $final := mergeOverwrite $built ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "rtcd" "namespace" $app.namespace "values" $final) }}
+{{- end }}

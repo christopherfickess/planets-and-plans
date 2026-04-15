@@ -1,0 +1,103 @@
+# ==============================================================================
+# Standalone test Postgres — mattermost-chris-test
+#
+# ⚠️  TEST ONLY — credentials are stored in plaintext in this file.
+#     In production, encrypt this Secret with SOPS before committing, or
+#     replace it with an ExternalSecret pulling from Secrets Manager.
+#
+# This postgres exists solely to validate the External Secrets → Mattermost
+# connection chain. The mattermost-test instance connects here via an
+# ESO-created secret rather than the chart-managed in-cluster postgres.
+#
+# Connection URL (store this in AWS Secrets Manager under dev-app-mattermost,
+# key DB_CONNECTION_STRING):
+#   postgres://mattermost:<password>@postgres-test.mattermost-chris-test.svc.cluster.local:5432/mattermost?connect_timeout=10&sslmode=disable
+# ==============================================================================
+
+# ── Namespace ─────────────────────────────────────────────────────────────────
+# Created here so the Secret and StatefulSet have a home before the Mattermost
+# HelmRelease (which also targets this namespace) is applied.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mattermost-chris-test
+
+# ── Credentials Secret ────────────────────────────────────────────────────────
+# Used by the postgres container for POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB
+# env vars at init time. Must exist before the StatefulSet pod starts.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-test-credentials
+  namespace: mattermost-chris-test
+type: Opaque
+stringData:
+  POSTGRES_USER: "mattermost"
+  POSTGRES_PASSWORD: "#############"
+  POSTGRES_DB: "mattermost"
+
+# ── StatefulSet ───────────────────────────────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-test
+  namespace: mattermost-chris-test
+spec:
+  serviceName: postgres-test
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-test
+  template:
+    metadata:
+      labels:
+        app: postgres-test
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-test-credentials
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 10Gi
+
+# ── Service ───────────────────────────────────────────────────────────────────
+# ClusterIP (not headless) so Mattermost connects via stable virtual IP even
+# if the pod restarts and gets a new IP.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-test
+  namespace: mattermost-chris-test
+spec:
+  selector:
+    app: postgres-test
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP

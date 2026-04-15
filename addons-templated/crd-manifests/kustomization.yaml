@@ -1,0 +1,74 @@
+# ==============================================================================
+# CRD kustomization config
+#
+# Flux applies this folder with prune: false — CRDs are NEVER auto-deleted.
+# To remove a CRD you must: kubectl delete crd <name> manually.
+#
+# CRDs are environment-agnostic — the same files deploy to dev, staging, and prod.
+# Env-specific config belongs in cluster-overrides/<env>/values.yaml, not here.
+#
+# Which charts are covered here and why:
+#
+#   kube-prometheus-stack  — CRDs live in a bundled `crds` subchart; Helm only
+#                            installs subchart CRDs on first install, not upgrades.
+#                            Managing them here ensures they are updated when you
+#                            bump the chart version.
+#
+#   mattermost-operator    — CRDs are in the chart's top-level crds/ folder;
+#                            same Helm limitation applies (install-only).
+#
+#   velero                 — Same pattern; CRDs in chart crds/ folder.
+#
+#   aws-load-balancer-controller — Same pattern; single combined crds.yaml.
+#
+#   alloy                  — CRDs are in the chart's top-level crds/ folder
+#                            (crds.create: false in values disables chart-managed CRDs).
+#                            Includes: PodLogs (monitoring.grafana.com/v1alpha2)
+#
+# external-secrets       — CRDs are in templates/crds/ so Helm manages them on
+#                            install and upgrade. They are ALSO included here so
+#                            they are present before the HelmRelease is applied
+#                            (required by ExternalSecret resources in extras/).
+#
+# How to add a new CRD set:
+#   1. Pull the chart: helm pull <repo>/<chart> --version <ver> --untar
+#   2. Copy files from <chart>/crds/ into a new subfolder here
+#   3. Add a kustomization.yaml in that subfolder listing the files
+#   4. Add the subfolder as a resource below
+#   5. Commit and push
+#
+# How to upgrade CRDs when bumping a chart version:
+#   1. Pull the new chart version (same as above)
+#   2. Overwrite the files in the subfolder
+#   3. Commit alongside the values.yaml chart version bump
+# ==============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Prometheus Operator CRDs: Alertmanager, AlertmanagerConfig, PodMonitor, Probe,
+  # PrometheusAgent, Prometheus, PrometheusRule, ScrapeConfig, ServiceMonitor, ThanosRuler
+  - kube-prometheus-stack/
+
+  # Mattermost Operator CRDs: Mattermost, MattermostRestoreDB, ClusterInstallation
+  - mattermost-operator/
+
+  # Velero CRDs: Backup, BackupRepository, BackupStorageLocation, DataDownload,
+  # DataUpload, DeleteBackupRequest, DownloadRequest, PodVolumeBackup,
+  # PodVolumeRestore, Restore, Schedule, ServerStatusRequest, VolumeSnapshotLocation
+  - velero/
+
+  # AWS Load Balancer Controller CRDs: IngressClassParams, TargetGroupBinding
+  - aws-load-balancer-controller/
+
+  # Gateway API CRDs: GatewayClass, Gateway, HTTPRoute, GRPCRoute, ReferenceGrant
+  # Required by Cilium when gatewayAPI.enabled: true and by the cilium-gateway templates
+  - gateway-api/
+
+  # External Secrets CRDs: ExternalSecret, ClusterSecretStore, SecretStore, etc.
+  # Included here so CRDs exist before ExternalSecret resources in extras/ are applied.
+  - external-secrets/
+
+  # Alloy CRDs: PodLogs (monitoring.grafana.com/v1alpha2)
+  # crds.create: false in values.yaml disables chart-managed CRDs.
+  - alloy/

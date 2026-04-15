@@ -1,0 +1,15 @@
+{{- if and .Values.grafana.enabled (((.Values.grafana.postgres).internal).enabled) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-grafana
+  namespace: {{ .Values.grafana.namespace }}
+spec:
+  selector:
+    app: postgres
+    component: grafana
+  ports:
+    - port: 5432
+      targetPort: 5432
+{{- end }}

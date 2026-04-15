@@ -1,0 +1,19 @@
+{{- /*
+  Shared namespaces — rendered once here to avoid duplicate resource errors.
+
+  Helm renders all templates simultaneously before applying anything to the
+  cluster, so lookup()-based "does it exist?" checks cannot prevent duplicates
+  within the same chart render. Any namespace used by more than one addon must
+  be created here instead of in each addon's namespace.yaml.
+
+  Unique namespaces stay in each addon's own namespace.yaml.
+*/ -}}
+
+{{- /* monitoring — shared by prometheus, grafana, alloy, thanos, loki */ -}}
+{{- if or .Values.prometheus.enabled .Values.grafana.enabled .Values.alloy.enabled .Values.thanos.enabled .Values.loki.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+{{- end }}

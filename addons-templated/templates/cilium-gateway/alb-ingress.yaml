@@ -1,0 +1,56 @@
+{{- if .Values.ciliumGateway.enabled }}
+{{- $alb := .Values.ciliumGateway.alb }}
+{{- if $alb.hostname }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alb-to-cilium
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: alb
+
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
+
+    # TLS + redirect
+    alb.ingress.kubernetes.io/certificate-arn: {{ $alb.certArn | quote }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+    # WAF
+    alb.ingress.kubernetes.io/wafv2-acl-arn: {{ $alb.wafArn | quote }}
+
+    # Networking
+    alb.ingress.kubernetes.io/subnets: {{ $alb.subnets | quote }}
+
+    # Health check independent of application pods
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=3600
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=300
+
+    alb.ingress.kubernetes.io/tags: {{ printf "ManagedBy=flux%s" ($alb.extraTags | default "" ) | quote }}
+
+spec:
+  ingressClassName: alb
+  rules:
+    - host: {{ $alb.hostname | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cilium-gateway-cilium-gateway
+                port:
+                  number: 80
+{{- end }}
+{{- end }}

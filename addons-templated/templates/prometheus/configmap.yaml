@@ -1,0 +1,105 @@
+{{- if .Values.prometheus.enabled }}
+{{- $app := .Values.prometheus }}
+
+{{/* ── Scheduling defaults — fall back to empty dict/list if not set ── */}}
+{{- $nodeSelector := $app.nodeSelector | default dict }}
+{{- $tolerations  := $app.tolerations  | default list }}
+
+{{/* ── Replica count — doubled when ha: true ─────────────────────── */}}
+{{- $replicaCount := $app.replicaCount | default 1 }}
+{{- if $app.ha }}{{- $replicaCount = 2 }}{{- end }}
+
+{{/* ── Resource requests/limits for the Prometheus pods ───────────── */}}
+{{- $prometheusResources := dict
+    "requests" (dict "cpu" "500m" "memory" "6Gi")
+    "limits"   (dict "cpu" "3"    "memory" "30Gi")
+}}
+
+{{/* ── PVC spec for Prometheus TSDB storage ────────────────────────── */}}
+{{- $storageSpec := dict "volumeClaimTemplate" (dict "spec" (dict
+    "storageClassName" $app.storageClass
+    "accessModes"      (list "ReadWriteOnce")
+    "resources"        (dict "requests" (dict "storage" $app.storageSize))))
+}}
+
+{{/* ── Core prometheusSpec — applies to the Prometheus StatefulSet ─── */}}
+{{- $prometheusSpec := dict
+    "replicas"       $replicaCount
+    "retention"      $app.retention
+    "scrapeInterval" "60s"
+    "nodeSelector"   $nodeSelector
+    "tolerations"    $tolerations
+    "externalLabels" (dict "clusterID" ($app.clusterID | default .Values.global.aws.clusterName))
+    "resources"      $prometheusResources
+    "storageSpec"    $storageSpec
+}}
+
+{{/* ── HA affinity — spread Prometheus replicas across nodes ──────── */}}
+{{- if $app.ha }}
+{{- $podAntiAffinityRule := dict
+    "labelSelector" (dict "matchLabels" (dict "app.kubernetes.io/name" "prometheus"))
+    "topologyKey"   "kubernetes.io/hostname"
+}}
+{{/* Set pod anti-affinity so HA replicas are never co-scheduled on the same node */}}
+{{- $_ := set $prometheusSpec "affinity" (dict "podAntiAffinity" (dict
+    "requiredDuringSchedulingIgnoredDuringExecution" (list $podAntiAffinityRule))) }}
+{{- end }}
+
+{{/* ── Thanos sidecar — object-store config read from existing secret ─ */}}
+{{- if $app.thanos.enabled }}
+{{/* Point the Thanos sidecar at the pre-created objstore secret so it can upload blocks */}}
+{{- $_ := set $prometheusSpec "thanos" (dict "objectStorageConfig" (dict
+    "existingSecret" (dict "key" "objstore.yml" "name" $app.thanos.objectStorageSecret))) }}
+{{- end }}
+
+{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
+
+{{/* ── prometheusBlock — wraps prometheusSpec and IRSA service account ─ */}}
+{{- $prometheusBlock := dict
+    "serviceAccount" (dict "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+    "prometheusSpec"  $prometheusSpec
+}}
+
+{{/* ── Thanos gRPC service — headless ClusterIP for Thanos querier ── */}}
+{{- if $app.thanos.enabled }}
+{{/* Expose a headless gRPC service so Thanos Query can discover and scrape this Prometheus */}}
+{{- $_ := set $prometheusBlock "thanosService" (dict
+    "enabled"    true
+    "portName"   "grpc"
+    "port"       10901
+    "targetPort" "grpc"
+    "clusterIP"  "None"
+    "type"       "ClusterIP") }}
+{{- end }}
+
+{{/* ── Additional service monitors — passthrough from values ──────── */}}
+{{- if $app.additionalServiceMonitors }}
+{{/* Merge any operator-defined ServiceMonitors in alongside the built-in ones */}}
+{{- $_ := set $prometheusBlock "additionalServiceMonitors" $app.additionalServiceMonitors }}
+{{- end }}
+
+{{/* ── Top-level chart values — composes all sub-sections ──────────── */}}
+{{- $chartValues := dict
+    "defaultRules"       (dict "create" false)
+    "alertmanager"       (dict "enabled" ($app.alertmanager.enabled | default false))
+    "grafana"            (dict "enabled" ($app.grafana.enabled       | default false))
+    "prometheusOperator" (dict
+        "nodeSelector"  $nodeSelector
+        "tolerations"   $tolerations
+        "admissionWebhooks" (dict "patch" (dict
+            "serviceAccount" (dict "create" false "name" "kube-prometheus-stack-admission")
+            "nodeSelector"   $nodeSelector
+            "tolerations"    $tolerations)))
+    "prometheus"         $prometheusBlock
+    "kube-state-metrics" (dict "nodeSelector" $nodeSelector "tolerations" $tolerations)
+    "kubelet"            (dict "enabled" true "serviceMonitor" (dict "interval" "60s"))
+    "coreDns"            (dict "enabled" true)
+    "kubeEtcd"           (dict "enabled" true)
+    "nodeExporter"       (dict "enabled" true)
+}}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "prometheus" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

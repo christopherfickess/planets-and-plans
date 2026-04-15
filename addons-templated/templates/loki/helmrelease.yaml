@@ -1,0 +1,8 @@
+{{- if .Values.loki.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "loki"
+    "releaseName" "loki"
+    "namespace"   .Values.loki.namespace
+    "chart"       .Values.loki.chart
+    "global"      .Values.global) }}
+{{- end }}
