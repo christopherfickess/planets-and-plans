@@ -1,0 +1,3 @@
+{{- if .Values.teleport.enabled }}
+{{- include "flux-addons.namespace" (dict "name" .Values.teleport.namespace) }}
+{{- end }}

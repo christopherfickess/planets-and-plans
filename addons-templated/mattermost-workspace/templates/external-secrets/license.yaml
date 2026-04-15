@@ -1,0 +1,22 @@
+{{- $instance := .Values.instance }}
+{{- if and .Values.externalSecrets.enabled (($instance.license).externalSecret).secretKey }}
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: {{ printf "%s-license" $instance.namespace }}
+  namespace: {{ $instance.namespace }}
+spec:
+  refreshInterval: 24h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secretsmanager
+  target:
+    name: {{ printf "%s-license" $instance.namespace }}
+    creationPolicy: Owner
+  data:
+    - secretKey: license
+      remoteRef:
+        key: {{ $instance.license.externalSecret.secretKey }}
+        property: {{ $instance.license.externalSecret.property }}
+{{- end }}

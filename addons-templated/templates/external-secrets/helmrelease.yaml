@@ -1,0 +1,8 @@
+{{- if .Values.externalSecrets.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "external-secrets"
+    "releaseName" "external-secrets"
+    "namespace"   .Values.externalSecrets.namespace
+    "chart"       .Values.externalSecrets.chart
+    "global"      .Values.global) }}
+{{- end }}

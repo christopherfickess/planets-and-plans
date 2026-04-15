@@ -1,0 +1,21 @@
+# velero v11.3.2 CRDs
+# Source: crds/ inside the vmware-tanzu/velero chart
+# When upgrading: helm pull vmware-tanzu/velero --version <new> --untar
+#                 then overwrite these files from <chart>/crds/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - backuprepositories.yaml
+  - backupstoragelocations.yaml
+  - backups.yaml
+  - datadownloads.yaml
+  - datauploads.yaml
+  - deletebackuprequests.yaml
+  - downloadrequests.yaml
+  - podvolumebackups.yaml
+  - podvolumerestores.yaml
+  - restores.yaml
+  - schedules.yaml
+  - serverstatusrequests.yaml
+  - volumesnapshotlocations.yaml

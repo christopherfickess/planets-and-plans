@@ -1,0 +1,13 @@
+{{- if .Values.ciliumGateway.enabled }}
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: cilium-nodeport-config
+  namespace: kube-system
+spec:
+  description: "NodePort Gateway with stable ALB health checks"
+  service:
+    type: NodePort
+    externalTrafficPolicy: Local
+{{- end }}

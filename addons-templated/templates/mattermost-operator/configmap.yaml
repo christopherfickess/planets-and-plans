@@ -1,0 +1,10 @@
+{{- if .Values.mattermostOperator.enabled }}
+{{- $app := .Values.mattermostOperator }}
+{{- $built := dict
+    "replicaCount" ($app.replicaCount | default 1)
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+}}
+{{- $final := mergeOverwrite $built ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "mattermost-operator" "namespace" $app.namespace "values" $final) }}
+{{- end }}

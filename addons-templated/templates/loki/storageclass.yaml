@@ -1,0 +1,30 @@
+{{- if and .Values.loki.enabled ((.Values.loki.storageClass).enabled) }}
+{{- $sc := .Values.loki.storageClass }}
+---
+# Dedicated EBS gp3 StorageClass for Loki — used by the singleBinary StatefulSet PVC.
+# Not the cluster default; scoped to Loki only.
+# Requires the aws-ebs-csi-driver EKS addon (enabled by default in the Terraform module).
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $sc.name | default "loki-gp3" }}
+  labels:
+    app: loki
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: "true"
+  {{- with $sc.iops }}
+  # Custom IOPS — gp3 baseline is 3000; raise for write-heavy WAL workloads
+  iops: {{ . | quote }}
+  {{- end }}
+  {{- with $sc.throughput }}
+  # Custom throughput in MiB/s — gp3 baseline is 125
+  throughput: {{ . | quote }}
+  {{- end }}
+# WaitForFirstConsumer ensures the EBS volume is provisioned in the same AZ as the pod
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+# Retain keeps the EBS volume after PVC deletion — prevents accidental data loss on Loki WAL
+reclaimPolicy: Retain
+{{- end }}

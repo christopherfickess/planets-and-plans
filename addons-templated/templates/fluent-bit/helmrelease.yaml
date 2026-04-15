@@ -1,0 +1,8 @@
+{{- if .Values.fluentBit.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "fluent-bit"
+    "releaseName" "fluent-bit"
+    "namespace"   .Values.fluentBit.namespace
+    "chart"       .Values.fluentBit.chart
+    "global"      .Values.global) }}
+{{- end }}

@@ -1,0 +1,17 @@
+{{- $instance := .Values.instance }}
+{{- if ($instance.postgres).enabled }}
+{{- $name := .Values.instanceName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "postgres-%s" $name }}
+  namespace: {{ $instance.namespace }}
+spec:
+  selector:
+    app: postgres
+    instance: {{ $name }}
+  ports:
+    - port: 5432
+      targetPort: 5432
+{{- end }}

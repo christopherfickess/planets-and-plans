@@ -1,0 +1,8 @@
+{{- if .Values.nginx.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "nginx"
+    "releaseName" "nginx"
+    "namespace"   .Values.nginx.namespace
+    "chart"       .Values.nginx.chart
+    "global"      .Values.global) }}
+{{- end }}

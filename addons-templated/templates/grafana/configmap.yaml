@@ -1,0 +1,115 @@
+{{- if .Values.grafana.enabled }}
+{{- $app       := .Values.grafana }}
+{{- $namespace := $app.namespace }}
+
+{{/* ── Canonical host — prefer httproute, fall back to ingress ────── */}}
+{{- $host := "" }}
+{{- if (($app.httproute).enabled) }}
+{{-   $host = $app.httproute.host }}
+{{- else if (($app.ingress).enabled) }}
+{{-   $host = $app.ingress.host }}
+{{- end }}
+
+{{/* ── Admin credentials — inline password or reference an existing secret ─ */}}
+{{- $adminCredentials := dict "adminPassword" ($app.adminPassword | default "REPLACE_ME") }}
+{{- if $app.adminPasswordSecretRef }}
+{{/* When a secretRef is provided, use Grafana's existingSecret mechanism instead
+     of embedding the password directly in the ConfigMap values */}}
+{{- $adminCredentials = dict "admin" (dict
+    "existingSecret" $app.adminPasswordSecretRef.name
+    "userKey"        "admin-user"
+    "passwordKey"    ($app.adminPasswordSecretRef.key | default "admin-password")) }}
+{{- end }}
+
+{{/* ── StorageClass name — grafana.storageClass wins when enabled, otherwise
+     falls back to persistence.storageClass (explicit override) or blank (cluster default) ─ */}}
+{{- $scName := $app.persistence.storageClass | default "" }}
+{{- if (($app.storageClass).enabled) }}
+{{-   $scName = $app.storageClass.name | default "grafana-gp3" }}
+{{- end }}
+
+{{/* ── Postgres mode flags — used by both persistence and db-config blocks ── */}}
+{{- $inClusterPG := ((($app.postgres).internal).enabled) | default false }}
+{{- $externalPG  := ((($app.postgres).external).enabled) | default false }}
+
+{{/* ── Persistence — suppressed whenever any postgres mode is active.
+     SQLite PVC is unused when grafana.ini [database] points at postgres. */}}
+{{- $persistenceConfig := dict "enabled" false }}
+{{- if and $app.persistence.enabled (not $inClusterPG) (not $externalPG) }}
+{{- $persistenceConfig = dict
+    "enabled"           true
+    "size"              ($app.persistence.size | default "10Gi")
+    "storageClassName"  $scName }}
+{{- end }}
+
+{{/* ── grafana.ini [database] — auto-configured for in-cluster or external postgres.
+     Password is intentionally omitted from grafana.ini to satisfy the chart's
+     assertNoLeakedSecrets check. It is injected via GF_DATABASE_PASSWORD via
+     envValueFrom from the grafana-database Secret instead.
+     In-cluster takes precedence if both modes are mistakenly enabled. */}}
+{{- $dbIni := dict }}
+{{- $dbEnv := dict }}
+{{- if $inClusterPG }}
+{{- $username := $app.postgres.internal.username | default "grafana" }}
+{{- $dbIni = dict
+    "type" "postgres"
+    "host" (printf "postgres-grafana.%s.svc.cluster.local:5432" $namespace)
+    "name" "grafana"
+    "user" $username }}
+{{- $dbEnv = dict "GF_DATABASE_PASSWORD" (dict
+    "secretKeyRef" (dict
+        "name" "grafana-database"
+        "key"  "POSTGRES_PASSWORD")) }}
+{{- else if $externalPG }}
+{{- $extPg      := $app.postgres.external }}
+{{- $secretName := (($extPg.existingSecret).name) | default "grafana-database" }}
+{{- $secretKey  := (($extPg.existingSecret).key)  | default "POSTGRES_PASSWORD" }}
+{{- $dbIni = dict
+    "type" "postgres"
+    "host" (printf "%s:%v" $extPg.host ($extPg.port | default 5432))
+    "name" ($extPg.database | default "grafana")
+    "user" ($extPg.username | default "grafana") }}
+{{- $dbEnv = dict "GF_DATABASE_PASSWORD" (dict
+    "secretKeyRef" (dict
+        "name" $secretName
+        "key"  $secretKey)) }}
+{{- end }}
+
+{{/* ── Top-level chart values ─────────────────────────────────────────
+     Ingress is always disabled in chart values — routing is handled by
+     the standalone httproute.yaml or ingress.yaml templates above, which
+     gives us Gateway API support and keeps the chart values clean.
+     server.domain / root_url are only set when a host is known — omitting
+     them when $host is empty avoids rendering an invalid "https://" root_url
+     that can break Grafana startup and OAuth redirect URL generation. */}}
+{{- $grafanaIni := dict "auth.anonymous" (dict "enabled" false) }}
+{{- if ne $host "" }}
+{{- $_ := set $grafanaIni "server" (dict
+    "domain"   $host
+    "root_url" (printf "https://%s" $host)) }}
+{{- end }}
+{{- if $dbIni }}
+{{- $_ := set $grafanaIni "database" $dbIni }}
+{{- end }}
+
+{{- $chartValues := merge $adminCredentials (dict
+    "replicas"     ($app.replicas | default 1)
+    "persistence"  $persistenceConfig
+    "ingress"      (dict "enabled" false)
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+    "envValueFrom" $dbEnv
+    "grafana.ini"  $grafanaIni) }}
+
+{{/* ── Datasources — only added when defined in values ───────────── */}}
+{{- if $app.datasources }}
+{{/* Wrap datasources in the datasources.yaml key expected by the Grafana chart */}}
+{{- $_ := set $chartValues "datasources" (dict "datasources.yaml" (dict
+    "apiVersion"  1
+    "datasources" $app.datasources)) }}
+{{- end }}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "grafana" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

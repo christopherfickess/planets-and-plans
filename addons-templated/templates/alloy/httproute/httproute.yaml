@@ -1,0 +1,25 @@
+{{- if and .Values.alloy.enabled ((.Values.alloy.httproute).enabled) }}
+{{- $app              := .Values.alloy }}
+{{- $gatewayName      := $app.httproute.gatewayName      | default "cilium-gateway" }}
+{{- $gatewayNamespace := $app.httproute.gatewayNamespace | default "kube-system" }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alloy
+  namespace: {{ $app.namespace }}
+spec:
+  hostnames:
+    - {{ $app.httproute.host }}
+  parentRefs:
+    - name: {{ $gatewayName }}
+      namespace: {{ $gatewayNamespace }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: alloy
+          port: 12345
+{{- end }}

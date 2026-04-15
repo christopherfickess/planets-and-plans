@@ -1,0 +1,32 @@
+# external-secrets v0.17.0 CRDs
+# Source: rendered from templates/crds/ inside the external-secrets chart
+#
+# To update when bumping the chart version:
+#   helm template external-secrets external-secrets/external-secrets \
+#     --version <ver> --set installCRDs=true --include-crds \
+#     | python3 scripts/split-crds.py crds/external-secrets/
+#   Commit alongside the chart version bump in addons/values.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - acraccesstokens.yaml
+  - clusterexternalsecrets.yaml
+  - clustergenerators.yaml
+  - clusterpushsecrets.yaml
+  - clustersecretstores.yaml
+  - ecrauthorizationtokens.yaml
+  - externalsecrets.yaml
+  - fakes.yaml
+  - gcraccesstokens.yaml
+  - generatorstates.yaml
+  - githubaccesstokens.yaml
+  - grafanas.yaml
+  - passwords.yaml
+  - pushsecrets.yaml
+  - quayaccesstokens.yaml
+  - secretstores.yaml
+  - stssessiontokens.yaml
+  - uuids.yaml
+  - vaultdynamicsecrets.yaml
+  - webhooks.yaml

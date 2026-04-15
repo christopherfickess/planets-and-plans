@@ -1,0 +1,7 @@
+{{/* NOTE: 'grafana' HelmRepository is also used by alloy (same repo URL/name).
+     alloy/helmrepository.yaml skips emission when grafana is enabled, so this
+     file is the canonical owner. If grafana is disabled but alloy is enabled,
+     alloy's helmrepository.yaml emits it instead. */}}
+{{- if .Values.grafana.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.grafana.chart.repo "global" .Values.global) }}
+{{- end }}

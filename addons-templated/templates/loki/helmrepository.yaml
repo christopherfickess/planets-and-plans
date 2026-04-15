@@ -1,0 +1,7 @@
+{{/* Loki, Alloy, and Grafana all share the 'grafana' HelmRepository
+     (grafana.github.io/helm-charts). Only one resource can exist per name.
+     Priority chain: grafana owns it when enabled → alloy owns it when enabled
+     and grafana is off → loki owns it only when both are disabled. */}}
+{{- if and .Values.loki.enabled (not .Values.grafana.enabled) (not .Values.alloy.enabled) }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.loki.chart.repo "global" .Values.global) }}
+{{- end }}

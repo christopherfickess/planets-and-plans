@@ -1,0 +1,64 @@
+{{- if .Values.ciliumGateway.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alb-healthz
+  namespace: kube-system
+  labels:
+    app: alb-healthz
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alb-healthz
+  template:
+    metadata:
+      labels:
+        app: alb-healthz
+    spec:
+      containers:
+        - name: http-echo
+          image: hashicorp/http-echo:1.0.0
+          args:
+            - "-listen=:8080"
+            - "-text=ok"
+          ports:
+            - name: http
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alb-healthz
+  namespace: kube-system
+spec:
+  selector:
+    app: alb-healthz
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alb-healthz
+  namespace: kube-system
+spec:
+  parentRefs:
+    - name: cilium-gateway
+      namespace: kube-system
+      sectionName: http
+  # No hostnames — matches any Host header ALB uses for health checks
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /healthz
+      backendRefs:
+        - name: alb-healthz
+          port: 80
+          weight: 100
+{{- end }}

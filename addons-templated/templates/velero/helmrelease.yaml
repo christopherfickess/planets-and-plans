@@ -1,0 +1,8 @@
+{{- if .Values.velero.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "velero"
+    "releaseName" "velero"
+    "namespace"   .Values.velero.namespace
+    "chart"       .Values.velero.chart
+    "global"      .Values.global) }}
+{{- end }}

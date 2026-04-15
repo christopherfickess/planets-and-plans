@@ -1,0 +1,8 @@
+{{- if .Values.mattermostOperator.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "mattermost-operator"
+    "releaseName" "mattermost-operator"
+    "namespace"   .Values.mattermostOperator.namespace
+    "chart"       .Values.mattermostOperator.chart
+    "global"      .Values.global) }}
+{{- end }}

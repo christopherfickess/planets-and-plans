@@ -1,0 +1,18 @@
+# ==============================================================================
+# Example: Velero BackupStorageLocation
+#
+# The Velero Helm chart can create this via values, but if you need multiple
+# backup locations (e.g. cross-region DR) define them as raw resources here.
+# ==============================================================================
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: default
+  namespace: velero
+spec:
+  provider: aws
+  objectStorage:
+    bucket: <your-cluster>-velero-dev    # must match velero.s3.bucket in values.yaml
+    prefix: ""
+  config:
+    region: <your-region>    # must match global.aws.region in values.yaml

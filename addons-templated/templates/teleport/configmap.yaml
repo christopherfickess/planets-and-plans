@@ -1,0 +1,20 @@
+{{- if .Values.teleport.enabled }}
+{{- $app := .Values.teleport }}
+{{- $replicas := $app.replicaCount | default 1 }}
+{{- if $app.ha }}{{- $replicas = 2 }}{{- end }}
+{{- $built := dict
+    "replicaCount" $replicas
+    "proxyAddr"    ($app.proxyAddr | default "REPLACE_ME")
+    "roles"        ($app.roles     | default "kube")
+    "joinParams" (dict
+        "method"    ($app.joinParams.method    | default "token")
+        "tokenName" ($app.joinParams.tokenName | default "REPLACE_ME"))
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+}}
+{{- if $app.kubeClusterName }}
+{{- $_ := set $built "kubeClusterName" $app.kubeClusterName }}
+{{- end }}
+{{- $final := mergeOverwrite $built ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "teleport" "namespace" $app.namespace "values" $final) }}
+{{- end }}

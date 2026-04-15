@@ -1,0 +1,3 @@
+{{- if .Values.teleport.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.teleport.chart.repo "global" .Values.global) }}
+{{- end }}

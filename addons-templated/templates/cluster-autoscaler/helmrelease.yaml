@@ -1,0 +1,8 @@
+{{- if .Values.clusterAutoscaler.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "cluster-autoscaler"
+    "releaseName" "cluster-autoscaler"
+    "namespace"   .Values.clusterAutoscaler.namespace
+    "chart"       .Values.clusterAutoscaler.chart
+    "global"      .Values.global) }}
+{{- end }}

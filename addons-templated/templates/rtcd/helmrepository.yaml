@@ -1,0 +1,6 @@
+{{/* RTCD and mattermost-operator share the 'mattermost' HelmRepository (helm.mattermost.com).
+     Skip emitting it here when mattermost-operator is also enabled — it owns the resource
+     in that case. Helm's post-renderer rejects duplicate resource IDs at render time. */}}
+{{- if and .Values.rtcd.enabled (not .Values.mattermostOperator.enabled) }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.rtcd.chart.repo "global" .Values.global) }}
+{{- end }}

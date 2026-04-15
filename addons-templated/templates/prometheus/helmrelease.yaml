@@ -1,0 +1,9 @@
+{{- if .Values.prometheus.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"          "prometheus"
+    "releaseName"   "kube-prometheus-stack"
+    "namespace"     .Values.prometheus.namespace
+    "chart"         .Values.prometheus.chart
+    "configmapName" "prometheus"
+    "global"        .Values.global) }}
+{{- end }}

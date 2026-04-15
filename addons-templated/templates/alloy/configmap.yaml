@@ -1,0 +1,309 @@
+{{/*
+  alloy.riverConfig — Alloy River pipeline configuration
+
+  Context keys (passed as a dict via include):
+    .clusterName       — cluster identity label applied to all log streams
+    .customer          — customer/tenant label; omitted when blank
+    .environment       — environment label; omitted when blank
+    .lokiEndpoint      — full Loki push URL
+    .tenantID          — X-Scope-OrgID header; omitted when blank
+    .basicAuthUsername — if non-empty, renders a basic_auth block;
+                         LOKI_PASSWORD is read from env (injected via envFrom)
+    .tlsSkipVerify     — set true only when Loki uses a self-signed cert
+*/}}
+{{- define "alloy.riverConfig" }}
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+/************************************
+ * Pod Log Discovery + Relabeling
+ ************************************/
+
+discovery.kubernetes "pod" {
+  role = "pod"
+}
+
+discovery.relabel "pod_logs" {
+  targets = discovery.kubernetes.pod.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    action        = "replace"
+    target_label  = "node_name"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    action        = "replace"
+    target_label  = "namespace"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    action        = "replace"
+    target_label  = "pod"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    action        = "replace"
+    target_label  = "container"
+  }
+
+  // Log path for regular pods — pod UID + container name maps to the node path
+  rule {
+    source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+    action        = "replace"
+    target_label  = "__path__"
+    separator     = "/"
+    replacement   = "/var/log/pods/*$1/*.log"
+  }
+
+  // Log path for static pods (identified by kubernetes.io/config.hash annotation)
+  rule {
+    source_labels = [
+      "__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash",
+      "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash",
+      "__meta_kubernetes_pod_container_name",
+    ]
+    action       = "replace"
+    target_label = "__path__"
+    replacement  = "/var/log/pods/*$1/*.log"
+    separator    = "/"
+    regex        = "true/(.*)"
+  }
+
+  // Extract controller base name — strips the random suffix from
+  // replicaset/deployment names, used as fallback for the app label below
+  rule {
+    source_labels = ["__meta_kubernetes_pod_controller_name"]
+    action        = "replace"
+    target_label  = "__tmp_controller_name"
+    regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+  }
+
+  // app label with fallback chain:
+  //   app.kubernetes.io/name → app label → controller name → pod name
+  rule {
+    source_labels = [
+      "__meta_kubernetes_pod_label_app_kubernetes_io_name",
+      "__meta_kubernetes_pod_label_app",
+      "__tmp_controller_name",
+      "__meta_kubernetes_pod_name",
+    ]
+    action       = "replace"
+    target_label = "app"
+    regex        = "^;*([^;]+)(;.*)?$"
+  }
+
+  // component label: app.kubernetes.io/component → component
+  rule {
+    source_labels = [
+      "__meta_kubernetes_pod_label_app_kubernetes_io_component",
+      "__meta_kubernetes_pod_label_component",
+    ]
+    action       = "replace"
+    target_label = "component"
+    regex        = "^;*([^;]+)(;.*)?$"
+  }
+
+  // job label — namespace/app used for Loki stream grouping
+  rule {
+    source_labels = ["namespace", "app"]
+    action        = "replace"
+    target_label  = "job"
+    separator     = "/"
+    replacement   = "$1"
+  }
+
+  // container_runtime — extracted from the container ID URI (e.g. containerd://)
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_id"]
+    action        = "replace"
+    target_label  = "container_runtime"
+    regex         = "^(\\S+):\\/\\/.+$"
+    replacement   = "$1"
+  }
+}
+
+loki.source.kubernetes "pod_logs" {
+  targets    = discovery.relabel.pod_logs.output
+  forward_to = [loki.process.pod_logs.receiver]
+}
+
+loki.process "pod_logs" {
+  // Stamp every log stream with cluster identity labels — required for
+  // multi-cluster Loki queries to distinguish streams across clusters
+  stage.static_labels {
+    values = {
+      cluster  = {{ .clusterName | quote }},
+      {{- if .customer }}
+      customer = {{ .customer | quote }},
+      {{- end }}
+      {{- if .environment }}
+      env      = {{ .environment | quote }},
+      {{- end }}
+    }
+  }
+
+  // Extract log level from Mattermost JSON and surface it as a stream label
+  // so queries can filter by level without parsing the full payload.
+  // Container log format: "<timestamp> <stream> <flags> <json-payload>"
+  stage.match {
+    selector = "{app=\"mattermost\"}"
+
+    stage.regex {
+      expression = "^(?s)(?P<time>\\S+?) (?P<stream>stdout|stderr) (?P<flags>\\S+?) (?P<log>.*)$"
+    }
+    stage.output {
+      source = "log"
+    }
+    stage.regex {
+      expression = "(\"level\":\"(?P<level>(.*?))\")"
+    }
+    stage.labels {
+      values = { level = "" }
+    }
+  }
+
+  // Drop Mattermost split-service logs — very high volume, near-zero operational value
+  stage.match {
+    selector = "{app=\"mattermost\"} |~ \"\\\"service\\\":\\\"split\\\"\""
+    action   = "drop"
+  }
+
+  forward_to = [loki.write.loki_receiver.receiver]
+}
+
+/************************************
+ * Kubernetes Events Collection
+ ************************************/
+
+loki.source.kubernetes_events "cluster_events" {
+  job_name   = "integrations/kubernetes/eventhandler"
+  log_format = "logfmt"
+  forward_to = [loki.process.cluster_events.receiver]
+}
+
+loki.process "cluster_events" {
+  stage.static_labels {
+    values = {
+      cluster  = {{ .clusterName | quote }},
+      {{- if .customer }}
+      customer = {{ .customer | quote }},
+      {{- end }}
+      {{- if .environment }}
+      env      = {{ .environment | quote }},
+      {{- end }}
+    }
+  }
+
+  stage.labels {
+    values = { kubernetes_cluster_events = "job" }
+  }
+
+  forward_to = [loki.write.loki_receiver.receiver]
+}
+
+/************************************
+ * Loki Push Target
+ ************************************/
+
+loki.write "loki_receiver" {
+  endpoint {
+    url = {{ .lokiEndpoint | quote }}
+
+    {{- if .tenantID }}
+    headers = { "X-Scope-OrgID" = {{ .tenantID | quote }} }
+    {{- end }}
+
+    {{- if .basicAuthUsername }}
+    // LOKI_PASSWORD is injected via the envFrom secretRef on the controller
+    basic_auth {
+      username = {{ .basicAuthUsername | quote }}
+      password = env("LOKI_PASSWORD")
+    }
+    {{- end }}
+
+    tls_config {
+      insecure_skip_verify = {{ .tlsSkipVerify | default false }}
+    }
+  }
+}
+{{- end }}
+
+
+{{- if .Values.alloy.enabled }}
+{{- $app    := .Values.alloy }}
+{{- $global := .Values.global }}
+
+{{/* ── River config context — passed into the define block above ── */}}
+{{- $riverCtx := dict
+    "clusterName"       ($app.clusterName  | default $global.aws.clusterName)
+    "customer"          ($app.customer     | default "")
+    "environment"       ($app.environment  | default "")
+    "lokiEndpoint"      ($app.loki.endpoint | default "")
+    "tenantID"          ($app.loki.tenantID | default "")
+    "basicAuthUsername" ((($app.loki.basicAuth).username) | default "")
+    "tlsSkipVerify"     (((($app.loki).tls).insecureSkipVerify) | default false)
+}}
+
+{{- $riverConfig := include "alloy.riverConfig" $riverCtx | trim }}
+
+{{/* ── Extra Alloy config — appended verbatim after the generated block ── */}}
+{{- if $app.extraAlloyConfig }}
+{{- $riverConfig = printf "%s\n\n// --- extra config ---\n%s" $riverConfig $app.extraAlloyConfig }}
+{{- end }}
+
+{{/* ── alloy-config: standalone ConfigMap holding the River pipeline config ──
+     Created here as a first-class K8s resource rather than relying on the chart's
+     alloy.configMap.create mechanism, which does not run reliably when values are
+     passed via a valuesFrom ConfigMap (the chart never sees the content field).
+     The chart is told create: false so it mounts this ConfigMap directly. */}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: {{ $app.namespace }}
+data:
+  config.alloy: |
+{{ $riverConfig | indent 4 }}
+
+{{/* ── Top-level Alloy chart values ── */}}
+{{- $chartValues := dict
+    "nameOverride"     "alloy"
+    "fullnameOverride" "alloy"
+    "crds" (dict
+        "create" (($app.crds).create | default true))
+    "alloy" (dict
+        "configMap" (dict
+            "create" false
+            "name"   "alloy-config"
+            "key"    "config.alloy")
+        "extraEnv" ($app.extraEnv | default list))
+    "controller" (dict
+        "type"           ($app.controller.type | default "daemonset")
+        "tolerations"    ($app.tolerations     | default list)
+        "resources"      ($app.resources       | default dict)
+        "updateStrategy" (dict
+            "type"          ((($app.updateStrategy).type)         | default "RollingUpdate")
+            "rollingUpdate" (dict
+                "maxUnavailable" ((($app.updateStrategy).maxUnavailable) | default 1))))
+    "serviceAccount" (dict
+        "create" ((($app.serviceAccount).create) | default true)
+        "name"   ((($app.serviceAccount).name)   | default "alloy"))
+}}
+
+{{/* ── Inject basic auth password secret as envFrom if configured ── */}}
+{{- if and $app.loki.basicAuth $app.loki.basicAuth.passwordSecretRef }}
+{{- $_ := set (index $chartValues "controller") "envFrom"
+    (list (dict "secretRef" (dict "name" $app.loki.basicAuth.passwordSecretRef.name))) }}
+{{- end }}
+
+{{/* ── Merge extraValues last so operators can override anything ── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "alloy" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

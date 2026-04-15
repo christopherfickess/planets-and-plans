@@ -1,0 +1,34 @@
+{{- $instance := .Values.instance }}
+{{- if and .Values.externalSecrets.enabled (($instance.db).externalSecret).secretKey }}
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: {{ printf "%s-database" $instance.namespace }}
+  namespace: {{ $instance.namespace }}
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secretsmanager
+  target:
+    name: {{ printf "%s-database" $instance.namespace }}
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_CONNECTION_CHECK_URL
+      remoteRef:
+        key: {{ $instance.db.externalSecret.secretKey }}
+        property: {{ $instance.db.externalSecret.property }}
+    - secretKey: DB_CONNECTION_STRING
+      remoteRef:
+        key: {{ $instance.db.externalSecret.secretKey }}
+        property: {{ $instance.db.externalSecret.property }}
+    - secretKey: MM_CONFIG
+      remoteRef:
+        key: {{ $instance.db.externalSecret.secretKey }}
+        property: {{ $instance.db.externalSecret.property }}
+    - secretKey: MM_SQLSETTINGS_DATASOURCEREPLICAS
+      remoteRef:
+        key: {{ $instance.db.externalSecret.secretKey }}
+        property: {{ $instance.db.externalSecret.property }}
+{{- end }}

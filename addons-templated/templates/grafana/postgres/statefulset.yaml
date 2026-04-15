@@ -1,0 +1,87 @@
+{{- if and .Values.grafana.enabled (((.Values.grafana.postgres).internal).enabled) }}
+{{- $app          := .Values.grafana }}
+{{- $namespace    := $app.namespace }}
+{{- $secretName   := "grafana-database" }}
+{{- $username     := $app.postgres.internal.username     | default "grafana" }}
+{{- $storage      := $app.postgres.internal.storage      | default "10Gi" }}
+{{/* grafana.storageClass.name takes precedence when enabled; postgres.internal.storageClass
+     is an explicit override; blank falls through to the cluster default StorageClass */}}
+{{- $storageClass := $app.postgres.internal.storageClass | default "" }}
+{{- if and (not $storageClass) (($app.storageClass).enabled) }}
+{{-   $storageClass = $app.storageClass.name | default "grafana-gp3" }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-grafana
+  namespace: {{ $namespace }}
+spec:
+  serviceName: postgres-grafana
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      component: grafana
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: grafana
+    spec:
+      {{- with $app.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          {{- with $app.postgres.internal.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ $username | quote }}]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ $username | quote }}]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if $storageClass }}
+        storageClassName: {{ $storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $storage | quote }}
+{{- end }}

@@ -1,0 +1,30 @@
+{{- if and .Values.grafana.enabled ((.Values.grafana.storageClass).enabled) }}
+{{- $sc := .Values.grafana.storageClass }}
+---
+# Dedicated EBS gp3 StorageClass for Grafana — used by both the Grafana chart PVC
+# and the in-cluster postgres PVC. Not the cluster default; scoped to grafana only.
+# Requires the aws-ebs-csi-driver EKS addon (enabled by default in the Terraform module).
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $sc.name | default "grafana-gp3" }}
+  labels:
+    app: grafana
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: "true"
+  {{- with $sc.iops }}
+  # Custom IOPS — gp3 baseline is 3000; raise for write-heavy postgres workloads
+  iops: {{ . | quote }}
+  {{- end }}
+  {{- with $sc.throughput }}
+  # Custom throughput in MiB/s — gp3 baseline is 125
+  throughput: {{ . | quote }}
+  {{- end }}
+# WaitForFirstConsumer ensures the EBS volume is provisioned in the same AZ as the pod
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+# Retain keeps the EBS volume after PVC deletion — prevents accidental data loss
+reclaimPolicy: Retain
+{{- end }}

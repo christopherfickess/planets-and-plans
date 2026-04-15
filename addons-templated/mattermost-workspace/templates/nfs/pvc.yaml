@@ -1,0 +1,31 @@
+{{- $instance := .Values.instance }}
+{{- if eq ((($instance.fileStore).mode) | default "s3") "nfs" }}
+{{- $nfs := $instance.fileStore.nfs }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-nfs" $instance.namespace }}
+spec:
+  capacity:
+    storage: {{ $nfs.storageSize | default "100Gi" }}
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: {{ $nfs.server }}
+    path: {{ $nfs.path }}
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-nfs" $instance.namespace }}
+  namespace: {{ $instance.namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ $nfs.storageSize | default "100Gi" }}
+  volumeName: {{ printf "%s-nfs" $instance.namespace }}
+{{- end }}

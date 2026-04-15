@@ -1,0 +1,33 @@
+{{- if .Values.clusterAutoscaler.enabled }}
+{{- $app := .Values.clusterAutoscaler }}
+
+{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
+
+{{/* ── Top-level chart values — auto-discovery, scaling, and RBAC ──── */}}
+{{- $chartValues := dict
+    "autoDiscovery" (dict "clusterName" .Values.global.aws.clusterName)
+    "awsRegion"     (.Values.global.aws.region | default "us-east-2")
+    "replicaCount"  ($app.replicaCount | default 1)
+    "nodeSelector"  ($app.nodeSelector | default dict)
+    "tolerations"   ($app.tolerations  | default list)
+    "extraArgs" (dict
+        "balance-similar-node-groups"      ($app.balanceSimilarGroups | default true)
+        "expander"                         ($app.expander | default "least-waste")
+        "skip-nodes-with-system-pods"      ($app.skipNodesWithSystemPods | default false)
+        "scale-down-enabled"               (not (eq ($app.scaleDown.enabled | default true) false))
+        "scale-down-delay-after-add"       ($app.scaleDown.delayAfterAdd          | default "10m")
+        "scale-down-delay-after-delete"    ($app.scaleDown.delayAfterDelete        | default "10s")
+        "scale-down-unneeded-time"         ($app.scaleDown.unneededTime             | default "10m")
+        "scale-down-utilization-threshold" ($app.scaleDown.utilizationThreshold | default "0.5"))
+    "rbac" (dict
+        "serviceAccount" (dict
+            "create"      true
+            "name"        "cluster-autoscaler"
+            "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn)))
+}}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "cluster-autoscaler" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

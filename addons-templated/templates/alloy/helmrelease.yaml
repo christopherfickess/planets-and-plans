@@ -1,0 +1,8 @@
+{{- if .Values.alloy.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "alloy"
+    "releaseName" "alloy"
+    "namespace"   .Values.alloy.namespace
+    "chart"       .Values.alloy.chart
+    "global"      .Values.global) }}
+{{- end }}

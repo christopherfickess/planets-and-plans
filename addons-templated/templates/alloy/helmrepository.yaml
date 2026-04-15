@@ -1,0 +1,6 @@
+{{- /* Alloy and Grafana share the same 'grafana' HelmRepository (grafana.github.io/helm-charts).
+     Skip emitting it here when grafana is also enabled — grafana's helmrepository.yaml owns it
+     in that case, and Helm's post-renderer will reject duplicate resource IDs at render time. */}}
+{{- if and .Values.alloy.enabled (not .Values.grafana.enabled) }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.alloy.chart.repo "global" .Values.global) }}
+{{- end }}

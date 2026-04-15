@@ -1,0 +1,6 @@
+{{/* mattermost-operator is the canonical owner of the 'mattermost' HelmRepository.
+     rtcd/helmrepository.yaml skips emission when mattermost-operator is enabled.
+     If mattermost-operator is disabled but rtcd is enabled, rtcd emits it instead. */}}
+{{- if .Values.mattermostOperator.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.mattermostOperator.chart.repo "global" .Values.global) }}
+{{- end }}

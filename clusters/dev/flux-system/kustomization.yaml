@@ -1,0 +1,10 @@
+# This kustomization.yaml is used by the kubernetes-base-addons Flux Kustomization
+# (in kubernetes-base-addons.yaml) when it reconciles this directory from Git.
+#
+# It intentionally lists ONLY helmrelease.yaml so that the Kustomization applies
+# just the HelmRelease and not the other Flux objects in this folder (which are
+# applied directly by the bootstrap via clusters/dev/kustomization.yaml).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helmrelease.yaml

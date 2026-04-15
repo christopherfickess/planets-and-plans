@@ -1,0 +1,8 @@
+{{- if .Values.thanos.enabled }}
+{{- include "flux-addons.helmrelease" (dict
+    "name"        "thanos"
+    "releaseName" "thanos"
+    "namespace"   .Values.thanos.namespace
+    "chart"       .Values.thanos.chart
+    "global"      .Values.global) }}
+{{- end }}

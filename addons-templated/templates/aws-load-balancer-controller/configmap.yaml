@@ -1,0 +1,47 @@
+{{- if .Values.awsLoadBalancerController.enabled }}
+{{- $app := .Values.awsLoadBalancerController }}
+
+{{/* ── Replica count — pinned to 2 when ha: true ──────────────────── */}}
+{{- $replicaCount := $app.replicaCount | default 2 }}
+{{- if $app.ha }}{{- $replicaCount = 2 }}{{- end }}
+
+{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
+{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
+
+{{/* ── Top-level chart values — cluster, scheduling, and service account ─ */}}
+{{- $chartValues := dict
+    "clusterName"  .Values.global.aws.clusterName
+    "replicaCount" $replicaCount
+    "nodeSelector" ($app.nodeSelector | default dict)
+    "tolerations"  ($app.tolerations  | default list)
+    "serviceAccount" (dict
+        "create"      true
+        "name"        "aws-load-balancer-controller"
+        "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+}}
+
+{{/* ── Optional VPC ID — only set when explicitly provided ──────────── */}}
+{{- if $app.vpcID }}
+{{/* The controller needs the VPC ID to tag and discover subnets correctly */}}
+{{- $_ := set $chartValues "vpcId" $app.vpcID }}
+{{- end }}
+
+{{/* ── Region — defaults to global.aws.region ────────────────────────── */}}
+{{- $_ := set $chartValues "region" (.Values.global.aws.region | default "us-east-2") }}
+
+{{/* ── Webhook toggle ───────────────────────────────────────────────────
+     Reads enableWebhook from values (default true). Set false to remove
+     the MutatingWebhookConfiguration when the EKS control plane cannot
+     reach the webhook ClusterIP ("Address is not allowed"). */}}
+{{- $_ = set $chartValues "enableWebhook" ($app.enableWebhook | default true) }}
+
+{{/* ── HA pod disruption budget — ensures at least one replica stays up ─ */}}
+{{- if $app.ha }}
+{{/* Allow at most 1 unavailable pod during node drains when running in HA mode */}}
+{{- $_ := set $chartValues "podDisruptionBudget" (dict "maxUnavailable" 1) }}
+{{- end }}
+
+{{/* ── Merge extraValues last so operators can override anything ───── */}}
+{{- $mergedValues := mergeOverwrite $chartValues ($app.extraValues | default dict) }}
+{{- include "flux-addons.configmap" (dict "name" "aws-load-balancer-controller" "namespace" $app.namespace "values" $mergedValues) }}
+{{- end }}

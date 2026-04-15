@@ -1,0 +1,3 @@
+{{- if .Values.fluentBit.enabled }}
+{{- include "flux-addons.helmrepository" (dict "repo" .Values.fluentBit.chart.repo "global" .Values.global) }}
+{{- end }}

@@ -1,0 +1,33 @@
+{{- $instance := .Values.instance }}
+{{- if ($instance.ingress).enabled }}
+{{- $ingressClass := $instance.ingress.ingressClass | default "nginx" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mattermost
+  namespace: {{ $instance.namespace }}
+  {{- if $instance.ingress.annotations }}
+  annotations:
+    {{- toYaml $instance.ingress.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $ingressClass }}
+  rules:
+    - host: {{ $instance.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost
+                port:
+                  number: 8065
+  {{- if $instance.ingress.tlsSecret }}
+  tls:
+    - hosts:
+        - {{ $instance.host }}
+      secretName: {{ $instance.ingress.tlsSecret }}
+  {{- end }}
+{{- end }}
