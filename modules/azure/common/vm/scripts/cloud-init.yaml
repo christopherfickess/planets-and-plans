@@ -1,0 +1,82 @@
+#cloud-config
+
+# Add Docker's official apt repository so docker-compose-plugin is available.
+# docker-compose-plugin is not in Ubuntu's default repos — it only ships via
+# download.docker.com. The keyid is Docker's signing key fingerprint.
+apt:
+  sources:
+    docker.list:
+      source: deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+# docker-ce replaces docker.io — it's Docker's own package and includes the CLI.
+# docker-compose-plugin provides the "docker compose" subcommand (Compose v2).
+packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+  - curl
+
+write_files:
+  # Write the Compose file before runcmd runs so the chown + up commands work cleanly.
+  - path: /opt/mattermost/docker-compose.yml
+    permissions: "0644"
+    content: |
+      version: "3.9"
+      services:
+
+        postgres:
+          image: postgres:15-alpine
+          container_name: postgres
+          restart: unless-stopped
+          environment:
+            # Credentials are test-only — fine for a single-VM CrossGuard deployment
+            # with no external network access to the DB port.
+            POSTGRES_USER: mattermost
+            POSTGRES_PASSWORD: mattermost
+            POSTGRES_DB: mattermost
+          volumes:
+            - /opt/mattermost/postgres:/var/lib/postgresql/data
+          healthcheck:
+            test: ["CMD", "pg_isready", "-U", "mattermost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+        mattermost:
+          image: mattermost/mattermost-enterprise-edition:${mattermost_version}
+          container_name: mattermost
+          restart: unless-stopped
+          depends_on:
+            postgres:
+              condition: service_healthy
+          ports:
+            - "8065:8065"
+          environment:
+            MM_SQLSETTINGS_DRIVERNAME: postgres
+            MM_SQLSETTINGS_DATASOURCE: postgres://mattermost:mattermost@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
+            MM_SERVICESETTINGS_SITEURL: "${mattermost_site_url}"
+            MM_FILESETTINGS_DRIVERNAME: local
+            MM_FILESETTINGS_DIRECTORY: /mattermost/data/
+            MM_PLUGINSETTINGS_ENABLEUPLOADS: "true"
+            # 50MB — default 20MB is too small for the CrossGuard plugin bundle (~35MB).
+            MM_PLUGINSETTINGS_MAXPLUGINFILESIZE: "52428800"
+            MM_LOGSETTINGS_CONSOLELEVEL: INFO
+          volumes:
+            - /opt/mattermost/config:/mattermost/config:rw
+            - /opt/mattermost/data:/mattermost/data:rw
+            - /opt/mattermost/logs:/mattermost/logs:rw
+            - /opt/mattermost/plugins:/mattermost/plugins:rw
+            - /opt/mattermost/client/plugins:/mattermost/client/plugins:rw
+            - /opt/mattermost/bleve-indexes:/mattermost/bleve-indexes:rw
+
+runcmd:
+  # Enable and start Docker before anything else
+  - systemctl enable docker
+  - systemctl start docker
+  # Mattermost runs as UID 2000 inside the container — pre-create dirs with matching ownership
+  - mkdir -p /opt/mattermost/config /opt/mattermost/data /opt/mattermost/logs /opt/mattermost/plugins /opt/mattermost/client/plugins /opt/mattermost/bleve-indexes /opt/mattermost/postgres
+  - chown -R 2000:2000 /opt/mattermost/config /opt/mattermost/data /opt/mattermost/logs /opt/mattermost/plugins /opt/mattermost/client/plugins /opt/mattermost/bleve-indexes
+  # Launch Postgres first, then Mattermost (depends_on handles ordering)
+  - cd /opt/mattermost && docker compose up -d
