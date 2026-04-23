@@ -58,14 +58,15 @@ variable "blob_container_name" {
   default     = "crossguard-files"
 }
 
-variable "vm_principal_ids" {
+variable "principal_ids" {
   description = <<-EOT
-    Map of managed identity principal IDs to grant Storage Queue Data Contributor and
-    Storage Blob Data Contributor on the storage account. Keys must be static strings
-    (e.g. "vm_a", "vm_b") — Terraform uses them as for_each keys at plan time so they
-    cannot be derived from resource attributes. Values are the principal IDs, which may
-    be known only after apply.
-    Example: { vm_a = module.vm_a.vm_principal_id, vm_b = module.vm_b.vm_principal_id }
+    Map of principal IDs (managed identities, service principals, or users) to grant
+    Storage Queue Data Contributor and Storage Blob Data Contributor on the storage account.
+    Keys must be static strings (e.g. "instance_a", "instance_b") — Terraform uses them as
+    for_each keys at plan time so they cannot be derived from resource attributes.
+    Values are the principal IDs, which may be known only after apply.
+    Leave empty if authenticating via account key — RBAC is only needed for managed identity auth.
+    Example: { instance_a = "<principal-id>", instance_b = "<principal-id>" }
   EOT
   type    = map(string)
   default = {}

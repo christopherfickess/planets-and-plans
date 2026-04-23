@@ -20,7 +20,7 @@ module "queue_storage" {
   # Both VM managed identities get Storage Queue Data Contributor and Storage Blob
   # Data Contributor. Keys are static strings — Terraform resolves them at plan time.
   # Values (principal IDs) are resolved at apply time after the VMs are created.
-  vm_principal_ids = {
+  principal_ids = {
     vm_a = module.vm_a.vm_principal_id
     vm_b = module.vm_b.vm_principal_id
   }

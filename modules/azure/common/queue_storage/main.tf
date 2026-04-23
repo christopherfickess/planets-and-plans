@@ -77,7 +77,7 @@ resource "azurerm_role_assignment" "vm_queue_contributor" {
 
   # Keys (e.g. "vm_a", "vm_b") are static — defined in the stack, not derived from
   # resource attributes — so Terraform can resolve the full key set at plan time.
-  for_each = var.vm_principal_ids
+  for_each = var.principal_ids
 
   scope                = azurerm_storage_account.crossguard.id
   role_definition_name = "Storage Queue Data Contributor"
@@ -87,7 +87,7 @@ resource "azurerm_role_assignment" "vm_queue_contributor" {
 resource "azurerm_role_assignment" "vm_blob_contributor" {
   depends_on = [azurerm_storage_account.crossguard]
 
-  for_each = var.vm_principal_ids
+  for_each = var.principal_ids
 
   scope                = azurerm_storage_account.crossguard.id
   role_definition_name = "Storage Blob Data Contributor"
