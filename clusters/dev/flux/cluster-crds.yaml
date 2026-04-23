@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./addons-templated/crd-manifests
+  sourceRef:
+    kind: GitRepository
+    name: kubernetes-base-addons
+  prune: false  # CRITICAL: never delete CRDs automatically
+  wait: true    # wait for all CRD objects to be Established before marking Ready

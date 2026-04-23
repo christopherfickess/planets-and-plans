@@ -1,3 +1,0 @@
-{{- if .Values.rtcd.enabled }}
-{{- include "flux-addons.namespace" (dict "name" .Values.rtcd.namespace) }}
-{{- end }}

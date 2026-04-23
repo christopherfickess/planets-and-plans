@@ -52,12 +52,8 @@
     "existingSecret" (dict "key" "objstore.yml" "name" $app.thanos.objectStorageSecret))) }}
 {{- end }}
 
-{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
-{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
-{{/* ── prometheusBlock — wraps prometheusSpec and IRSA service account ─ */}}
+{{/* ── prometheusBlock — wraps prometheusSpec ─────────────────────── */}}
 {{- $prometheusBlock := dict
-    "serviceAccount" (dict "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
     "prometheusSpec"  $prometheusSpec
 }}
 
@@ -81,7 +77,7 @@
 
 {{/* ── Top-level chart values — composes all sub-sections ──────────── */}}
 {{- $chartValues := dict
-    "defaultRules"       (dict "create" false)
+    "defaultRules"       (dict "create" (($app.defaultRules).create | default true))
     "alertmanager"       (dict "enabled" ($app.alertmanager.enabled | default false))
     "grafana"            (dict "enabled" ($app.grafana.enabled       | default false))
     "prometheusOperator" (dict

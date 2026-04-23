@@ -85,7 +85,10 @@ spec:
         kind: HelmRepository
         name: {{ .chart.repo.name }}
         namespace: flux-system
-      interval: 1h
+      # How often Flux re-checks for a new chart version (and retries on download
+      # failure). 1h is fine for pinned versions in prod; lower to 5-10m for dev
+      # or whenever you need faster recovery from transient HelmRepository errors.
+      interval: {{ .global.chartInterval | default "10m" }}
   install:
     createNamespace: true
     remediation:

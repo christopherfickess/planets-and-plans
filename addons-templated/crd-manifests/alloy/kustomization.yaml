@@ -1,12 +1,10 @@
-# grafana/alloy v0.12.5 CRDs
-# Source: crds/ inside the grafana/alloy chart
+# grafana/alloy v1.7.0 CRDs
+# Source: charts/crds/crds/ inside the grafana/alloy chart (subchart, not top-level crds/)
 #
 # To populate this folder, run:
 #   helm repo add grafana https://grafana.github.io/helm-charts
-#   helm pull grafana/alloy --version 0.12.5 --untar --destination /tmp/alloy-chart
-#   cp /tmp/alloy-chart/alloy/charts/crds/crds/*.yaml gitops/kubernetes-base-addons/crds/alloy/
-#
-# Note: CRDs are in charts/crds/crds/ (subchart), not a top-level crds/ folder.
+#   helm pull grafana/alloy --version <new> --untar --destination /tmp/alloy-chart
+#   cp /tmp/alloy-chart/alloy/charts/crds/crds/*.yaml <this dir>/podlogs.yaml
 #
 # When upgrading: bump the version above, re-run the commands, overwrite the files,
 # and commit alongside the chart version bump in addons/values.yaml.

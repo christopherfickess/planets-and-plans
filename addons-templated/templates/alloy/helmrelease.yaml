@@ -1,8 +1,18 @@
 {{- if .Values.alloy.enabled }}
+{{/* ── dependsOn: wait for loki when it is co-deployed ──────────────────────
+     Alloy ships logs to the Loki gateway. Alloy won't crash without Loki
+     (it retries on failure), but gating on Loki being Ready prevents the
+     initial burst of connection errors that can mask real startup issues.
+     Skip when loki.enabled is false (e.g. Alloy ships to an external endpoint). */}}
+{{- $deps := list }}
+{{- if .Values.loki.enabled }}
+{{-   $deps = append $deps (dict "name" "loki" "namespace" .Values.loki.namespace) }}
+{{- end }}
 {{- include "flux-addons.helmrelease" (dict
     "name"        "alloy"
     "releaseName" "alloy"
     "namespace"   .Values.alloy.namespace
     "chart"       .Values.alloy.chart
-    "global"      .Values.global) }}
+    "global"      .Values.global
+    "dependsOn"   $deps) }}
 {{- end }}

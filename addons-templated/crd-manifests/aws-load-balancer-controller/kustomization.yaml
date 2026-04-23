@@ -1,13 +1,28 @@
-# aws-load-balancer-controller v1.11.0 CRDs
-# Source: crds/ inside the eks/aws-load-balancer-controller chart
+# aws-load-balancer-controller v3.2.1 CRDs
+# Sources:
+#   crds/crds.yaml         → albtargetcontrolconfigs, globalaccelerators,
+#                            ingressclassparams, targetgroupbindings
+#   crds/gateway-crds.yaml → listenerruleconfigurations, loadbalancerconfigurations,
+#                            targetgroupconfigurations  (gateway.k8s.aws group)
+#
+# Note: ListenerSet (gateway.networking.k8s.io experimental) is NOT included here.
+# LBC's NLBGatewayAPI and ALBGatewayAPI feature gates are disabled in values because
+# this cluster uses Cilium for Gateway API, not LBC.
 #
 # To update when bumping the chart version:
 #   helm pull eks/aws-load-balancer-controller --version <ver> --untar --destination /tmp/alb-chart
-#   Split <chart>/crds/crds.yaml into one file per CRD and overwrite files here.
+#   Split <chart>/crds/crds.yaml and <chart>/crds/gateway-crds.yaml into one file per CRD.
 #   Commit alongside the chart version bump in addons/values.yaml.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  # crds/crds.yaml — core LBC CRDs
   - ingressclassparams.yaml
   - targetgroupbindings.yaml
+  - albtargetcontrolconfigs.yaml
+  - globalaccelerators.yaml
+  # crds/gateway-crds.yaml — LBC Gateway API CRDs (gateway.k8s.aws group)
+  - listenerruleconfigurations.yaml
+  - loadbalancerconfigurations.yaml
+  - targetgroupconfigurations.yaml

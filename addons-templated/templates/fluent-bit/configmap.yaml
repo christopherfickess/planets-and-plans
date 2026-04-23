@@ -127,8 +127,6 @@
 {{- $fileSize      := $app.s3.totalFileSize  | default "100M" }}
 {{- $uploadTimeout := $app.s3.uploadTimeout  | default "10m" }}
 {{- $customer      := $app.customer | default .Values.global.aws.clusterName }}
-{{- $irsaRoleArn   := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
 {{- $outputCtx := dict
     "s3Bucket"      $s3Bucket
     "s3Region"      $s3Region
@@ -138,8 +136,7 @@
 
 {{- $chartValues := dict
     "serviceAccount" (dict
-        "create"      true
-        "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+        "create"      true)
     "tolerations"    ($app.tolerations | default list)
     "resources"      ($app.resources   | default dict)
     "podAnnotations" (dict "fluentbit.io/exclude" "true")

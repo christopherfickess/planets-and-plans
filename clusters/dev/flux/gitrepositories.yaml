@@ -1,0 +1,49 @@
+# ==============================================================================
+# GitRepository sources for the dev cluster
+#
+# These are applied by the root Kustomization (managed by flux bootstrap).
+# Each requires a matching SSH secret in the flux-system namespace:
+#
+#   flux create secret git kubernetes-base-addons \
+#     --url=ssh://git@github.com/mattermost-platform/kubernetes-base-addons \
+#     --private-key-file=~/.ssh/kubernetes-base-addons \
+#     --namespace=flux-system
+#
+#   flux create secret git terraform-aws-eks \
+#     --url=ssh://git@github.com/mattermost-platform/terraform-aws-eks \
+#     --private-key-file=~/.ssh/terraform-aws-eks \
+#     --namespace=flux-system
+#
+# Bastion note: use ssh://git@ssh.github.com:443/... if port 22 is blocked.
+# ==============================================================================
+
+# ── Addons chart repo ─────────────────────────────────────────────────────────
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kubernetes-base-addons
+  namespace: flux-system
+spec:
+  interval: 1m
+  ref:
+    branch: feature/base-flux-redesign
+  secretRef:
+    name: kubernetes-base-addons
+  url: ssh://git@github.com/mattermost-platform/kubernetes-base-addons
+
+
+# ── Cluster config repo (this repo) ──────────────────────────────────────────
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: terraform-aws-eks
+  namespace: flux-system
+spec:
+  interval: 1m
+  ref:
+    branch: feature/flux-custom-naming-convention-for-gitrepo
+  secretRef:
+    name: terraform-aws-eks
+  url: ssh://git@github.com/mattermost-platform/terraform-aws-eks

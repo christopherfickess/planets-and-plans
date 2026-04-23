@@ -8,7 +8,6 @@
 
 global:
   aws:
-    accountNumber: ""
     clusterName: ""
     region: ""
   helmReleaseInterval: "10m"
@@ -22,8 +21,6 @@ instance:
   version: ""
   replicas: 1
   host: ""
-  irsaRoleSuffix: ""
-
   fileStore:
     mode: s3 # s3 | operatorManaged | nfs | blobStorage (coming soon)
     s3:
