@@ -4,13 +4,6 @@
 {{- $replicas := $app.replicaCount | default 1 }}
 {{- if $app.ha }}{{- $replicas = 2 }}{{- end }}
 
-{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
-{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
-{{/* failurePolicy: Ignore — EKS managed control plane sits outside Cilium's network
-     boundary so webhook calls from the API server are often blocked. Ignore prevents
-     a connectivity blip from failing the whole Helm upgrade; the operator still
-     validates resources when it reconciles them. */}}
 {{- $built := dict
     "replicaCount" $replicas
     "installCRDs"  false
@@ -20,18 +13,17 @@
         "createPushSecret"            true)
     "serviceAccount" (dict
         "create"      true
-        "name"        "external-secrets"
-        "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+        "name"        "external-secrets")
     "webhook" (dict
         "create"        ($app.webhook.create | default false)
         "replicaCount"  (ternary 2 1 ($app.ha | default false))
         "failurePolicy" "Ignore")
     "certController" (dict "create" ($app.certController.create | default false))
 }}
-{{/* webhook.create / certController.create default to false — the EKS managed
-     control plane runs outside the Cilium network boundary and cannot reach
-     in-cluster webhook ClusterIP endpoints. Set true only if control-plane →
-     pod IP connectivity is confirmed. */}}
+{{/* webhook.create defaults to false — the ESO webhook server runs as a ClusterIP
+     and the EKS control plane cannot reach it without hostNetwork: true on the pod.
+     Enable only after confirming control-plane → pod IP connectivity, or setting
+     hostNetwork: true via extraValues. */}}
 
 {{- $final := mergeOverwrite $built ($app.extraValues | default dict) }}
 {{- include "flux-addons.configmap" (dict "name" "external-secrets" "namespace" $app.namespace "values" $final) }}

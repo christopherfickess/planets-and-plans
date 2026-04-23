@@ -1,9 +1,6 @@
 {{- if .Values.clusterAutoscaler.enabled }}
 {{- $app := .Values.clusterAutoscaler }}
 
-{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
-{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
 {{/* ── Top-level chart values — auto-discovery, scaling, and RBAC ──── */}}
 {{- $chartValues := dict
     "autoDiscovery" (dict "clusterName" .Values.global.aws.clusterName)
@@ -23,8 +20,7 @@
     "rbac" (dict
         "serviceAccount" (dict
             "create"      true
-            "name"        "cluster-autoscaler"
-            "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn)))
+            "name"        "cluster-autoscaler"))
 }}
 
 {{/* ── Merge extraValues last so operators can override anything ───── */}}

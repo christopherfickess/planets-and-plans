@@ -24,7 +24,6 @@ metadata:
 spec:
   version: {{ $instance.version | quote }}
   replicas: {{ $instance.replicas | default 1 }}
-  serviceAccountName: mattermost
   database:
     external:
       secret: {{ printf "%s-database" $namespace }}

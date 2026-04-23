@@ -1,8 +1,8 @@
 # ==============================================================================
 # GitRepository sources for the dev cluster
 #
-# These are applied during bootstrap (kubectl apply -k clusters/dev/).
-# Each requires a matching SSH secret created before applying:
+# These are applied by the root Kustomization (managed by flux bootstrap).
+# Each requires a matching SSH secret in the flux-system namespace:
 #
 #   flux create secret git kubernetes-base-addons \
 #     --url=ssh://git@github.com/mattermost-platform/kubernetes-base-addons \
@@ -27,7 +27,7 @@ metadata:
 spec:
   interval: 1m
   ref:
-    tag: v1.0.2
+    branch: feature/base-flux-redesign
   secretRef:
     name: kubernetes-base-addons
   url: ssh://git@github.com/mattermost-platform/kubernetes-base-addons
@@ -43,7 +43,7 @@ metadata:
 spec:
   interval: 1m
   ref:
-    branch: main
+    branch: feature/flux-custom-naming-convention-for-gitrepo
   secretRef:
     name: terraform-aws-eks
-  url: ssh://git@github.com/christopherfickess/planets-and-plans
+  url: ssh://git@github.com/mattermost-platform/terraform-aws-eks

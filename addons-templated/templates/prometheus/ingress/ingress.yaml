@@ -1,0 +1,32 @@
+{{- if and .Values.prometheus.enabled ((.Values.prometheus.ingress).enabled) }}
+{{- $app := .Values.prometheus }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: {{ $app.namespace }}
+  {{- with $app.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $app.ingress.ingressClass | default "nginx-controller" }}
+  rules:
+    - host: {{ $app.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-prometheus
+                port:
+                  number: 9090
+  {{- if $app.ingress.tlsSecretName }}
+  tls:
+    - secretName: {{ $app.ingress.tlsSecretName }}
+      hosts:
+        - {{ $app.ingress.host }}
+  {{- end }}
+{{- end }}

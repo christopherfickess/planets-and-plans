@@ -1,8 +1,18 @@
 {{- if .Values.thanos.enabled }}
+{{/* ── dependsOn: wait for kube-prometheus-stack when prometheus is co-deployed ──
+     Thanos Query discovers the Prometheus Thanos sidecar via DNS. If Thanos
+     deploys before Prometheus the sidecar endpoint doesn't exist yet and
+     thanos-query fails startup. Skip the dep when prometheus is disabled
+     (e.g. this cluster is a pure query layer reading from remote object stores). */}}
+{{- $deps := list }}
+{{- if .Values.prometheus.enabled }}
+{{-   $deps = append $deps (dict "name" "kube-prometheus-stack" "namespace" .Values.prometheus.namespace) }}
+{{- end }}
 {{- include "flux-addons.helmrelease" (dict
     "name"        "thanos"
     "releaseName" "thanos"
     "namespace"   .Values.thanos.namespace
     "chart"       .Values.thanos.chart
-    "global"      .Values.global) }}
+    "global"      .Values.global
+    "dependsOn"   $deps) }}
 {{- end }}

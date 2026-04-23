@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  path: ./addons/crd-manifests
+  path: ./addons-templated/crd-manifests
   sourceRef:
     kind: GitRepository
     name: kubernetes-base-addons

@@ -5,9 +5,6 @@
 {{- $replicaCount := $app.replicaCount | default 2 }}
 {{- if $app.ha }}{{- $replicaCount = 2 }}{{- end }}
 
-{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
-{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
 {{/* ── Top-level chart values — cluster, scheduling, and service account ─ */}}
 {{- $chartValues := dict
     "clusterName"  .Values.global.aws.clusterName
@@ -16,8 +13,7 @@
     "tolerations"  ($app.tolerations  | default list)
     "serviceAccount" (dict
         "create"      true
-        "name"        "aws-load-balancer-controller"
-        "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn))
+        "name"        "aws-load-balancer-controller")
 }}
 
 {{/* ── Optional VPC ID — only set when explicitly provided ──────────── */}}
@@ -28,12 +24,6 @@
 
 {{/* ── Region — defaults to global.aws.region ────────────────────────── */}}
 {{- $_ := set $chartValues "region" (.Values.global.aws.region | default "us-east-2") }}
-
-{{/* ── Webhook toggle ───────────────────────────────────────────────────
-     Reads enableWebhook from values (default true). Set false to remove
-     the MutatingWebhookConfiguration when the EKS control plane cannot
-     reach the webhook ClusterIP ("Address is not allowed"). */}}
-{{- $_ = set $chartValues "enableWebhook" ($app.enableWebhook | default true) }}
 
 {{/* ── HA pod disruption budget — ensures at least one replica stays up ─ */}}
 {{- if $app.ha }}

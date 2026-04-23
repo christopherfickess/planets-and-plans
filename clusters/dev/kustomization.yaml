@@ -1,48 +1,43 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# ── Entry point for the bootstrap Kustomization ───────────────────────────────
-# Flux resource definitions live in flux-system/.
-# Plain cluster resources (postgres, service accounts, etc.) live in extras/.
+# ── Bootstrap entry point — one-time manual apply ─────────────────────────────
+# Run once from examples/basic/: kubectl apply -k clusters/dev/
 #
-# To add extras: drop a subfolder under extras/ and list it in extras/kustomization.yaml.
+# After bootstrap, Flux owns addon config. Day-to-day changes:
+#   - Addon config  → edit addons/values.yaml and push (Flux auto-reconciles)
+#   - Flux objects  → edit flux/ files, then re-run: kubectl apply -k clusters/dev/
+#                     (flux/ is not self-reconciled — no Kustomization watches it)
+#
+# flux/   — Flux object definitions: GitRepositories, Kustomizations
+# addons/ — HelmRelease + values.yaml (watched by the kubernetes-base-addons Kustomization)
+#           flux-addons-values-dev ConfigMap is generated from addons/values.yaml by Flux,
+#           not by this bootstrap file — changes take effect on git push automatically.
 # ─────────────────────────────────────────────────────────────────────────────
 
 resources:
-  # ── Flux resource definitions ─────────────────────────────────────────────
-  - flux-system/gitrepositories.yaml
-  - flux-system/bootstrap-kustomization.yaml
-  - flux-system/cluster-crds.yaml
-  - flux-system/kubernetes-base-addons.yaml
-  # HelmReleases are rendered directly by the flux-addons umbrella chart — no separate Kustomization needed
+  # ── Flux object definitions ───────────────────────────────────────────────
+  - flux/gitrepositories.yaml
+  - flux/cluster-crds.yaml
+  - flux/kubernetes-base-addons.yaml
 
-  # ── Plain New Kubernetes Resources ───────────────────────────────────────────────
-  # Extra K8s resources applied by Flux after CRDs exist (ExternalSecrets,
-  # ServiceAccounts, RBAC, etc.). Safe to have listed once Flux is running.
-  - addons/external-secrets-examples/test-externalsecret.yaml
-  - extras/postgres-test/postgres.yaml
-  # - addons/grafana-examples/service-account.yaml
-  # - addons/grafana-examples/backup-storage-location.yaml
-  # - addons/grafana-examples/secrets/grafana-admin.sops.yaml
-  # - addons/velero-examples/backup-storage-location.yaml
+  # ── Addon HelmRelease + values ConfigMap (also managed by Flux after bootstrap) ──
+  # Including addons/ here ensures flux-addons-values-dev exists before the
+  # HelmRelease tries to read it on first bootstrap. Flux takes over after this.
+  - addons/
+  # ── Plain Kubernetes resources ────────────────────────────────────────────
+  # Uncomment once ESO is running and the external-secrets namespace exists.
+  # - addons/external-secrets-examples/test-externalsecret.yaml
 
-# -----------------------------------------------------------
-# How to patch existing Kubernetes resources
-# -----------------------------------------------------------
-# To patch existing Kubernetes resources, create a file in the addons/patches/ directory.
-# The file should be named <resource-name>.yaml.
-# The file should contain the patch to apply to the resource.
-# The patch should be a YAML object.
-# The patch should be applied to the resource in the addons/patches/ directory.
-# The patch should be applied to the resource in the addons/patches/ directory.
-# -------------------------------------------------------------------------------
-# patchesStrategicMerge:
-#   - addons/patches/<app-name>-<resource-name>.yaml
-
-configMapGenerator:
-  - name: flux-addons-values-dev
-    namespace: flux-system
-    files:
-      - values.yaml=values.yaml
-    options:
-      disableNameSuffixHash: true
+  # -----------------------------------------------------------
+  # How to patch existing Kubernetes resources
+  # -----------------------------------------------------------
+  # To patch existing Kubernetes resources, create a file in the addons/patches/ directory.
+  # The file should be named <resource-name>.yaml.
+  # The file should contain the patch to apply to the resource.
+  # The patch should be a YAML object.
+  # The patch should be applied to the resource in the addons/patches/ directory.
+  # The patch should be applied to the resource in the addons/patches/ directory.
+  # -------------------------------------------------------------------------------
+  # patchesStrategicMerge:
+  #   - addons/patches/<app-name>-<resource-name>.yaml

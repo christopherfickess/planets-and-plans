@@ -1,8 +1,0 @@
-{{- if .Values.rtcd.enabled }}
-{{- include "flux-addons.helmrelease" (dict
-    "name"        "rtcd"
-    "releaseName" "rtcd"
-    "namespace"   .Values.rtcd.namespace
-    "chart"       .Values.rtcd.chart
-    "global"      .Values.global) }}
-{{- end }}

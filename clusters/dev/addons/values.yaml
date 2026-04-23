@@ -20,12 +20,6 @@
 # When you bump a chart version, also update crds/<app>/ if the chart ships
 # CRDs (prometheus-stack, mattermost-operator, velero, alb).
 #
-# IRSA ROLE ARN FORMAT
-# --------------------
-# irsaRoleSuffix constructs the full ARN as:
-#   arn:aws:iam::<global.aws.accountNumber>:role/<global.aws.clusterName>-<suffix>
-# The suffix must match the irsa_roles key in terraform.tfvars.
-#
 # PASSING ARBITRARY CHART VALUES
 # --------------------------------
 # Any field the chart exposes but this wrapper doesn't can be passed via
@@ -43,13 +37,17 @@
 global:
   helmReleaseInterval: 1m # faster reconcile in dev — set 10m in staging/prod
   helmRepoInterval: 1m # how often Flux polls Helm repos; set 10m in staging/prod
-  upgradeTimeout: 1m # abort a Helm upgrade after this duration; increase in prod
+  chartInterval: 1m # how often Flux re-checks chart versions
+  upgradeTimeout: 15m # 1m was too short for multi-component charts (loki, prometheus)
   upgradeRetries: 5 # retries before marking HelmRelease as failed
 
   aws:
-    accountNumber: "000000000000"
     clusterName: "platform-test"
     region: "us-east-2"
+
+  dns:
+    # kubectl get svc kube-dns -n kube-system -o jsonpath='{.spec.clusterIP}'
+    clusterDNS: "10.100.0.10"
 
 # ------------------------------------------------------------------------------
 # Alloy — log collection and forwarding to Loki
@@ -64,7 +62,7 @@ global:
 alloy:
   enabled: true
   chart:
-    version: "0.12.5"
+    version: "1.7.0"
 
   # clusterName defaults to global.aws.clusterName — explicit here per template convention
   clusterName: "platform-test"
@@ -97,31 +95,54 @@ alloy:
     annotations:
       alb.ingress.kubernetes.io/scheme: internal
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:00000000000:certificate/#######-####-####-#######"
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\":443}]"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:926412419614:\
+        certificate/e91b2cf5-6075-49ff-b7b7-fb5adf06541f"
       external-dns.alpha.kubernetes.io/hostname: alloy.dev.cloud.mattermost.com
 
 # ------------------------------------------------------------------------------
 # AWS Load Balancer Controller — provisions ALBs from Kubernetes Ingress resources
 #
 # Enabled: required for ciliumGateway to provision the external ALB.
-# enableWebhook: false because the EKS control plane cannot reach the ClusterIP
-# webhook service in this cluster's network configuration.
+# hostNetwork: true puts the LBC pod on the node's VPC IP so the EKS control plane
+# can reach the webhook server directly (same pattern as byoc). Without this,
+# the control plane cannot reach Cilium overlay IPs ("Address is not allowed").
+# v3 CRDs required: kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
 # ------------------------------------------------------------------------------
 awsLoadBalancerController:
   enabled: true
   chart:
-    version: "1.11.0"
+    version: "3.2.1"
 
   clusterName: "platform-test"
-  irsaRoleSuffix: "aws-load-balancer-controller"
+
+  # Explicit VPC ID — required because the controller cannot reach EC2 instance
+  # metadata (IMDS) from within the pod to auto-detect it.
+  vpcID: "vpc-09264fb1819da54f2"
 
   ha: false # single replica is fine in dev
   replicaCount: 1
-  enableWebhook: false # set true if control-plane → webhook ClusterIP is reachable
 
   nodeSelector: {}
   tolerations: []
+
+  extraValues:
+    # hostNetwork puts the pod on the node's VPC IP — required so the EKS control
+    # plane can reach the LBC webhook server in this Cilium CNI setup.
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-aws-l\
+          oad-balancer-controller"
+    controllerConfig:
+      featureGates:
+        # Cilium handles all Gateway API traffic in this cluster — LBC does not need
+        # to watch Gateway API types. Disabling prevents LBC from crashing with
+        # "failed to sync ListenerSet cache" when Gateway API experimental CRDs
+        # (gateway.networking.k8s.io/ListenerSet) are not installed.
+        NLBGatewayAPI: "false"
+        ALBGatewayAPI: "false"
 
 # ------------------------------------------------------------------------------
 # Cilium Gateway — ALB → Cilium Gateway API bridge
@@ -134,9 +155,12 @@ ciliumGateway:
 
   alb:
     hostname: "*.dev.cloud.mattermost.com"
-    certArn: "arn:aws:acm:us-east-2:00000000000:certificate/#######-####-####-#######"
-    wafArn: "arn:aws:wafv2:us-east-2:00000000000:regional/webacl/byoc-staging-internal-staging-waf/#######-####-####-#######"
-    subnets: "subnet-0c20137b1b99651f8, subnet-0f90ef14a6b23a545, subnet-0bf9709c4f8e7ac6e"
+    certArn: "arn:aws:acm:us-east-2:926412419614:certificate/e91b2cf5-6075-49ff-b7b\
+      7-fb5adf06541f"
+    wafArn: "arn:aws:wafv2:us-east-2:926412419614:regional/webacl/byoc-staging-inte\
+      rnal-staging-waf/078a64a3-e2a0-4953-8c7d-fa8fb7969fa5"
+    subnets: "subnet-0c20137b1b99651f8, subnet-0f90ef14a6b23a545,
+      subnet-0bf9709c4f8e7ac6e"
     extraTags: ",Environment=dev,Customer=mattermost"
 
 # ------------------------------------------------------------------------------
@@ -153,10 +177,15 @@ clusterAutoscaler:
     version: "9.54.0"
 
   clusterName: "platform-test"
-  irsaRoleSuffix: "cluster-autoscaler"
 
   nodeSelector: {}
   tolerations: []
+
+  extraValues:
+    rbac:
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-cluster-autoscaler"
 
 # ------------------------------------------------------------------------------
 # External Secrets Operator — syncs K8s Secrets from AWS Secrets Manager
@@ -170,12 +199,15 @@ externalSecrets:
   chart:
     version: "0.17.0"
 
-  irsaRoleSuffix: "external-secrets"
-
   clusterSecretStore:
     enabled: true
     name: aws-secretsmanager
     region: "us-east-2"
+
+  extraValues:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-external-secrets"
 
 # ------------------------------------------------------------------------------
 # Fluent Bit — ships Mattermost audit logs to S3
@@ -189,19 +221,21 @@ fluentBit:
   chart:
     version: "0.48.9"
 
-  irsaRoleSuffix: "fluent-bit"
   customer: "dev" # label added to every log record for multi-tenant identification
 
   s3:
-    bucket: "chris-cloud-audit-logs-dev"
+    bucket: "platform-test-audit-logs-926412419614"
 
   extraValues:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-fluent-bit"
     config:
       outputs: |
         [OUTPUT]
             Name                         s3
             Match                        mattermost-audit.*
-            bucket                       chris-cloud-audit-logs-dev
+            bucket                       platform-test-audit-logs-926412419614
             region                       us-east-2
             total_file_size              250M
             upload_timeout               24h
@@ -246,10 +280,12 @@ grafana:
   datasources:
     - name: Prometheus
       type: prometheus
+      uid: prometheus # kube-prometheus-stack dashboards hardcode this UID in their variable definitions
       url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
       isDefault: true
     - name: Thanos
       type: prometheus
+      uid: thanos
       url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
 
   postgres:
@@ -278,8 +314,8 @@ grafana:
       #   name: grafana-database
       #   key: POSTGRES_PASSWORD
 
-  # Admin credentials — grafana-auth.yaml auto-generates grafana-admin-secret on first install.
-  # Switch to adminExternalSecret when externalSecrets is enabled above.
+      # Admin credentials — grafana-auth.yaml auto-generates grafana-admin-secret on first install.
+      # Switch to adminExternalSecret when externalSecrets is enabled above.
   adminPasswordSecretRef:
     name: grafana-admin-secret
     key: admin-password
@@ -291,10 +327,7 @@ grafana:
   nodeSelector: {}
   tolerations: []
 
-  extraValues:
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::00000000000:role/platform-test-grafana"
+  extraValues: {}
 
 # ------------------------------------------------------------------------------
 # Loki — in-cluster log aggregation
@@ -311,14 +344,12 @@ grafana:
 # cross-cluster Alloy agents pushing to this instance.
 #
 # IRSA role (platform-test-loki) must have:
-#   s3:GetObject, s3:PutObject, s3:DeleteObject, s3:ListBucket on chris-cloud-loki-dev
+#   s3:GetObject, s3:PutObject, s3:DeleteObject, s3:ListBucket on platform-test-loki-926412419614
 # ------------------------------------------------------------------------------
 loki:
   enabled: true
   chart:
     version: "6.12.0"
-
-  irsaRoleSuffix: "loki"
 
   authEnabled: true # multi-tenant — matches alloy.loki.tenantID: "platform-test"
 
@@ -327,11 +358,11 @@ loki:
   replicationFactor: 1
 
   s3:
-    bucket: "chris-cloud-loki-dev"
+    bucket: "platform-test-loki-926412419614"
     # region defaults to global.aws.region (us-east-2)
 
-  # Creates the loki-gp3 EBS StorageClass — required on this cluster since gp2
-  # is the EKS default class and gp3 is preferred for Loki WAL workloads.
+    # Creates the loki-gp3 EBS StorageClass — required on this cluster since gp2
+    # is the EKS default class and gp3 is preferred for Loki WAL workloads.
   storageClass:
     enabled: true
     name: loki-gp3
@@ -357,12 +388,40 @@ loki:
     annotations:
       alb.ingress.kubernetes.io/scheme: internal
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:00000000000:certificate/#######-####-####-#######"
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\":443}]"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:926412419614:\
+        certificate/e91b2cf5-6075-49ff-b7b7-fb5adf06541f"
       external-dns.alpha.kubernetes.io/hostname: loki.dev.cloud.mattermost.com
 
   nodeSelector: {}
   tolerations: []
+
+  # Single-replica dev override — bypass memberlist ring discovery entirely.
+  # With 1 replica there is no cross-node ring coordination; inmemory kvstore
+  # handles all ring state in-process. This eliminates the loki-memberlist
+  # headless Service dependency so a deleted or missing Service can't break boot.
+  # Do NOT carry this to staging/prod — multi-replica deployments need memberlist.
+  #
+  # Only ingester and distributor expose a top-level `ring` field in Loki 3.1.x.
+  # compactor.Config and scheduler.Config have no `ring` field — setting those
+  # causes a config parse failure ("field ring not found in type X").
+  extraValues:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-loki"
+    loki:
+      memberlistConfig:
+        join_members: [] # empty = form a single-node cluster with itself; no DNS lookup
+      ingester:
+        lifecycler:
+          ring:
+            kvstore:
+              store: inmemory
+            replication_factor: 1
+      distributor:
+        ring:
+          kvstore:
+            store: inmemory
 
 # ------------------------------------------------------------------------------
 # Mattermost Operator — manages MattermostCluster CRDs
@@ -394,6 +453,16 @@ mattermostOperator:
 mattermost:
   instances:
     mattermost-internal:
+      # RTCD — Mattermost Calls plugin media backend, deployed in the same namespace.
+      # Flip enabled to true and switch service.type to LoadBalancer when Calls is active.
+      # Public subnets must be tagged kubernetes.io/role/elb=1 for an internet-facing NLB.
+      rtcd:
+        enabled: true # flip to true when Calls plugin is active
+        chartVersion: "1.4.1"
+        rtcPort: 8443
+        service:
+          type: ClusterIP # switch to LoadBalancer when Calls is active
+
       namespace: mattermost-internal
       version: "11.5.1"
       replicas: 1
@@ -406,9 +475,7 @@ mattermost:
       fileStore:
         mode: s3
         s3:
-          bucket: "chris-cloud-dev-app-data-internal"
-
-      irsaRoleSuffix: "mattermost-internal" # → arn:aws:iam::00000000000:role/platform-test-mattermost-internal
+          bucket: "platform-test-mattermost-internal-926412419614"
 
       postgres:
         enabled: true
@@ -486,22 +553,21 @@ mattermost:
 
         # Advanced logging — writes structured JSON to stdout; Fluent Bit picks it up.
         - name: MM_LOGSETTINGS_ADVANCEDLOGGINGJSON
-          value: '{"stdout":{"Type":"console","Format":"json","Levels":[{"ID":4,"Name":"info","Stacktrace":false},{"ID":3,"Name":"warn","Stacktrace":false},{"ID":2,"Name":"error","Stacktrace":true},{"ID":1,"Name":"fatal","Stacktrace":true},{"ID":0,"Name":"panic","Stacktrace":true}],"Options":{"Out":"stdout"},"MaxQueueSize":1000}}'
+          value: "{\"stdout\":{\"Type\":\"console\",\"Format\":\"json\",\"Levels\":[{\"ID\
+            \":4,\"Name\":\"info\",\"Stacktrace\":false},{\"ID\":3,\"Name\":\"w\
+            arn\",\"Stacktrace\":false},{\"ID\":2,\"Name\":\"error\",\"Stacktra\
+            ce\":true},{\"ID\":1,\"Name\":\"fatal\",\"Stacktrace\":true},{\"ID\
+            \":0,\"Name\":\"panic\",\"Stacktrace\":true}],\"Options\":{\"Out\":\
+            \"stdout\"},\"MaxQueueSize\":1000}}"
 
         # Audit logging — produces audit-api/content/permissions events for compliance.
         # Fluent Bit matches on mattermost-audit.* and ships to S3.
         - name: MM_EXPERIMENTALAUDITSETTINGS_ADVANCEDLOGGINGJSON
-          value: '{"audit-stdout":{"type":"console","options":{"out":"stdout"},"format":"json","format_options":{},"levels":[{"id":100,"name":"audit-api"},{"id":101,"name":"audit-content"},{"id":102,"name":"audit-permissions"},{"id":103,"name":"audit-cli"}],"maxqueuesize":1000}}'
-
-        # Shared Channels / Connected Workspaces — enables cross-cluster federation.
-        - name: MM_SERVICESETTINGS_ENABLEAPIPOSTDELETION
-          value: "true"
-        - name: MM_CONNECTEDWORKSPACESSETTINGS_ENABLEREMOTECLUSTERSERVICE
-          value: "true"
-        - name: MM_CONNECTEDWORKSPACESSETTINGS_ENABLESHAREDCHANNELS
-          value: "true"
-        - name: MM_FEATUREFLAGS_ENABLESHAREDCHANNELSMEMBERSYNC
-          value: "true"
+          value: "{\"audit-stdout\":{\"type\":\"console\",\"options\":{\"out\":\"stdout\"\
+            },\"format\":\"json\",\"format_options\":{},\"levels\":[{\"id\":100,\
+            \"name\":\"audit-api\"},{\"id\":101,\"name\":\"audit-content\"},{\"\
+            id\":102,\"name\":\"audit-permissions\"},{\"id\":103,\"name\":\"aud\
+            it-cli\"}],\"maxqueuesize\":1000}}"
 
         # OpenSearch / Elasticsearch — uncomment to enable full-text search backend.
         # Requires an OpenSearch cluster and credentials stored in an "opensearch" Secret.
@@ -534,116 +600,6 @@ mattermost:
         #       name: opensearch
         #       optional: true
 
-    mattermost-test:
-      namespace: mattermost-chris-test
-      version: "11.5.1"
-      replicas: 1
-      host: "chris-mm-test.dev.cloud.mattermost.com"
-
-      # Pin to x86_64 nodes — the mattermost-enterprise-edition image has no ARM64 variant.
-      nodeSelector:
-        arch: amd64
-
-      # Reuses the mattermost-internal IRSA role — both instances share the same
-      # S3 bucket and Secrets Manager access pattern in this dev cluster.
-      irsaRoleSuffix: "mattermost-internal"
-
-      # Shares the mattermost-internal S3 bucket — Mattermost prefixes files by
-      # site URL internally so the two instances don't collide.
-      fileStore:
-        mode: s3
-        s3:
-          bucket: "chris-cloud-dev-app-data-internal"
-
-      # postgres.enabled: false — database credentials come entirely from External
-      # Secrets below. The ESO-created secret mattermost-chris-test-database must
-      # exist before the Mattermost pod starts (the HelmRelease dependsOn handles this).
-      postgres:
-        enabled: false
-
-      db:
-        externalSecret:
-          secretKey: dev-app-mattermost # AWS Secrets Manager secret name
-          property: DB_CONNECTION_STRING_INTERNAL # JSON key inside the secret — must match exactly
-
-      httproute:
-        enabled: true
-        gatewayName: cilium-gateway
-        gatewayNamespace: kube-system
-
-      mattermostEnv:
-        - name: MM_FILESETTINGS_AMAZONS3SSE
-          value: "true"
-        - name: MM_FILESETTINGS_AMAZONS3SSL
-          value: "true"
-
-        # License — expects a pre-existing Secret named mattermost-license with key "license".
-        # Mark optional: true so the pod starts without it (useful for dev spin-up).
-        - name: MM_LICENSE
-          valueFrom:
-            secretKeyRef:
-              key: license
-              name: mattermost-license
-              optional: true
-
-        # Database connection string — pulled from AWS Secrets Manager via ESO.
-        - name: MM_CONFIG
-          valueFrom:
-            secretKeyRef:
-              key: MM_CONFIG
-              name: mattermost-chris-test-database
-
-        # Email delivery via SES SMTP in us-east-2.
-        - name: MM_EMAILSETTINGS_SMTPPORT
-          value: "587"
-        - name: MM_EMAILSETTINGS_SMTPSERVER
-          value: email-smtp.us-east-2.amazonaws.com
-        - name: MM_EMAILSETTINGS_CONNECTIONSECURITY
-          value: STARTTLS
-        - name: MM_EMAILSETTINGS_ENABLESMTPAUTH
-          value: "true"
-        - name: MM_EMAILSETTINGS_SMTPUSERNAME
-          valueFrom:
-            secretKeyRef:
-              name: smtp-credentials
-              key: SMTP_USERNAME
-              optional: true
-        - name: MM_EMAILSETTINGS_SMTPPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: smtp-credentials
-              key: SMTP_PASSWORD
-              optional: true
-        - name: MM_EMAILSETTINGS_FEEDBACKEMAIL
-          value: "no-reply@palantir.mattermost.net"
-        - name: MM_EMAILSETTINGS_FEEDBACKNAME
-          value: Mattermost Notification
-        - name: MM_EMAILSETTINGS_REPLYTOADDRESS
-          value: "no-reply@palantir.mattermost.net"
-        - name: MM_SUPPORTSETTINGS_SUPPORTEMAIL
-          value: support@mattermost.com
-
-        # Structured JSON logging — required for Fluent Bit audit log capture.
-        - name: MM_LOGSETTINGS_CONSOLEJSON
-          value: "true"
-        - name: MM_LOGSETTINGS_CONSOLELEVEL
-          value: "INFO"
-        - name: MM_LOGSETTINGS_FILELEVEL
-          value: "INFO"
-        - name: MM_NOTIFICATIONLOGSETTINGS_CONSOLELEVEL
-          value: "INFO"
-        - name: MM_NOTIFICATIONLOGSETTINGS_FILELEVEL
-          value: "INFO"
-
-        # Advanced logging — writes structured JSON to stdout; Fluent Bit picks it up.
-        - name: MM_LOGSETTINGS_ADVANCEDLOGGINGJSON
-          value: '{"stdout":{"Type":"console","Format":"json","Levels":[{"ID":4,"Name":"info","Stacktrace":false},{"ID":3,"Name":"warn","Stacktrace":false},{"ID":2,"Name":"error","Stacktrace":true},{"ID":1,"Name":"fatal","Stacktrace":true},{"ID":0,"Name":"panic","Stacktrace":true}],"Options":{"Out":"stdout"},"MaxQueueSize":1000}}'
-
-        # Audit logging — produces audit-api/content/permissions events for compliance.
-        # Fluent Bit matches on mattermost-audit.* and ships to S3.
-        - name: MM_EXPERIMENTALAUDITSETTINGS_ADVANCEDLOGGINGJSON
-          value: '{"audit-stdout":{"type":"console","options":{"out":"stdout"},"format":"json","format_options":{},"levels":[{"id":100,"name":"audit-api"},{"id":101,"name":"audit-content"},{"id":102,"name":"audit-permissions"},{"id":103,"name":"audit-cli"}],"maxqueuesize":1000}}'
-
         # Shared Channels / Connected Workspaces — enables cross-cluster federation.
         - name: MM_SERVICESETTINGS_ENABLEAPIPOSTDELETION
           value: "true"
@@ -660,20 +616,23 @@ mattermost:
 # Disabled: EKS provides native metrics via CloudWatch; kubectl top not needed
 # in this cluster. Enable if HPA or VPA is required.
 # ------------------------------------------------------------------------------
-
 metricsServer:
   enabled: true
   chart:
     version: "3.12.1"
 
-# ------------------------------------------------------------------------------
-# NGINX Ingress Controller
-#
-# Disabled: ciliumGateway handles all ingress in this cluster.
-# Enable and configure for clusters that use NGINX instead of Cilium Gateway.
-# ------------------------------------------------------------------------------
-nginx:
-  enabled: false
+  extraValues:
+    # hostNetwork moves the pod onto the node's IP rather than a Cilium pod IP.
+    # The EKS control plane cannot reach Cilium pod IPs, so without this the
+    # metrics-server APIService stays Unavailable (same "Address is not allowed"
+    # error as the LBC webhooks). A broken APIService poisons Kubernetes API
+    # discovery for all clients — including the Cilium operator, which then
+    # never initializes its Gateway API controller.
+    # containerPort 4443 avoids conflicting with kubelet which owns 10250 on
+    # the host network.
+    hostNetwork:
+      enabled: true
+    containerPort: 4443
 
 # ------------------------------------------------------------------------------
 # Prometheus (kube-prometheus-stack) — cluster-wide metrics collection
@@ -685,12 +644,7 @@ nginx:
 prometheus:
   enabled: true
   chart:
-    version: "61.8.0"
-
-  # IRSA annotates the Prometheus ServiceAccount used by the Thanos sidecar
-  # to write TSDB blocks to S3. Required even when thanos.enabled is false
-  # so the annotation is in place when Thanos is turned on.
-  irsaRoleSuffix: "thanos"
+    version: "83.6.0"
 
   storageSize: "50Gi" # increase to 200Gi+ for high-cardinality prod clusters
 
@@ -701,35 +655,42 @@ prometheus:
   thanos:
     enabled: false # enable when thanos-objstore-config Secret exists in monitoring ns
 
-# ------------------------------------------------------------------------------
-# RTCD — Mattermost Real-Time Communications Daemon (Calls plugin backend)
-#
-# Disabled: Calls is not used in this dev cluster.
-# Enable and configure rtcPort/irsaRoleSuffix when the Calls plugin is active.
-# ------------------------------------------------------------------------------
-rtcd:
-  enabled: true
-  chart:
-    version: "1.4.1"
+  httproute:
+    enabled: true
+    host: chris-prometheus.dev.cloud.mattermost.com
 
-  rtcPort: 8443
-  # irsaRoleSuffix: "rtcd" # uncomment when using External Secrets for the RTCD API key
+  ingress:
+    enabled: false
+    host: prometheus.dev.cloud.mattermost.com
+    ingressClass: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\":443}]"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:926412419614:\
+        certificate/e91b2cf5-6075-49ff-b7b7-fb5adf06541f"
+      external-dns.alpha.kubernetes.io/hostname: prometheus.dev.cloud.mattermost.com
 
-  # WebRTC NLB — internet-facing so browser/mobile clients can reach the media port.
-  # Flip to LoadBalancer and uncomment annotations when enabling Calls.
-  # Public subnets must be tagged: kubernetes.io/role/elb = 1
-  service:
-    type: ClusterIP # switch to LoadBalancer when Calls is active
-    annotations: {}
-    # type: LoadBalancer
-    # annotations:
-    #   service.beta.kubernetes.io/aws-load-balancer-type: external
-    #   service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-    #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    #   external-dns.alpha.kubernetes.io/hostname: rtcd.dev.cloud.mattermost.com
-
-  nodeSelector: {}
-  tolerations: []
+  extraValues:
+    # Generate kube-prometheus-stack's built-in dashboard ConfigMaps even though
+    # its bundled Grafana is disabled. Standalone Grafana's sidecar picks these up
+    # via the grafana_dashboard: "1" label.
+    grafana:
+      enabled: false
+      forceDeployDashboards: true
+    prometheus:
+      prometheusSpec:
+        externalUrl: "https://chris-prometheus.dev.cloud.mattermost.com"
+        # Dev sizing — chart default is 6Gi request which exceeds available headroom
+        # on these t3.large/m5.large nodes once other addons are running.
+        # Bump to 4Gi+ for staging/prod where dedicated monitoring nodes exist.
+        resources:
+          requests:
+            cpu: 200m
+            memory: 2Gi
+          limits:
+            cpu: 2
+            memory: 6Gi
 
 # ------------------------------------------------------------------------------
 # Teleport Kubernetes Agent — SSH / Kubernetes access via Teleport proxy
@@ -769,7 +730,7 @@ thanos:
     version: "17.3.1"
 
   objstore:
-    bucket: "chris-cloud-thanos-dev" # set to the S3 bucket name for Thanos block storage before enabling
+    bucket: "platform-test-thanos-926412419614" # set to the S3 bucket name for Thanos block storage before enabling
     # region defaults to global.aws.region (us-east-2)
 
   query:
@@ -782,19 +743,19 @@ thanos:
       sidecarsService: ""
       # sidecarsNamespace defaults to thanos.namespace (monitoring) — matches prometheus
 
-    # gRPC service — ClusterIP for now; switch to LoadBalancer when cross-cluster
-    # querying is needed. Using LoadBalancer here blocks the Helm release until
-    # the NLB is provisioned (~2-5 min), and will fail entirely if the private
-    # subnets are missing the kubernetes.io/role/internal-elb: "1" tag.
-    #
-    # To enable cross-cluster NLB later, replace with:
-    #   grpcService:
-    #     type: LoadBalancer
-    #     annotations:
-    #       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
-    #       service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-    #       service.beta.kubernetes.io/aws-load-balancer-type: nlb
-    #       external-dns.alpha.kubernetes.io/hostname: platform-test-grpc.thanos.dev.cloud.mattermost.com
+      # gRPC service — ClusterIP for now; switch to LoadBalancer when cross-cluster
+      # querying is needed. Using LoadBalancer here blocks the Helm release until
+      # the NLB is provisioned (~2-5 min), and will fail entirely if the private
+      # subnets are missing the kubernetes.io/role/internal-elb: "1" tag.
+      #
+      # To enable cross-cluster NLB later, replace with:
+      #   grpcService:
+      #     type: LoadBalancer
+      #     annotations:
+      #       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+      #       service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #       service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      #       external-dns.alpha.kubernetes.io/hostname: platform-test-grpc.thanos.dev.cloud.mattermost.com
     grpcService:
       type: ClusterIP
 
@@ -819,8 +780,9 @@ thanos:
     annotations:
       alb.ingress.kubernetes.io/scheme: internal
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:00000000000:certificate/#######-####-####-#######"
+      alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\":443}]"
+      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:926412419614:\
+        certificate/e91b2cf5-6075-49ff-b7b7-fb5adf06541f"
       external-dns.alpha.kubernetes.io/hostname: thanos.dev.cloud.mattermost.com
 
   storegateway:
@@ -829,10 +791,10 @@ thanos:
 
   extraValues:
     query:
-      # IRSA — all three components share the same role (S3 read/write on the objstore bucket)
+      # All three components share the same role (S3 read/write on the objstore bucket).
       serviceAccount:
         annotations:
-          eks.amazonaws.com/role-arn: "arn:aws:iam::00000000000:role/platform-test-thanos"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-thanos"
 
       # resources and podAntiAffinity inherit from base values
       # Prefer addons-role nodes when present in this cluster
@@ -850,12 +812,12 @@ thanos:
     storegateway:
       serviceAccount:
         annotations:
-          eks.amazonaws.com/role-arn: "arn:aws:iam::00000000000:role/platform-test-thanos"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-thanos"
 
     compactor:
       serviceAccount:
         annotations:
-          eks.amazonaws.com/role-arn: "arn:aws:iam::00000000000:role/platform-test-thanos"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-thanos"
 
 # ------------------------------------------------------------------------------
 # Velero — cluster backup and restore to S3
@@ -870,13 +832,11 @@ velero:
   chart:
     version: "11.3.2"
 
-  irsaRoleSuffix: "velero"
-
   plugin:
     tag: v1.10.0
 
   s3:
-    bucket: "chris-cloud-velero-dev"
+    bucket: "platform-test-velero-926412419614"
     prefix: "platform-test"
 
   schedules: [] # example schedule:
@@ -884,6 +844,12 @@ velero:
   #   - name: daily-full
   #     cron: "0 3 * * *"   # 03:00 UTC daily
   #     ttl: 720h0m0s        # retain for 30 days
+
+  extraValues:
+    serviceAccount:
+      server:
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::926412419614:role/platform-test-velero"
 
 # ------------------------------------------------------------------------------
 # Wrapper Charts — deploy custom charts from private Helm repos or OCI registries.

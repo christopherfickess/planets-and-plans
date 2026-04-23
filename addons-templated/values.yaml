@@ -36,15 +36,14 @@
 # ==============================================================================
 
 global:
-  helmRepoInterval: 1h # how often Flux polls Helm repos for new chart versions
-  helmReleaseInterval: 1h # how often Flux re-applies HelmReleases
-  upgradeTimeout: 10m # abort a Helm upgrade after this duration
+  helmRepoInterval: 1m # how often Flux polls Helm repos for new chart index
+  helmReleaseInterval: 1m # how often Flux re-applies HelmReleases
+  chartInterval: 1m # how often Flux re-checks chart versions and retries failed downloads
+  upgradeTimeout: 15m # abort a Helm upgrade after this duration
   upgradeRetries: 3 # retries before marking HelmRelease as failed
 
-  # AWS account details — used by templates to construct IRSA role ARNs:
-  #   arn:aws:iam::<accountNumber>:role/<clusterName>-<app.irsaRoleSuffix>
+  # AWS account details
   aws:
-    accountNumber: "" # 12-digit AWS account ID
     clusterName: "" # must match the EKS cluster name exactly
     region: us-east-2 # AWS region for all addons unless overridden per-app
 
@@ -61,7 +60,7 @@ alloy:
 
   chart:
     name: alloy
-    version: "0.12.5"
+    version: "1.7.0"
     repo:
       name: grafana
       type: default
@@ -237,14 +236,11 @@ awsLoadBalancerController:
 
   chart:
     name: aws-load-balancer-controller
-    version: "1.11.0"
+    version: "3.2.1"
     repo:
       name: eks
       type: default
       url: https://aws.github.io/eks-charts
-
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "aws-load-balancer-controller"
 
   vpcID: "" # leave blank to auto-detect from EC2 instance metadata
 
@@ -278,9 +274,6 @@ clusterAutoscaler:
       name: autoscaler
       type: default
       url: https://kubernetes.github.io/autoscaler
-
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "cluster-autoscaler"
 
   replicaCount: 1 # one instance is enough; autoscaler is not HA by design
 
@@ -339,9 +332,6 @@ externalSecrets:
       type: default
       url: https://charts.external-secrets.io
 
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "external-secrets"
-
   ha: false # set true for production — forces replicaCount to 2 + PodDisruptionBudget
   replicaCount: 1 # ignored when ha: true (pinned to 2)
 
@@ -383,9 +373,6 @@ fluentBit:
       name: fluent
       type: default
       url: https://fluent.github.io/helm-charts
-
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "fluent-bit"
 
   customer: "" # label added to every audit log record; defaults to global.aws.clusterName
 
@@ -449,37 +436,34 @@ loki:
     name: loki
     version: "6.12.0"
     repo:
-      name: grafana   # shared with alloy and grafana — only one HelmRepository is created
+      name: grafana # shared with alloy and grafana — only one HelmRepository is created
       type: default
       url: https://grafana.github.io/helm-charts
 
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "loki"
+  authEnabled: true # true = multi-tenant (requires X-Scope-OrgID); false = single-tenant
 
-  authEnabled: true   # true = multi-tenant (requires X-Scope-OrgID); false = single-tenant
-
-  deploymentMode: SingleBinary   # SingleBinary | SimpleScalable | Distributed
-  replicationFactor: 1           # set 3 for HA in SimpleScalable or Distributed mode
-  replicas: 1                    # singleBinary replicas — ignored in other modes
+  deploymentMode: SingleBinary # SingleBinary | SimpleScalable | Distributed
+  replicationFactor: 1 # set 3 for HA in SimpleScalable or Distributed mode
+  replicas: 1 # singleBinary replicas — ignored in other modes
 
   s3:
-    bucket: ""   # S3 bucket name — must exist; Loki does not create it
-    region: ""   # defaults to global.aws.region when blank
+    bucket: "" # S3 bucket name — must exist; Loki does not create it
+    region: "" # defaults to global.aws.region when blank
 
   # ── StorageClass — Loki-owned EBS gp3 StorageClass ──────────────────
   # Creates a dedicated StorageClass for the singleBinary StatefulSet PVC.
   # Required on clusters without a default StorageClass (e.g. no gp2/gp3 default).
   # Leave disabled and set persistence.storageClass to use an existing class instead.
   storageClass:
-    enabled: false  # set true to create the loki-gp3 StorageClass
+    enabled: false # set true to create the loki-gp3 StorageClass
     name: loki-gp3
-    iops: ""        # blank = gp3 baseline (3000)
-    throughput: ""  # blank = gp3 baseline (125 MiB/s)
+    iops: "" # blank = gp3 baseline (3000)
+    throughput: "" # blank = gp3 baseline (125 MiB/s)
 
   # PVC for WAL and TSDB index cache (singleBinary only).
   persistence:
     size: 10Gi
-    storageClass: ""   # blank = cluster default; set to storageClass.name when enabled above
+    storageClass: "" # blank = cluster default; set to storageClass.name when enabled above
 
   # Loki gateway — nginx reverse proxy that routes push and query requests
   # to the correct internal component. Always keep enabled.
@@ -491,7 +475,7 @@ loki:
   # Set enabled: true and configure period to enforce a retention window.
   retention:
     enabled: false
-    period: "744h"   # 31 days — compactor enforces this across all streams
+    period: "744h" # 31 days — compactor enforces this across all streams
 
   # ── Routing — pick ONE or neither ──────────────────────────────────────
   # Only needed for cross-cluster access (Alloy or Grafana in another cluster).
@@ -501,13 +485,13 @@ loki:
   # ingress:   use for clusters with a traditional ingress controller (nginx/ALB)
   httproute:
     enabled: false
-    host: ""   # e.g. loki.dev.example.com
+    host: "" # e.g. loki.dev.example.com
     gatewayName: cilium-gateway
     gatewayNamespace: kube-system
 
   ingress:
     enabled: false
-    host: ""   # e.g. loki.dev.example.com
+    host: "" # e.g. loki.dev.example.com
     ingressClass: nginx-controller
     annotations: {}
     tlsSecretName: ""
@@ -614,7 +598,22 @@ grafana:
   nodeSelector: {}
   tolerations: []
 
-  extraValues: {}
+  extraValues:
+    # Auto-discover dashboard ConfigMaps labeled grafana_dashboard: "1" across all
+    # namespaces. kube-prometheus-stack generates these via forceDeployDashboards when
+    # its bundled Grafana subchart is disabled — the sidecar picks them up automatically.
+    # Remove searchNamespace: ALL in locked-down envs that restrict cross-namespace reads.
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+    # Disable Grafana telemetry and update-check phone-homes.
+    grafana.ini:
+      analytics:
+        reporting_enabled: false
+        check_for_updates: false
 
 # ------------------------------------------------------------------------------
 # Mattermost instances — deployed via the Mattermost Operator
@@ -660,7 +659,6 @@ grafana:
 #         version: "10.5.1"
 #         replicas: 1
 #         host: "mattermost.example.com"
-#         irsaRoleSuffix: "mattermost-my-workspace"
 #         fileStore:
 #           mode: s3
 #           s3:
@@ -838,14 +836,11 @@ prometheus:
 
   chart:
     name: kube-prometheus-stack
-    version: "61.8.0"
+    version: "83.6.0"
     repo:
       name: prometheus-community
       type: default
       url: https://prometheus-community.github.io/helm-charts
-
-  # Thanos sidecar needs S3 access — arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "thanos"
 
   clusterID: "" # defaults to global.aws.clusterName; used as externalLabels.clusterID in Thanos
 
@@ -860,6 +855,13 @@ prometheus:
     enabled: false # enable when thanos-objstore-config secret is present
     objectStorageSecret: "thanos-objstore-config"
 
+  # defaultRules.create controls whether kube-prometheus-stack installs its bundled
+  # recording and alerting rules. These pre-compute node_namespace_pod_container:*
+  # and other aggregated metrics that all built-in dashboards depend on.
+  # Set false only if you manage recording rules externally.
+  defaultRules:
+    create: true
+
   alertmanager:
     enabled: false
 
@@ -871,55 +873,22 @@ prometheus:
 
   additionalServiceMonitors: [] # ServiceMonitors injected verbatim — add per-workload scrape targets
 
-  extraValues: {}
+  httproute:
+    enabled: false
+    host: "" # e.g. prometheus.dev.cloud.mattermost.com
+    gatewayName: cilium-gateway
+    gatewayNamespace: kube-system
 
-# ------------------------------------------------------------------------------
-# RTCD — Mattermost Real-Time Communications Daemon (Calls plugin backend)
-#
-# Disabled by default; only enable in clusters that host the Calls plugin.
-# Requires mattermost-operator to be installed first (HelmRelease dependsOn).
-# Calls traffic uses UDP/TCP on rtcPort — ensure SG/NLB allows it.
-# ------------------------------------------------------------------------------
-rtcd:
-  enabled: false
-  namespace: mattermost-rtcd
-
-  chart:
-    name: mattermost-rtcd
-    version: "1.4.1"
-    repo:
-      name: mattermost # shared repo with mattermost-operator
-      type: default
-      url: https://helm.mattermost.com
-
-  replicaCount: 1
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  # Only needed when using External Secrets to pull the RTCD API key from Secrets Manager.
-  irsaRoleSuffix: ""
-  rtcPort: 8443 # WebRTC UDP/TCP port — must match the Calls plugin config in Mattermost
-
-  # ── WebRTC service — must be publicly reachable by browser/mobile clients ──
-  # WebRTC media is UDP — HTTPRoute and Ingress are Layer 7 (HTTP only) and
-  # cannot handle UDP. An NLB (Layer 4) is required.
-  #
-  # internet-facing NLB example (most common for Calls):
-  #   service:
-  #     type: LoadBalancer
-  #     annotations:
-  #       service.beta.kubernetes.io/aws-load-balancer-type: external
-  #       service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-  #       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-  #       external-dns.alpha.kubernetes.io/hostname: rtcd.dev.cloud.mattermost.com
-  #
-  # Public subnets must be tagged: kubernetes.io/role/elb = 1
-  service:
-    type: ClusterIP   # override to LoadBalancer in cluster values when Calls is active
+  ingress:
+    enabled: false
+    host: ""
+    ingressClass: alb
     annotations: {}
 
-  nodeSelector: {}
-  tolerations: []
-
   extraValues: {}
+
+# RTCD is deployed per Mattermost instance — see mattermost.instances.<name>.rtcd.
+# Enable per instance with rtcd.enabled: true and set rtcd.chartVersion.
 
 # ------------------------------------------------------------------------------
 # Teleport Kubernetes Agent — SSH / Kubernetes access control via Teleport proxy
@@ -1127,9 +1096,6 @@ velero:
       type: default
       url: https://vmware-tanzu.github.io/helm-charts
 
-  # arn:aws:iam::<accountNumber>:role/<clusterName>-<irsaRoleSuffix>
-  irsaRoleSuffix: "velero"
-
   s3:
     bucket: "" # name of the S3 bucket — must exist; Velero does not create it
     region: us-east-2 # defaults to global.aws.region
@@ -1163,7 +1129,6 @@ velero:
 # Fields:
 #   namespace      — namespace to deploy into (required)
 #   releaseName    — override the Helm release name (defaults to the addon key)
-#   irsaRoleSuffix — injects eks.amazonaws.com/role-arn into serviceAccount.annotations
 #   dependsOn      — list of {name, namespace} HelmReleases this must wait for
 #   values         — arbitrary Helm chart values passed through as-is
 #
@@ -1188,7 +1153,6 @@ velero:
 #     enabled: true
 #     namespace: tools
 #     releaseName: internal-tool
-#     irsaRoleSuffix: internal-tool
 #     dependsOn:
 #       - name: cert-manager
 #         namespace: cert-manager

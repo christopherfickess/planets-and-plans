@@ -5,9 +5,14 @@
 # cluster-crds is a Kustomization, so a HelmRelease cannot depend on it directly.
 #
 # Solution: wrap the HelmRelease in a Kustomization that CAN depend on cluster-crds.
-# This Kustomization reconciles ./examples/basic/clusters/dev/flux-system, whose
-# kustomization.yaml lists only helmrelease.yaml — so only the HelmRelease is applied
-# (not the Kustomization objects, which the bootstrap applies directly).
+#
+# SOURCE: reads from the terraform-aws-eks GitRepo (same repo as the cluster config),
+# not the kubernetes-base-addons GitRepo. The name refers to what it deploys.
+#
+# PATH: clusters/dev/addons/ — contains helmrelease.yaml and values.yaml.
+# The configMapGenerator in addons/kustomization.yaml generates flux-addons-values-dev
+# from values.yaml on every reconcile, so git push is all that's needed to
+# update addon configuration — no manual kubectl apply required.
 # ==============================================================================
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -21,6 +26,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: terraform-aws-eks
-  path: ./examples/basic/clusters/dev/flux-system
+  path: ./examples/basic/clusters/dev/addons
   prune: true
-  wait: true  # wait for HelmRelease to reach Ready before cluster-extras starts
+  wait: true  # wait for HelmRelease to reach Ready before dependent resources start

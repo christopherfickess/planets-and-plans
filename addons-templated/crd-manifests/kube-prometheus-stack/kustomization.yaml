@@ -1,4 +1,4 @@
-# kube-prometheus-stack v61.8.0 CRDs
+# kube-prometheus-stack v83.6.0 CRDs
 # Source: charts/crds/crds/ inside the prometheus-community/kube-prometheus-stack chart
 # When upgrading: helm pull prometheus-community/kube-prometheus-stack --version <new> --untar
 #                 then overwrite these files from charts/crds/crds/

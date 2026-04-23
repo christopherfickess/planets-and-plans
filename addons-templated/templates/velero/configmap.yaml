@@ -46,15 +46,11 @@
     ($app.plugin.image | default "velero/velero-plugin-for-aws")
     ($app.plugin.tag   | default "v1.8.0") }}
 
-{{/* ── IRSA role ARN — arn:aws:iam::${.Values.global.aws.accountNumber}:role/${.Values.global.aws.clusterName}-${app.irsaRoleSuffix} */}}
-{{- $irsaRoleArn := printf "arn:aws:iam::%s:role/%s-%s" .Values.global.aws.accountNumber .Values.global.aws.clusterName $app.irsaRoleSuffix }}
-
 {{/* ── Top-level chart values — service account, configuration, plugin ─ */}}
 {{- $chartValues := dict
     "serviceAccount" (dict
         "server" (dict
-            "create"      true
-            "annotations" (dict "eks.amazonaws.com/role-arn" $irsaRoleArn)))
+            "create"      true))
     "configuration" (dict
         "backupStorageLocation"    $backupStorageLocation
         "volumeSnapshotLocation"   $volumeSnapshotLocation

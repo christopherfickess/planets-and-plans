@@ -12,15 +12,6 @@
     "namespace" $namespace
     "values"    ($app.values | default dict)) }}
 
-{{/* ── IRSA service account annotation ────────────────────────────────
-     Only injected when irsaRoleSuffix is set. Merged into values so the
-     chart's serviceAccount.annotations picks it up automatically. */}}
-{{- $chartValues := $app.values | default dict | deepCopy }}
-{{- if $app.irsaRoleSuffix }}
-{{-   $irsaArn := printf "arn:aws:iam::%s:role/%s-%s" $.Values.global.aws.accountNumber $.Values.global.aws.clusterName $app.irsaRoleSuffix }}
-{{-   $_ := set $chartValues "serviceAccount" (dict "annotations" (dict "eks.amazonaws.com/role-arn" $irsaArn)) }}
-{{- end }}
-
 {{/* ── HelmRelease ──────────────────────────────────────────────────── */}}
 {{- include "flux-addons.helmrelease" (dict
     "name"          $name

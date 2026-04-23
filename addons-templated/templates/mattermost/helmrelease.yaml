@@ -16,7 +16,7 @@ data:
   values.yaml: |
 {{ toYaml $wsValues | indent 4 }}
 
-{{/* ── HelmRelease per instance ────────────────────────────────────── */}}
+{{/* ── Mattermost HelmRelease per instance ────────────────────────── */}}
 {{/* Add external-secrets dependency only when the instance actually uses it */}}
 {{- $usesExternalSecrets := and ($.Values.externalSecrets).enabled
     (or (($instance.db).externalSecret).secretKey
@@ -32,13 +32,17 @@ spec:
   dependsOn:
     - name: kubernetes-base-addons
       namespace: flux-system
+    # Operator CRDs must be installed before any Mattermost CR can be applied.
+    # The operator HelmRelease lives in its own namespace, so namespace is required.
+    - name: mattermost-operator
+      namespace: {{ $.Values.mattermostOperator.namespace }}
     {{- if $usesExternalSecrets }}
     - name: external-secrets
       namespace: {{ $.Values.externalSecrets.namespace }}
     {{- end }}
   chart:
     spec:
-      chart: ./addons/mattermost-workspace
+      chart: ./addons-templated/mattermost-workspace
       sourceRef:
         kind: GitRepository
         name: kubernetes-base-addons
@@ -57,4 +61,79 @@ spec:
     - kind: ConfigMap
       name: {{ printf "mattermost-%s-values" $name }}
       valuesKey: values.yaml
+
+{{/* ── RTCD per instance ───────────────────────────────────────────── */}}
+{{/* When instance.rtcd.enabled is true, deploy an RTCD instance in the same
+     namespace as Mattermost. RTCD is the Calls plugin media backend — co-locating
+     it in the instance namespace keeps Calls traffic scoped to the workspace and
+     gives each instance its own API key and scaling boundary.
+     The mattermost HelmRepository (shared with mattermost-operator) is reused. */}}
+{{- if ($instance.rtcd).enabled }}
+{{- $rtcd := $instance.rtcd }}
+{{- $rtcPort := $rtcd.rtcPort | default 8443 }}
+{{- $svc := $rtcd.service | default dict }}
+
+{{/* RTCD reads all config from RTCD_* env vars — no config file */}}
+{{- $envVars := dict
+    "RTCD_LOGGER_ENABLEFILE"    "\"false\""
+    "RTCD_LOGGER_ENABLECONSOLE" "\"true\""
+    "RTCD_LOGGER_CONSOLELEVEL"  "\"INFO\""
+    "RTCD_RTC_ICEPORTUDP"       (printf "\"%v\"" $rtcPort)
+    "RTCD_RTC_ICEPORTTCP"       (printf "\"%v\"" $rtcPort) }}
+
+{{- $rtcdValues := dict
+    "configuration" (dict
+        "replicas"             ($rtcd.replicaCount | default 1)
+        "environmentVariables" $envVars)
+    "nodeSelector" ($rtcd.nodeSelector | default dict)
+    "tolerations"  ($rtcd.tolerations  | default list)
+    "service" (dict
+        "type"        ($svc.type        | default "ClusterIP")
+        "annotations" ($svc.annotations | default dict)
+        "RTCport"     $rtcPort) }}
+
+{{- $rtcdFinal := mergeOverwrite $rtcdValues ($rtcd.extraValues | default dict) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "rtcd-%s-values" $name }}
+  namespace: {{ $instance.namespace }}
+data:
+  values.yaml: |
+{{ toYaml $rtcdFinal | indent 4 }}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: {{ printf "rtcd-%s" $name }}
+  namespace: {{ $instance.namespace }}
+spec:
+  interval: {{ $.Values.global.helmReleaseInterval | default "10m" }}
+  chart:
+    spec:
+      # mattermost-rtcd from the shared 'mattermost' HelmRepository (https://helm.mattermost.com).
+      # The HelmRepository is owned by mattermost-operator — no duplicate needed here.
+      chart: mattermost-rtcd
+      version: {{ $rtcd.chartVersion | required (printf "mattermost.instances.%s.rtcd.chartVersion is required when rtcd.enabled is true" $name) | quote }}
+      sourceRef:
+        kind: HelmRepository
+        name: mattermost
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: false  # namespace already created by the mattermost HelmRelease
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    timeout: {{ $.Values.global.upgradeTimeout | default "5m" }}
+    remediation:
+      retries: 3
+      strategy: rollback
+  valuesFrom:
+    - kind: ConfigMap
+      name: {{ printf "rtcd-%s-values" $name }}
+      valuesKey: values.yaml
+{{- end }}
 {{- end }}
