@@ -42,3 +42,5 @@ blob_container_name = "crossguard-files"
 key_vault_reader_object_ids = {
   chris = "7ced9db5-d867-4820-9fd3-3c777df7c3c8"
 }
+
+sp_object_id="e5f6b454-993c-43cc-9f0d-a0fc8a097d80"

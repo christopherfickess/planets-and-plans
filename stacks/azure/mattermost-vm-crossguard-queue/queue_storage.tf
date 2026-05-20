@@ -17,13 +17,16 @@ module "queue_storage" {
   outbound_queue_name = var.outbound_queue_name
   blob_container_name = var.blob_container_name
 
-  # Both VM managed identities get Storage Queue Data Contributor and Storage Blob
-  # Data Contributor. Keys are static strings — Terraform resolves them at plan time.
-  # Values (principal IDs) are resolved at apply time after the VMs are created.
-  principal_ids = {
-    vm_a = module.vm_a.vm_principal_id
-    vm_b = module.vm_b.vm_principal_id
-  }
+  # VM managed identities and (optionally) the service principal get
+  # Storage Queue Data Contributor and Storage Blob Data Contributor.
+  # Keys are static strings resolved at plan time. Values resolved at apply time.
+  principal_ids = merge(
+    {
+      vm_a = module.vm_a.vm_principal_id
+      vm_b = module.vm_b.vm_principal_id
+    },
+    var.enable_service_principal ? { sp = var.sp_object_id } : {}
+  )
 
   # Public access is fine for testing. See queue_storage module for production guidance.
   public_network_access_enabled = true

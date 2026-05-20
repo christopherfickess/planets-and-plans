@@ -85,6 +85,30 @@ variable "blob_container_name" {
   default     = "crossguard-files"
 }
 
+# ── Service Principal (externally created) ───────────────────────────────────
+
+variable "enable_service_principal" {
+  description = <<-EOT
+    Enable service principal RBAC for the CrossGuard plugin. When true, Terraform
+    assigns Storage Queue Data Contributor and Storage Blob Data Contributor to
+    sp_object_id on the storage account. Requires sp_object_id to be set.
+  EOT
+  type    = bool
+  default = false
+}
+
+variable "sp_object_id" {
+  description = <<-EOT
+    Object ID of the service principal (NOT the client/application ID).
+    Used for RBAC role assignments. Find it in Azure Portal under
+    Enterprise Applications, or ask your AD admin.
+    az ad sp show --id <client-id> --query id -o tsv
+  EOT
+  type    = string
+  default = ""
+}
+
+
 variable "key_vault_reader_object_ids" {
   description = <<-EOT
     Map of Azure AD object IDs granted Key Vault Secrets User on each VM's Key Vault.

@@ -8,7 +8,7 @@
 TF_VARS="dev-chris"
 az storage container create \
     --account-name tfstatechrisfickess \
-    --name azure-crossguard-tfstate \
+    --name azure-crossguard-servicebus-tfstate \
     --auth-mode login
 
 terraform init --upgrade -backend-config=tfvars/${TF_VARS}/backend.hcl

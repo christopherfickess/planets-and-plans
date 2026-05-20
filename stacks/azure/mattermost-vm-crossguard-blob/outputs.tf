@@ -48,6 +48,16 @@ output "storage_account_key" {
 
 output "crossguard_plugin_config" {
   value       = module.blob_storage.crossguard_plugin_config
-  description = "CrossGuard blob provider settings — paste these into System Console on both instances."
+  description = "CrossGuard blob provider settings (account key auth) — paste these into System Console on both instances."
   sensitive   = true
+}
+
+# ── Service Principal outputs (only populated when enable_service_principal = true) ──
+# Credentials (tenant_id, client_id, client_secret) are not managed by Terraform.
+# Get them from the shared 1Password note and pass directly to the plugin config.
+
+output "crossguard_plugin_config_sp" {
+  description = "CrossGuard blob provider settings (service principal auth). Only populated when enable_service_principal = true. Credentials come from 1Password, not Terraform."
+  sensitive   = true
+  value       = local.sp_plugin_config
 }
